@@ -1,0 +1,10 @@
+﻿type,filename
+pop_raster,Benin/HRSL_Benin_1km_km_UTM31N.tif
+adm_WGS84,gadm36_BEN_0.shp
+adm,gadm36_BEN_0_UTM31N.shp
+crs,UTM31N
+minigrid_concat,Concat_Mini-grid_UMT31N.shp
+MV_concat,Concat_MV_lines_UMT31N.shp
+point,Benin/new_points_BENIN_UTM31N.shp
+polygon,Benin/new_polygon_benin_UTM31N.shp
+rastertopoint,Benin/raster_to_point_Benin_UTM31N.shp
