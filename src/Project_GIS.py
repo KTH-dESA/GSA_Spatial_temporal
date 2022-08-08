@@ -86,15 +86,22 @@ def clip_vector(admin, vectordata, vectordata_location, outputvector):
 
     :return: vector
     """
-    with fiona.open(vectordata_location) as f:
-        input_schema = f.schema
+    #with fiona.open(vectordata_location) as f:
+    #    input_schema = f.schema
+    #    print(input_schema)
     adm_multi = gpd.read_file(admin)
     adm = adm_multi.explode()
     try:
         vector = gpd.clip(vectordata, adm)
+        with fiona.open(vector) as f:
+            input_schema_vector = f.schema
+        print(input_schema_vector)
     except:
         print("Already clipped")
-        vector = vectordata
+        vector = gpd.clip(vectordata, adm)
+        with fiona.open(vector) as f:
+            input_schema_vector = f.schema
+        print(input_schema_vector)
 
     vector.to_file(outputvector, schema=input_schema)
     return(vector)

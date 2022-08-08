@@ -2,7 +2,7 @@
 Module: Download_files
 =============================
 
-A module that downloads data that is required for the GEOSeMOSYS analysis and unzips them and places them in a new folder "GIS-data"
+A module that downloads data that is required for the GEOSeMOSYS analysis and unzips them and places them in a new folder
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Module author: Nandi Moksnes <nandi@kth.se>
@@ -108,9 +108,11 @@ def download_url_data(url,temp):
 
 def unzip_all(url, fromfolder, tofolder):
 
-    """ This function unzips the data from URL (url) and place them in GIS_data folder.
+    """ This function unzips the data from URL (url) in "fromfolder" and place them in  "tofolder".
 
     :param url:
+    :param fromfolder:
+    :param tofolder:
     :return:
     """
 

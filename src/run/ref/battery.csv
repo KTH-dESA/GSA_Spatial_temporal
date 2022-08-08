@@ -1,0 +1,4 @@
+Technology,renewable ninjafile,BatteryTime,Batterycapacityfactor
+SOPV,capacityfactor_solar,8,0.425
+SOMG,capacityfactor_solar,8,0.425
+WI,capacityfactor_wind,4,0.85
