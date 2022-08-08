@@ -1,4 +1,4 @@
-# Global Sensitivty Analaysis - Spatial and temporal analysis for energy access
+## Global Sensitivity Analysis - Spatial and temporal analysis for energy access
 
 This repository is for the paper
 
