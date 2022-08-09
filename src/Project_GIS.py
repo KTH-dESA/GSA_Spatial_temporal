@@ -86,24 +86,19 @@ def clip_vector(admin, vectordata, vectordata_location, outputvector):
 
     :return: vector
     """
-    #with fiona.open(vectordata_location) as f:
-    #    input_schema = f.schema
-    #    print(input_schema)
     adm_multi = gpd.read_file(admin)
     adm = adm_multi.explode()
     try:
         vector = gpd.clip(vectordata, adm)
-        with fiona.open(vector) as f:
-            input_schema_vector = f.schema
-        print(input_schema_vector)
+        vschema = gpd.io.file.infer_schema(vector)
+        vector.to_file(outputvector, schema = vschema )
     except:
-        print("Already clipped")
-        vector = gpd.clip(vectordata, adm)
-        with fiona.open(vector) as f:
-            input_schema_vector = f.schema
-        print(input_schema_vector)
+        print("%s, Already clipped" %vectordata)
+        vector = vectordata
+    #with fiona.open(os.path.dirname(os.path.abspath(vectordata))) as f:
+    #    input_schema = f.schema
+    #    print(input_schema)
 
-    vector.to_file(outputvector, schema=input_schema)
     return(vector)
 
 def merge_transmission(proj_path):

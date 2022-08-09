@@ -12,7 +12,12 @@ from elec_start import *
 from Build_csv_files import *
 from Pathfinder_processing_steps import *
 
+print(os.getcwd())
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 files = pd.read_csv('input_data/Benin_GIS_files.csv', index_col=0)
+import os
+
+
 crs = "EPSG:32631"
 
 # 1. The files in "input_data/GIS_data" are downloaded and placed in a "temp" folder.
@@ -28,7 +33,7 @@ URL_viirs = 'https://eogdata.mines.edu/nighttime_light/annual/v20/2020/VNL_v2_np
 date = datetime. now(). strftime("%Y_%m_%d-%I:%M:%S_%p")
 print(date)
 
-project_main('../GIS_Data', '../Projected_files', files, crs)
+#project_main('../GIS_Data', '../Projected_files', files, crs)
 # 3. Through QGIS make raster to point layer and save (MANUAL STEP)
 date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
 print(date)
@@ -52,7 +57,7 @@ Projected_files_path = '../Projected_files'
 date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
 print(date)
 
-elec_actual = 0.403  # percent #https://data.worldbank.org/indicator/EG.ELC.ACCS.ZS accessed 2021-10-02
+elec_actual = 0.414  # percent #https://data.worldbank.org/indicator/EG.ELC.ACCS.ZS accessed 2022-08-09
 pop_cutoff = 400  # people
 dist_mv = 1000 #meters
 dist_lv = 1000 #meters
@@ -60,8 +65,8 @@ min_night_lights = 0.5
 max_grid_dist = 5000  # meters
 max_road_dist = 500  # meters
 pop_cutoff2 = 3000 # people
-urban_elec_ratio = 0.653  # percent https://data.worldbank.org/indicator/EG.ELC.ACCS.UR.ZS 2022-02-02
-rural_elec_ratio = 0.174  # percent https://data.worldbank.org/indicator/EG.ELC.ACCS.RU.ZS accessed 2022-02-02
+urban_elec_ratio = 0.663  # percent https://data.worldbank.org/indicator/EG.ELC.ACCS.UR.ZS 2022-08-09
+rural_elec_ratio = 0.182  # percent https://data.worldbank.org/indicator/EG.ELC.ACCS.RU.ZS accessed 2022-02-02
 pop_actual = 12046162  # people
 urban = 0.48  # percent https://data.worldbank.org/indicator/SP.URB.TOTL.IN.ZS 2021-02-02
 urban_cutoff = 20000
@@ -91,7 +96,7 @@ plt.savefig('run/elec.png')
 date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
 print(date)
 path = '../Projected_files/'
-proj_path = 'temp'
+proj_path = 'temp/temp'
 elec_shp = '../Projected_files/elec.shp'
 tofolder = 'run/ref'
 tiffile = '../Projected_files/' + files.loc['pop_raster','filename']

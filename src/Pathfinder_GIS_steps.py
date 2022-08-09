@@ -132,27 +132,27 @@ def highway_weights(path_grid, path, crs):
     weight_grid = os.path.join(path,'grid_weights.shp')
     weight_highway = os.path.join(path,'road_weights.shp')
     grid = gpd.read_file(path_grid)
-    #Length_m_ represents all lines that are grid and Length_km represents road
+    #Km represents all lines that are grid and Length_km represents road
 
-    keep = ['Length_km', 'Length_m_']
+    keep = ['Km', 'VOLTAGE_KV']
     grid_col = grid[keep]
     pd.options.mode.chained_assignment = None
     grid_col['weight'] = 1
     grid_col = grid_col.astype('float64')
-    grid_col.loc[grid_col['Length_km']>0, ['weight']] = 0.01
-    grid_col.loc[grid_col['Length_m_']>0, ['weight']] = 0.01
+    grid_col.loc[grid_col['Km']>0, ['weight']] = 0.01
+    grid_col.loc[grid_col['VOLTAGE_KV']>0, ['weight']] = 0.01
 
     schema = grid.geometry  #the geometry same as highways
     gdf = gpd.GeoDataFrame(grid_col, crs=crs, geometry=schema)
     gdf.to_file(driver = 'ESRI Shapefile', filename= weight_grid)
 
     road = gpd.read_file('../Projected_files/UTM31N_benin roads.shp')
-    keep = ['Length_km']
+    keep = ['Shape_Leng']
     highways_col = road[keep]
     pd.options.mode.chained_assignment = None
     highways_col['weight'] = 1
     highways_col = highways_col.astype('float64')
-    highways_col.loc[highways_col['Length_km']>0, ['weight']] = 0.5
+    highways_col.loc[highways_col['Shape_Leng']>0, ['weight']] = 0.5
 
     schema = road.geometry  #the geometry same as highways
     gdf_road = gpd.GeoDataFrame(highways_col, crs=crs, geometry=schema)
