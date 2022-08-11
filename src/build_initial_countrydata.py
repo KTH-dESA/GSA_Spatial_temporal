@@ -23,7 +23,7 @@ crs = "EPSG:32631"
 # 1. The files in "input_data/GIS_data" are downloaded and placed in a "temp" folder.
 date = datetime. now(). strftime("%Y_%m_%d-%I:%M:%S_%p")
 print(date)
-print("1. The files in '"input_data/GIS_data are"' downloaded and placed in a temp folder.")
+print("1. The files in input_data/GIS_data are downloaded and placed in a temp folder.")
 URL_viirs = 'https://eogdata.mines.edu/nighttime_light/annual/v20/2020/VNL_v2_npp_2020_global_vcmslcfg_c202102150000.average_masked.tif.gz'
 
 #download_url_data('input_data/GIS_URL.txt', 'temp')
