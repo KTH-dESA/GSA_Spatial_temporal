@@ -17,7 +17,6 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 files = pd.read_csv('input_data/Benin_GIS_files.csv', index_col=0)
 import os
 
-
 crs = "EPSG:32631"
 
 # 1. The files in "input_data/GIS_data" are downloaded and placed in a "temp" folder.
@@ -87,9 +86,9 @@ elec_current_and_future(urbansettlements, elec_actual, pop_cutoff, min_night_lig
 
 date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
 print(date)
-shp_path = (r'..\Projected_files\elec.shp')
+shp_path = ('../Projected_files/elec.shp')
 point = gpd.read_file(shp_path)
-os.chdir('../src')
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 #
 fig, ax = plt.subplots(1, 1)
@@ -98,13 +97,3 @@ fig.suptitle('Estimated electrified popluation (in yellow) Benin', fontsize=18)
 
 plt.savefig('run/elec.png')
 
-date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
-print(date)
-print("6. Calculating the Pathfinder distribution lines to unelectrified cells")
-path = '../Projected_files/'
-proj_path = 'temp/temp'
-elec_shp = '../Projected_files/elec.shp'
-tofolder = 'run/ref'
-tiffile = '../Projected_files/' + files.loc['pop_raster','filename']
-
-pathfinder_main(path,proj_path, elec_shp, tofolder, tiffile, crs)

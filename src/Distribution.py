@@ -126,7 +126,7 @@ def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv
     distributionlines = distributionlines.set_index(distributionlines.iloc[:, 0])
     distribution = distributionlines.drop(columns ='Unnamed: 0')
 
-    distributioncelllength.index = distributioncelllength['pointid']
+    distributioncelllength.index = distributioncelllength['index_right']
     distribtionlength = distributioncelllength.drop(['Unnamed: 0', 'pointid', 'elec'], axis = 1)
 
     distribution_total = distribution.multiply(distribtionlength.LV_km, axis = "rows")
