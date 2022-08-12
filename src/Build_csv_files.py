@@ -32,14 +32,14 @@ def renewableninja(path, dest):
     outsolar = []
     for file in files:
 
-        if fnmatch.fnmatch(file, '*timezoneout_wind*'):
+        if fnmatch.fnmatch(file, '*timezoneoffsetout_w*'):
 
             file = os.path.join(path,file)
             wind = pd.read_csv(file, index_col='adjtime')
             outwind.append(wind)
     for file in files:
 
-        if fnmatch.fnmatch(file, '*timezoneout_solar*'):
+        if fnmatch.fnmatch(file, '*timezoneoffsetout_s*'):
 
             file = os.path.join(path,file)
             solar = pd.read_csv(file, index_col='adjtime')

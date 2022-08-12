@@ -87,40 +87,40 @@ def network_length(demandcells, input, tofolder):
 
     return(os.path.join(os.getcwd(),tofolder, 'distribution.csv'))
 
-def elec(demandcells):
+def elec(demandcells, scenario):
     demand_cell = pd.read_csv(demandcells)
 
     allcells = demand_cell.groupby(["index_right"])
     HV_all = allcells.filter(lambda x: (x['elec'].mean() > 0) and ((x['MV'].min() < 1)) or ((x['LV'].min() < 1)) or ((x['Grid'].min() < 1)))
     HV = HV_all.groupby(["index_right"])
     HV_df = HV.sum().reset_index()[['index_right']]
-    HV_df.to_csv(os.path.join(os.getcwd(),'run/HV_cells.csv'))
+    HV_df.to_csv(os.path.join(os.getcwd(),'run/%i_HV_cells.csv') %(scenario))
 
     elec_all = allcells.filter(lambda x: (x['elec'].mean() > 0))
     elec = elec_all.groupby(["index_right"])
-    elec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/elec.csv'))
-    elec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/scenarios/elec.csv'))
+    elec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/%i_elec.csv')%(scenario))
+    elec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/scenarios/%i_elec.csv')%(scenario))
 
     elec_df = elec.sum().reset_index()[['index_right']]
     noHV_elec = (
         pd.merge(elec_df, HV_df, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
-    noHV_elec.to_csv(os.path.join(os.getcwd(), 'run/elec_noHV_cells.csv'))
+    noHV_elec.to_csv(os.path.join(os.getcwd(), 'run/%i_elec_noHV_cells.csv')%(scenario))
 
     #noHV_all = allcells.filter()
     #noHV_all = allcells.filter(lambda x: (x['p'].mean() == 0 ) or (x['Minigrid'].min() < 5000) and (x['MV'].min() > 1) or (x['LV'].min() > 1))
     all_pointid = demand_cell['index_right'].drop_duplicates().dropna()
     noHV = (pd.merge(all_pointid,HV_df, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
     noHV_nominigrid= (pd.merge(noHV,noHV_elec, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
-    noHV_nominigrid.to_csv(os.path.join(os.getcwd(),'run/noHV_cells.csv'))
+    noHV_nominigrid.to_csv(os.path.join(os.getcwd(),'run/%i_noHV_cells.csv')%(scenario))
 
     minigrid = allcells.filter(lambda x: (x['elec'].mean() > 0 ))
     minigrid_all = minigrid.groupby(["index_right"])
-    minigrid_all.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/minigridcells.csv'))
+    minigrid_all.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/%i_minigridcells.csv')%(scenario))
 
     unelec_all = allcells.filter(lambda x: (x['elec'].mean() == 0 ))
     unelec = unelec_all.groupby(["index_right"])
-    unelec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/un_elec.csv'))
-    unelec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/scenarios/un_elec.csv'))
+    unelec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/%i_un_elec.csv')%(scenario))
+    unelec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/scenarios/%i_un_elec.csv')%(scenario))
 
 def calculate_demand(settlements, demand, scenario):
     demand_cell = pd.read_csv(settlements)
@@ -180,7 +180,7 @@ def calculate_demand(settlements, demand, scenario):
     ref = pd.concat(([ref_elec, ref_unelec]))
     ref.index = ref['Fuel']
     ref = ref.drop(columns =['elec', 'pop','GDP_PPP', 'elec_share', 'Fuel', 'un_elec_share'])
-    ref.to_csv('run/scenarios/ref_demand.csv')
+    ref.to_csv('run/scenarios/%i_demand.csv' %(scenario))
 
     #Vision scenario
 #    sum_pop_unelec = sum(unelec_pointid['pop'])

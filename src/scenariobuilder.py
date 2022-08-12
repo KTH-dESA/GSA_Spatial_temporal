@@ -52,7 +52,7 @@ for j in range(0,len(scenario.index)):
     demandcells = os.path.join(os.getcwd(), 'run/scenarios/Demand/demand_cells.csv')
 
     join_elec(elec_shp, gdp, shape)
-    elec(demandcells)
+    elec(demandcells, spatial)
 
     date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
     print(date)
@@ -80,8 +80,8 @@ for j in range(0,len(scenario.index)):
     srcpath = os.getcwd()
     print(srcpath)
     path = "temp/%i" %(spatial)
-    coordinates = project_vector(shapefile)
-    wind, solar = csv_make(coordinates)
+    #coordinates = project_vector(shapefile)
+    #wind, solar = csv_make(coordinates)
     #down = download(path, Rpath, srcpath, wind, solar, token)
     #adjust_timezone(path, time_zone_offset)
 
@@ -103,12 +103,12 @@ for j in range(0,len(scenario.index)):
     distribution_row = "_%isum" %(spatial)
 
     topath = 'run/scenarios/Demand'
-    noHV = 'run/noHV_cells.csv'
-    HV = 'run/HV_cells.csv'
-    minigrid = 'run/elec_noHV_cells.csv'
-    neartable = 'run/scenarios/Demand/Near_table.csv'
+    noHV = 'run/%i_noHV_cells.csv' %(spatial)
+    HV = 'run/%i_HV_cells.csv' %(spatial)
+    minigrid = 'run/%i_elec_noHV_cells.csv' %(spatial)
+    neartable = 'run/scenarios/Demand/%i_Near_table.csv' %(spatial)
 
-    demand = 'run/scenarios/ref_demand.csv'
+    demand = 'run/scenarios/1_demand.csv'
     specifieddemand= 'run/scenarios/demandprofile_rural.csv'
 
     capacitytoactivity = 31.536
@@ -116,7 +116,7 @@ for j in range(0,len(scenario.index)):
     reffolder = 'run/scenarios'
     distr_losses = 0.83
 
-    peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV, distribution, distribution_row, distribution_length_cell_ref, reffolder)
+    #peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV, distribution, distribution_row, distribution_length_cell_ref, reffolder)
     transmission_matrix(neartable, noHV, HV, minigrid, topath)
 
     date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
@@ -124,7 +124,7 @@ for j in range(0,len(scenario.index)):
 
     elec_noHV_cells = 'run/%i_elec_noHV_cells.csv' %(spatial)
     renewable_path = 'temp/%i' %(spatial)
-    pop_shp = '../Projected_files/' + files.loc['pop','filename']
+    pop_shp = '../Projected_files/' + files.loc['pop_raster','filename']
     unelec = 'run/%i_un_elec.csv' %(spatial)
     noHV = 'run/%i_noHV_cells.csv' %(spatial)
     HV = 'run/%i_HV_cells.csv' %(spatial)
