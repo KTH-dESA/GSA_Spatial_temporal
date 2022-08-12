@@ -88,7 +88,7 @@ def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath):
     final_matrix.to_csv(os.path.join(topath,'adjacencymatrix.csv'))
     return(final_matrix)
 
-def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv, distr_losses, HV_csv, distributionlines_file, distributioncelllength_file, tofolder):
+def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv, distr_losses, HV_csv, distributionlines_file, distribution_header, distributioncelllength_file, tofolder):
     """
     This function calculates the peakdemand per year and demand and divides it with the estimated km.
     :param demand_csv:
@@ -124,12 +124,12 @@ def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv
     peakdemand['cell'] = peakdemand.index.to_series().apply(lambda row: int(row.split("_")[1]))
 
     distributionlines = distributionlines.set_index(distributionlines.iloc[:, 0])
-    distribution = distributionlines.drop(columns ='Unnamed: 0')
+    #distribution = distributionlines.drop(columns ='Unnamed: 0')
 
     distributioncelllength.index = distributioncelllength['index_right']
     distribtionlength = distributioncelllength.drop(['Unnamed: 0', 'pointid', 'elec'], axis = 1)
 
-    distribution_total = distribution.multiply(distribtionlength.LV_km, axis = "rows")
+    distribution_total = distributionlines.multiply(distribtionlength.distribution_header, axis = "rows")
     peakdemand.index = peakdemand[('cell')]
     a = distribution_total.index
     peakdemand_divided_km = peakdemand.apply(lambda x: (x/distribution_total.loc[x['cell']][0] if (x['cell']==a).any() else print('not same')), axis=1)

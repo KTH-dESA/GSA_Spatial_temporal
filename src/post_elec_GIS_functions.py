@@ -19,7 +19,7 @@ from osgeo import gdal, ogr, gdalconst
 import os
 import math
 
-def join(elec, tif, cells):
+def join_elec(elec, tif, cells):
     """
 
     :param elec:
@@ -80,9 +80,9 @@ def network_length(demandcells, input, tofolder):
         ind = row.index
 
     networkkm = pd.DataFrame(network_list, columns=ind)
-    distribution =  networkkm[['elec', 'pointid', 'LV_km']]
+    distribution =  networkkm[['elec', 'index_right', 'LV_km']]
     average_distrbution = distribution[distribution['elec'] == 0]
-    distribution_aggr = average_distrbution.groupby(["pointid"])
+    distribution_aggr = average_distrbution.groupby(["index_right"])
     distribution_aggr.mean().reset_index().to_csv(os.path.join(os.getcwd(), tofolder,'distribution.csv'))
 
     return(os.path.join(os.getcwd(),tofolder, 'distribution.csv'))
@@ -90,52 +90,48 @@ def network_length(demandcells, input, tofolder):
 def elec(demandcells):
     demand_cell = pd.read_csv(demandcells)
 
-    allcells = demand_cell.groupby(["pointid"])
-    HV_all = allcells.filter(lambda x: (x['elec'].mean() > 0) and ((x['Minigrid'].min() > 5000)) or ((x['MV'].min() < 1)) or ((x['LV'].min() < 1)) or ((x['Grid'].min() < 1)))
-    HV = HV_all.groupby(["pointid"])
-    HV_df = HV.sum().reset_index()[['pointid']]
+    allcells = demand_cell.groupby(["index_right"])
+    HV_all = allcells.filter(lambda x: (x['elec'].mean() > 0) and ((x['MV'].min() < 1)) or ((x['LV'].min() < 1)) or ((x['Grid'].min() < 1)))
+    HV = HV_all.groupby(["index_right"])
+    HV_df = HV.sum().reset_index()[['index_right']]
     HV_df.to_csv(os.path.join(os.getcwd(),'run/HV_cells.csv'))
 
     elec_all = allcells.filter(lambda x: (x['elec'].mean() > 0))
-    elec = elec_all.groupby(["pointid"])
-    elec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/elec.csv'))
-    elec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/ref/elec.csv'))
-    elec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(), 'run/vision/elec.csv'))
-    elec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(), 'run/dryvision/elec.csv'))
+    elec = elec_all.groupby(["index_right"])
+    elec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/elec.csv'))
+    elec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/scenarios/elec.csv'))
 
-    elec_df = elec.sum().reset_index()[['pointid']]
+    elec_df = elec.sum().reset_index()[['index_right']]
     noHV_elec = (
         pd.merge(elec_df, HV_df, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
     noHV_elec.to_csv(os.path.join(os.getcwd(), 'run/elec_noHV_cells.csv'))
 
     #noHV_all = allcells.filter()
     #noHV_all = allcells.filter(lambda x: (x['p'].mean() == 0 ) or (x['Minigrid'].min() < 5000) and (x['MV'].min() > 1) or (x['LV'].min() > 1))
-    all_pointid = demand_cell['pointid'].drop_duplicates().dropna()
+    all_pointid = demand_cell['index_right'].drop_duplicates().dropna()
     noHV = (pd.merge(all_pointid,HV_df, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
     noHV_nominigrid= (pd.merge(noHV,noHV_elec, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
     noHV_nominigrid.to_csv(os.path.join(os.getcwd(),'run/noHV_cells.csv'))
 
-    minigrid = allcells.filter(lambda x: (x['elec'].mean() > 0 ) and ((x['Minigrid'].min() < 5000) ))
-    minigrid_all = minigrid.groupby(["pointid"])
-    minigrid_all.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/minigridcells.csv'))
+    minigrid = allcells.filter(lambda x: (x['elec'].mean() > 0 ))
+    minigrid_all = minigrid.groupby(["index_right"])
+    minigrid_all.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/minigridcells.csv'))
 
     unelec_all = allcells.filter(lambda x: (x['elec'].mean() == 0 ))
-    unelec = unelec_all.groupby(["pointid"])
-    unelec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/un_elec.csv'))
-    unelec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(),'run/ref/un_elec.csv'))
-    unelec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(), 'run/vision/un_elec.csv'))
-    unelec.sum().reset_index()[['pointid']].to_csv(os.path.join(os.getcwd(), 'run/dryvision/un_elec.csv'))
+    unelec = unelec_all.groupby(["index_right"])
+    unelec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/un_elec.csv'))
+    unelec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/scenarios/un_elec.csv'))
 
-def calculate_demand(settlements, demand):
-    demand_cell = pd.read_csv(settlements, index_col=['ID'])
+def calculate_demand(settlements, demand, scenario):
+    demand_cell = pd.read_csv(settlements)
     demand_GJ =  pd.read_csv(demand)
-    ref_demand = demand_GJ[demand_GJ['Scenario'].str.contains('ref')]
-    vision_demand = demand_GJ[demand_GJ['Scenario'].str.contains('Vision')]
+    ref_demand = demand_GJ[demand_GJ['Scenario']==scenario]
+    #vision_demand = demand_GJ[demand_GJ['Scenario'].str.contains('Vision')]
 
-    demand_cols =  demand_cell[['elec', 'pointid', 'pop', 'GDP_PPP']]
+    demand_cols =  demand_cell[['elec', 'index_right', 'pop', 'GDP_PPP']]
     #The case of unelectrified
     un_elec = demand_cols[demand_cols['elec'] == 0]
-    unelec_pointid = un_elec.groupby(["pointid"]).sum()
+    unelec_pointid = un_elec.groupby(["index_right"]).sum()
     unelec_pointid.sum().reset_index()
 
     sum_pop_unelec = sum(unelec_pointid['pop'])
@@ -146,7 +142,7 @@ def calculate_demand(settlements, demand):
         row['Fuel'] = 'EL3_'+ str(pointid) + '_0'
         startyear = 2016
         while startyear <=2040:
-            unelec_ref = ref_demand[ref_demand['demand GJ'].str.contains('unelectrified')]
+            unelec_ref = ref_demand[ref_demand['demand TJ'].str.contains('unelectrified')]
             r = unelec_ref.index[0]
             col = str(startyear)
             row[col] = unelec_ref.loc[r,col]*row['un_elec_share']
@@ -159,7 +155,7 @@ def calculate_demand(settlements, demand):
 
     #The case of electrified
     elec = demand_cols[demand_cols['elec'] == 1]
-    elec_pointid = elec.groupby(["pointid"]).sum()
+    elec_pointid = elec.groupby(["index_right"]).sum()
     elec_pointid.reset_index()
 
     sum_pop_elec = sum(elec_pointid['pop'])
@@ -172,7 +168,7 @@ def calculate_demand(settlements, demand):
         row['Fuel'] = 'EL3_'+ str(pointid) + '_1'
         startyear = 2016
         while startyear <=2040:
-            elec_ref = ref_demand[ref_demand['demand GJ'].str.contains('Electrified')]
+            elec_ref = ref_demand[ref_demand['demand TJ'].str.contains('Electrified')]
             r = elec_ref.index[0]
             col = str(startyear)
             row[col] = elec_ref.loc[r,col]*row['elec_share']
@@ -184,57 +180,57 @@ def calculate_demand(settlements, demand):
     ref = pd.concat(([ref_elec, ref_unelec]))
     ref.index = ref['Fuel']
     ref = ref.drop(columns =['elec', 'pop','GDP_PPP', 'elec_share', 'Fuel', 'un_elec_share'])
-    ref.to_csv('run/ref/ref_demand.csv')
+    ref.to_csv('run/scenarios/ref_demand.csv')
 
     #Vision scenario
-    sum_pop_unelec = sum(unelec_pointid['pop'])
-    un_elec_list= []
-    for i, row in unelec_pointid.iterrows():
-        row['un_elec_share'] = row['pop']/sum_pop_unelec
-        pointid = int(i)
-        row['Fuel'] = 'EL3_'+ str(pointid) + '_0'
-        startyear = 2016
-        while startyear <=2040:
-            unelec_vision = vision_demand[vision_demand['demand GJ'].str.contains('unelectrified')]
-            r = unelec_vision.index[0]
-            col = str(startyear)
-            row[col] = unelec_vision.loc[r,col]*row['un_elec_share']
-            startyear +=1
+#    sum_pop_unelec = sum(unelec_pointid['pop'])
+#    un_elec_list= []
+#    for i, row in unelec_pointid.iterrows():
+#        row['un_elec_share'] = row['pop']/sum_pop_unelec
+#        pointid = int(i)
+#        row['Fuel'] = 'EL3_'+ str(pointid) + '_0'
+#        startyear = 2016
+#        while startyear <=2040:
+#            unelec_vision = vision_demand[vision_demand['demand GJ'].str.contains('unelectrified')]
+#            r = unelec_vision.index[0]
+#            col = str(startyear)
+#            row[col] = unelec_vision.loc[r,col]*row['un_elec_share']
+#            startyear +=1
 
-        un_elec_list.append(row)
-        ind = row.index
+        #un_elec_list.append(row)
+        #ind = row.index
 
 
-    vision_unelec = pd.DataFrame(un_elec_list, columns=ind)
+#    vision_unelec = pd.DataFrame(un_elec_list, columns=ind)
+#
+#    #The case of electrified
+#    elec = demand_cols[demand_cols['elec'] == 1]
+#    elec_pointid = elec.groupby(["index_right"]).sum()
+#    elec_pointid.reset_index()
 
-    #The case of electrified
-    elec = demand_cols[demand_cols['elec'] == 1]
-    elec_pointid = elec.groupby(["pointid"]).sum()
-    elec_pointid.reset_index()
+#    sum_pop_elec = sum(elec_pointid['pop'])
+#    sum_gdp_elec = sum(elec_pointid['GDP_PPP'])
 
-    sum_pop_elec = sum(elec_pointid['pop'])
-    sum_gdp_elec = sum(elec_pointid['GDP_PPP'])
+#    elec_list = []
+#    for i, row in elec_pointid.iterrows():
+#        row['elec_share'] = 0.5*row['pop']/sum_pop_elec+0.5*row['GDP_PPP']/sum_gdp_elec
+#        pointid = int(i)
+#        row['Fuel'] = 'EL3_'+ str(pointid) + '_1'
+#        startyear = 2016
+#        while startyear <=2040:
+#            vision_demand = vision_demand[vision_demand['demand GJ'].str.contains('Electrified')]
+#            r = vision_demand.index[0]
+#            col = str(startyear)
+#            row[col] = vision_demand.loc[r,col]*row['elec_share']
+#            startyear +=1
+#        elec_list.append(row)
+#        ind = row.index
 
-    elec_list = []
-    for i, row in elec_pointid.iterrows():
-        row['elec_share'] = 0.5*row['pop']/sum_pop_elec+0.5*row['GDP_PPP']/sum_gdp_elec
-        pointid = int(i)
-        row['Fuel'] = 'EL3_'+ str(pointid) + '_1'
-        startyear = 2016
-        while startyear <=2040:
-            vision_demand = vision_demand[vision_demand['demand GJ'].str.contains('Electrified')]
-            r = vision_demand.index[0]
-            col = str(startyear)
-            row[col] = vision_demand.loc[r,col]*row['elec_share']
-            startyear +=1
-        elec_list.append(row)
-        ind = row.index
-
-    vision_elec = pd.DataFrame(elec_list, columns=ind)
-    vision = pd.concat(([vision_elec, vision_unelec]))
-    vision.index = vision['Fuel']
-    vision = vision.drop(columns =['elec', 'pop','GDP_PPP', 'elec_share', 'Fuel', 'un_elec_share'])
-    vision.to_csv('run/vision/vision_demand.csv')
-    vision.to_csv('run/dryvision/vision_demand.csv')
+#    vision_elec = pd.DataFrame(elec_list, columns=ind)
+#    vision = pd.concat(([vision_elec, vision_unelec]))
+#    vision.index = vision['Fuel']
+#    vision = vision.drop(columns =['elec', 'pop','GDP_PPP', 'elec_share', 'Fuel', 'un_elec_share'])
+#    vision.to_csv('run/vision/vision_demand.csv')
+#    vision.to_csv('run/dryvision/vision_demand.csv')
 
     return ()

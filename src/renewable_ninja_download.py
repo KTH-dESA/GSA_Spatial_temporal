@@ -46,7 +46,7 @@ def csv_make(coordinates):
     coordinates['lat'] = coordinates.geometry.apply(lambda p: p.y)
     df = pd.DataFrame(coordinates)
     wind = pd.DataFrame(index=df.index, columns=(['name', 'lat', 'lon', 'from', 'to', 'dataset', 'capacity', 'height', 'turbine']))
-    wind["name"] = df ["pointid"]
+    wind["name"] = df ["ORIG_FID"]
     wind["lat"] = df["lat"]
     wind["lon"] = df["lon"]
     wind["from"] = "01/01/2016"
@@ -56,7 +56,7 @@ def csv_make(coordinates):
     wind["height"] = 55
     wind["turbine"] = "Vestas+V42+600"
     solar = pd.DataFrame(index=df.index, columns=(['name', 'lat', 'lon', 'from', 'to', 'dataset', 'capacity', 'system_loss', 'tracking', 'tilt', 'azim']))
-    solar["name"] = df ["pointid"]
+    solar["name"] = df ["ORIG_FID"]
     solar["lat"] = df["lat"]
     solar["lon"] = df["lon"]
     solar["from"] = "01/01/2016"
@@ -219,7 +219,7 @@ def adjust_timezone(path, time_zone_offset):
         df = pd.read_csv(path+"/"+f)
         time = df["time"]
         time = time.iloc[time_zone_offset:]
-        new_index = range(0,8781)
+        new_index = range(0,len(time))
         time.index = new_index
         df["adjtime"] = time
         df = df.drop(columns=['Unnamed: 0','time'])

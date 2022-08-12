@@ -161,10 +161,10 @@ def highway_weights(path_grid, path, crs):
     return (weight_highway, weight_grid)
 
 # Pathfinder results to raster
-def make_raster(pathfinder, s):
+def make_raster(pathfinder, s, origin):
 
     dst_filename = os.path.join('temp/dijkstra','path_%s.tif' %(s))
-    path = os.path.join('../Projected_files','%s_elec.tif' %(s))
+    path = os.path.join('../Projected_files','%s_elec.tif' %(origin))
     zoom_20 = gdal.Open(path)
     geo_trans = zoom_20.GetGeoTransform()
     pixel_width = geo_trans[1]
@@ -176,7 +176,7 @@ def make_raster(pathfinder, s):
     x_min = geo_trans[0]
     y_max = geo_trans[3]
     wkt_projection = zoom_20.GetProjection()
-
+    print(os.getcwd())
     driver = gdal.GetDriverByName('GTiff')
     dataset3 = driver.Create(
         dst_filename,
