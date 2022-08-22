@@ -25,23 +25,23 @@ print(date)
 print("1. The files in input_data/GIS_data are downloaded and placed in a temp folder.")
 URL_viirs = 'https://eogdata.mines.edu/nighttime_light/annual/v20/2020/VNL_v2_npp_2020_global_vcmslcfg_c202102150000.average_masked.tif.gz'
 
-#download_url_data('input_data/GIS_URL.txt', 'temp')
-#download_viirs(URL_viirs, 'temp')
-#unzip_all('input_data/GIS_unzip.txt', '../temp', '../GIS_data')
+download_url_data('input_data/GIS_URL.txt', 'temp')
+download_viirs(URL_viirs, 'temp')
+unzip_all('input_data/GIS_unzip.txt', '../temp', '../GIS_data')
 
 # 2. The files are then projected and clipped to the administrative boundaries.
 date = datetime. now(). strftime("%Y_%m_%d-%I:%M:%S_%p")
 print(date)
 print("2. The files are then projected and clipped to the administrative boundaries.")
 
-#project_main('../GIS_Data', '../Projected_files', files, crs)
+project_main('../GIS_Data', '../Projected_files', files, crs)
 # 3. Through QGIS make raster to point layer and save (MANUAL STEP)
 date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
 print(date)
 print("3. Through QGIS make raster to point layer and save (download from zenodo)")
 #Make sure you are in the /src directory when you start this script
 print(os.getcwd())
-#download_url_data("input_data/zenodo.txt", "Projected_files")
+download_url_data("input_data/zenodo.txt", "Projected_files")
 
 # 4. The GIS layers are prepared to for a heuristic approximation for electrified settlements
 date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
@@ -53,8 +53,8 @@ print(os.getcwd())
 pop_shp = '../Projected_files/Benin/raster_to_point_Benin_UTM31N.shp'
 Projected_files_path = '../Projected_files'
 
-#rasterize = raster_proximity(Projected_files_path, files)
-#points = raster_to_point(rasterize, pop_shp, Projected_files_path, crs)
+rasterize = raster_proximity(Projected_files_path, files)
+points = raster_to_point(rasterize, pop_shp, Projected_files_path, crs)
 
 # 5. Approximate location of urban settlements and the electrified settlements 1kmx1km resolution
 date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
@@ -97,3 +97,13 @@ fig.suptitle('Estimated electrified popluation (in yellow) Benin', fontsize=18)
 
 plt.savefig('run/elec.png')
 
+date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
+print(date)
+print("1. Calculating the Pathfinder distribution lines to unelectrified cells")
+path = '../Projected_files/'
+proj_path = 'temp/dijkstra'
+elec_shp = '../Projected_files/elec.shp'
+tofolder = 'run/scenarios'
+tiffile = '../Projected_files/' + files.loc['pop_raster','filename']
+
+pathfinder_main(path,proj_path, elec_shp, tofolder, tiffile, crs)
