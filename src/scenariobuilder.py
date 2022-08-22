@@ -4,7 +4,7 @@ import pandas as pd
 from Build_csv_files import *
 from renewable_ninja_download import *
 from post_elec_GIS_functions import *
-from Pathfinder_processing_steps import *
+from Pathfinder_processing_step import *
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
