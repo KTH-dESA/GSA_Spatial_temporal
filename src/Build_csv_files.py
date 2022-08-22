@@ -72,7 +72,7 @@ def GIS_file(dest, point):
     :return:
     """
     point = gpd.read_file(point)
-    GIS_data = point['index_right']
+    GIS_data = point.index
     grid = pd.DataFrame(GIS_data, copy=True)
     grid.columns = ['Location']
     grid.to_csv(os.path.join(dest, 'GIS_data.csv'), index=False)
@@ -108,7 +108,11 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
 
     elec = pd.read_csv(elec)
     gis = pd.read_csv(gis_file)
-    matrix = pd.read_csv(adjacencymatrix)
+    try:
+        matrix = pd.read_csv(adjacencymatrix)
+    except:
+        print("No adjacencymatrix for this scenario")
+        pass
     elec.index_right = elec.index_right.astype(int)
     un_elec = pd.read_csv(unelec)
     un_elec.index_right = un_elec.index_right.astype(int)
@@ -292,34 +296,37 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
             inputactivity.loc[-1] = input_temp  # adding a row
             inputactivity.index = inputactivity.index + 1  # shifting index
             inputactivity = inputactivity.sort_index()
+    try:
+        output_matrix = matrix.drop(['INFUEL','SendTech','Unnamed: 0'], axis=1)
 
-    output_matrix = matrix.drop(['INFUEL','SendTech','Unnamed: 0'], axis=1)
-    matrix_out = output_matrix.drop_duplicates()
+        matrix_out = output_matrix.drop_duplicates()
 
-    for l in matrix_out.index:
-        output_temp = [0,  matrix.loc[l]['OUTFUEL'], matrix.loc[l]['INTECH'], 1, 1]
-        outputactivity.loc[-1] = output_temp  # adding a row
-        outputactivity.index = outputactivity.index + 1  # shifting index
-        outputactivity = outputactivity.sort_index()
+        for l in matrix_out.index:
+            output_temp = [0,  matrix.loc[l]['OUTFUEL'], matrix.loc[l]['INTECH'], 1, 1]
+            outputactivity.loc[-1] = output_temp  # adding a row
+            outputactivity.index = outputactivity.index + 1  # shifting index
+            outputactivity = outputactivity.sort_index()
 
-    input_matrix = matrix.drop(['OUTFUEL','SendTech','Unnamed: 0'], axis=1)
-    matrix_in = input_matrix.drop_duplicates()
+        input_matrix = matrix.drop(['OUTFUEL','SendTech','Unnamed: 0'], axis=1)
+        matrix_in = input_matrix.drop_duplicates()
 
-    for l in matrix_in.index:
-        input_temp = [0,  matrix.loc[l]['INFUEL'], matrix.loc[l]['INTECH'], 1, 1]
-        inputactivity.loc[-1] = input_temp  # adding a row
-        inputactivity.index = inputactivity.index + 1  # shifting index
-        inputactivity = inputactivity.sort_index()
+        for l in matrix_in.index:
+            input_temp = [0,  matrix.loc[l]['INFUEL'], matrix.loc[l]['INTECH'], 1, 1]
+            inputactivity.loc[-1] = input_temp  # adding a row
+            inputactivity.index = inputactivity.index + 1  # shifting index
+            inputactivity = inputactivity.sort_index()
 
-    tech_matrix = matrix.drop(['SendTech','INFUEL','OUTFUEL','Unnamed: 0'], axis=1)
-    tech_matr = tech_matrix.drop_duplicates()
-    for h in tech_matr.index:
-        capitalcost.loc[m]['Capitalcost'] = tech_matr.loc[h]['DISTANCE'] /1000*capital_cost_HV + substation  #kUSD/MW divided by 1000 as it is in meters
-        capitalcost.loc[m]['Technology'] =  matrix.loc[h]['INTECH']
+        tech_matrix = matrix.drop(['SendTech','INFUEL','OUTFUEL','Unnamed: 0'], axis=1)
+        tech_matr = tech_matrix.drop_duplicates()
+        for h in tech_matr.index:
+            capitalcost.loc[m]['Capitalcost'] = tech_matr.loc[h]['DISTANCE'] /1000*capital_cost_HV + substation  #kUSD/MW divided by 1000 as it is in meters
+            capitalcost.loc[m]['Technology'] =  matrix.loc[h]['INTECH']
 
-        fixedcost.loc[m]['Fixed Cost'] = tech_matr.loc[h]['DISTANCE']/1000*capital_cost_HV*0.025 + substation*0.025  #kUSD/MW divided by 1000 as it is in meters
-        fixedcost.loc[m]['Technology'] =  matrix.loc[h]['INTECH']
-        m = m+1
+            fixedcost.loc[m]['Fixed Cost'] = tech_matr.loc[h]['DISTANCE']/1000*capital_cost_HV*0.025 + substation*0.025  #kUSD/MW divided by 1000 as it is in meters
+            fixedcost.loc[m]['Technology'] =  matrix.loc[h]['INTECH']
+            m = m+1
+    except:
+        pass
 
     df1 = outputactivity['Fuel']
     df2 = inputactivity['Fuel']

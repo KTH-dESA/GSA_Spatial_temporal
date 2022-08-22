@@ -49,7 +49,7 @@ def join_elec(elec, tif, cells):
     path = 'run/Demand/demand_cells.csv'
     return(path)
 
-def network_length(demandcells, input, tofolder):
+def network_length(demandcells, input, tofolder, scenario):
     """
     This function calculates the network length for LV which is adapted from van Ruijven et al. 2012 doi:10.1016/j.energy.2011.11.037
     :param demandcells: Includes the data per 1x1km cell
@@ -83,9 +83,9 @@ def network_length(demandcells, input, tofolder):
     distribution =  networkkm[['elec', 'index_right', 'LV_km']]
     average_distrbution = distribution[distribution['elec'] == 0]
     distribution_aggr = average_distrbution.groupby(["index_right"])
-    distribution_aggr.mean().reset_index().to_csv(os.path.join(os.getcwd(), tofolder,'distribution.csv'))
+    distribution_aggr.mean().reset_index().to_csv(os.path.join(os.getcwd(), tofolder,'%i_distribution.csv' %(scenario)))
 
-    return(os.path.join(os.getcwd(),tofolder, 'distribution.csv'))
+    return(os.path.join(os.getcwd(),tofolder,'%i_distribution.csv' %(scenario)))
 
 def elec(demandcells, scenario):
     demand_cell = pd.read_csv(demandcells)

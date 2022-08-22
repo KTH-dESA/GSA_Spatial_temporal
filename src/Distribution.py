@@ -30,65 +30,72 @@ def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath):
     noHV = pd.read_csv(noHV_file)
     HV = pd.read_csv(HV_file)
     minigrid = pd.read_csv(minigridcsv)
-    neartable = pd.read_csv(path)
-    # The table includes the raw data from ArcMap function
-    near_adj_points: Union[Union[Series, ExtensionArray, ndarray, DataFrame, None], Any] = neartable[neartable["DISTANCE"] > 0]
+    try:
+        neartable = pd.read_csv(path)
+        # The table includes the raw data from ArcMap function
+        near_adj_points: Union[Union[Series, ExtensionArray, ndarray, DataFrame, None], Any] = neartable[neartable["DISTANCE"] > 0]
 
-    near_adj_points.loc[(near_adj_points.SENDID.isin(HV.index_right)), 'SendTech'] = 'KEEL00t00'
+        near_adj_points.loc[(near_adj_points.SENDID.isin(HV.index_right)), 'SendTech'] = 'KEEL00t00'
 
-    #add input fuel and inputtech to central exisiting grid
-    central = near_adj_points.loc[(near_adj_points.SENDID.isin(HV.index_right))]
-    central_nogrid = central.loc[central.NEARID.isin(noHV.index_right)]
-    for m in central_nogrid.index:
-        near_adj_points.loc[near_adj_points.index == m, 'INFUEL'] = 'KEEL2'
-        near_adj_points.loc[(near_adj_points.index == m , 'INTECH')] =  "TRHV_"+ str(int(near_adj_points.SENDID[m])) + "_" + str(int(near_adj_points.NEARID[m]))
-        near_adj_points.loc[near_adj_points.index == m, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[m]))
+        #add input fuel and inputtech to central exisiting grid
+        central = near_adj_points.loc[(near_adj_points.SENDID.isin(HV.index_right))]
+        central_nogrid = central.loc[central.NEARID.isin(noHV.index_right)]
+        for m in central_nogrid.index:
+            near_adj_points.loc[near_adj_points.index == m, 'INFUEL'] = 'KEEL2'
+            near_adj_points.loc[(near_adj_points.index == m , 'INTECH')] =  "TRHV_"+ str(int(near_adj_points.SENDID[m])) + "_" + str(int(near_adj_points.NEARID[m]))
+            near_adj_points.loc[near_adj_points.index == m, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[m]))
 
-    central = near_adj_points.loc[(near_adj_points.SENDID.isin(HV.index_right))]
+        central = near_adj_points.loc[(near_adj_points.SENDID.isin(HV.index_right))]
 
-    central_minigrid = central.loc[central.NEARID.isin(minigrid.index_right)]
-    for m in central_minigrid.index:
-        near_adj_points.loc[near_adj_points.index == m, 'INFUEL'] = 'KEEL2'
-        near_adj_points.loc[(near_adj_points.index == m , 'INTECH')] = "TRHV_"+ str(int(near_adj_points.SENDID[m])) + "_" + str(int(near_adj_points.NEARID[m]))
-        near_adj_points.loc[near_adj_points.index == m, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[m]))
+        central_minigrid = central.loc[central.NEARID.isin(minigrid.index_right)]
+        for m in central_minigrid.index:
+            near_adj_points.loc[near_adj_points.index == m, 'INFUEL'] = 'KEEL2'
+            near_adj_points.loc[(near_adj_points.index == m , 'INTECH')] = "TRHV_"+ str(int(near_adj_points.SENDID[m])) + "_" + str(int(near_adj_points.NEARID[m]))
+            near_adj_points.loc[near_adj_points.index == m, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[m]))
 
-    #select where no inputfuel is present and their recieving cell has no HV in baseyear
-    nan_intech = near_adj_points.loc[near_adj_points.INFUEL.isnull()]
-    nan_intech_nogrid = nan_intech.loc[nan_intech.NEARID.isin(noHV.index_right)]
-    #add input fuel to the (isnan INFUEL + isin noHV) selection
-    m = 0
-    for l in nan_intech_nogrid.index:
-        near_adj_points.loc[near_adj_points.index == l, 'INFUEL'] = "EL2_" + str(int(near_adj_points.SENDID[l]))
-        near_adj_points.loc[near_adj_points.index == l , 'INTECH'] = "TRHV_" + str(int(near_adj_points.SENDID[l])) + "_" + str(int(near_adj_points.NEARID[l]))
-        near_adj_points.loc[near_adj_points.index == l, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[l]))
+        #select where no inputfuel is present and their recieving cell has no HV in baseyear
+        nan_intech = near_adj_points.loc[near_adj_points.INFUEL.isnull()]
+        nan_intech_nogrid = nan_intech.loc[nan_intech.NEARID.isin(noHV.index_right)]
+        #add input fuel to the (isnan INFUEL + isin noHV) selection
+        m = 0
+        for l in nan_intech_nogrid.index:
+            near_adj_points.loc[near_adj_points.index == l, 'INFUEL'] = "EL2_" + str(int(near_adj_points.SENDID[l]))
+            near_adj_points.loc[near_adj_points.index == l , 'INTECH'] = "TRHV_" + str(int(near_adj_points.SENDID[l])) + "_" + str(int(near_adj_points.NEARID[l]))
+            near_adj_points.loc[near_adj_points.index == l, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[l]))
 
-    nan_intech_minigr = near_adj_points.loc[near_adj_points.INFUEL.isnull()]
-    nan_intech_minigrid = nan_intech_minigr.loc[nan_intech_minigr.NEARID.isin(minigrid.index_right)]
-    #add input fuel to the (isnan INFUEL + isin noHV) selection
+        nan_intech_minigr = near_adj_points.loc[near_adj_points.INFUEL.isnull()]
+        nan_intech_minigrid = nan_intech_minigr.loc[nan_intech_minigr.NEARID.isin(minigrid.index_right)]
+        #add input fuel to the (isnan INFUEL + isin noHV) selection
 
-    for l in nan_intech_minigrid.index:
-        near_adj_points.loc[near_adj_points.index == l, 'INFUEL'] = "EL2_" + str(int(near_adj_points.SENDID[l]))
-        near_adj_points.loc[near_adj_points.index == l , 'INTECH'] = "TRHV_" + str(int(near_adj_points.SENDID[l])) + "_" + str(int(near_adj_points.NEARID[l]))
-        near_adj_points.loc[near_adj_points.index == l, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[l]))
+        for l in nan_intech_minigrid.index:
+            near_adj_points.loc[near_adj_points.index == l, 'INFUEL'] = "EL2_" + str(int(near_adj_points.SENDID[l]))
+            near_adj_points.loc[near_adj_points.index == l , 'INTECH'] = "TRHV_" + str(int(near_adj_points.SENDID[l])) + "_" + str(int(near_adj_points.NEARID[l]))
+            near_adj_points.loc[near_adj_points.index == l, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[l]))
 
-    #Allow for connections over cells with no population ("nan")
-    not_grid = near_adj_points[~near_adj_points.SENDID.isin(HV.index_right)]
-    nan = not_grid.loc[not_grid.INFUEL.isnull()]
-    not_grid_reciever = nan[~nan.NEARID.isin(HV.index_right)]
-    for j in not_grid_reciever.index:
-        near_adj_points.loc[near_adj_points.index == j, 'INFUEL'] = "EL2_" + str(int(near_adj_points.SENDID[j]))
-        near_adj_points.loc[near_adj_points.index == j , 'INTECH'] = "TRHV_" + str(int(near_adj_points.SENDID[j])) + "_" + str(int(near_adj_points.NEARID[j]))
-        near_adj_points.loc[near_adj_points.index == j, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[j]))
+        #Allow for connections over cells with no population ("nan")
+        not_grid = near_adj_points[~near_adj_points.SENDID.isin(HV.index_right)]
+        nan = not_grid.loc[not_grid.INFUEL.isnull()]
+        not_grid_reciever = nan[~nan.NEARID.isin(HV.index_right)]
+        for j in not_grid_reciever.index:
+            near_adj_points.loc[near_adj_points.index == j, 'INFUEL'] = "EL2_" + str(int(near_adj_points.SENDID[j]))
+            near_adj_points.loc[near_adj_points.index == j , 'INTECH'] = "TRHV_" + str(int(near_adj_points.SENDID[j])) + "_" + str(int(near_adj_points.NEARID[j]))
+            near_adj_points.loc[near_adj_points.index == j, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[j]))
 
-    nan_matrix = near_adj_points.loc[near_adj_points.INTECH.notnull()]
-    #concat the two dataframes with the transmissionlines to one
-    final_matrix = nan_matrix.drop(['OBJECTID *','INPUT_FID','NEAR_FID','NEARID','SENDID'], axis=1)
-    final_matrix = final_matrix.drop_duplicates()
+        nan_matrix = near_adj_points.loc[near_adj_points.INTECH.notnull()]
+        #concat the two dataframes with the transmissionlines to one
+        final_matrix = nan_matrix.drop(['OBJECTID *','INPUT_FID','NEAR_FID','NEARID','SENDID'], axis=1)
+        final_matrix = final_matrix.drop_duplicates()
 
-    final_matrix.to_csv(os.path.join(topath,'adjacencymatrix.csv'))
-    return(final_matrix)
+        final_matrix.to_csv(os.path.join(topath,'adjacencymatrix.csv'))
+        return(final_matrix)
+    except:
+        print("No neartable in the folder. Please check that there are no cells to connect.")
+        exit
 
-def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv, distr_losses, HV_csv, distributionlines_file, distribution_header, distributioncelllength_file, tofolder):
+    
+
+
+def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv, distr_losses, HV_csv, distributionlines_file, distribution_header, distributioncelllength_file, tofolder, spatail, demand_scneario):
     """
     This function calculates the peakdemand per year and demand and divides it with the estimated km.
     :param demand_csv:
@@ -124,12 +131,12 @@ def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv
     peakdemand['cell'] = peakdemand.index.to_series().apply(lambda row: int(row.split("_")[1]))
 
     distributionlines = distributionlines.set_index(distributionlines.iloc[:, 0])
-    #distribution = distributionlines.drop(columns ='Unnamed: 0')
+    distribution = distributionlines.drop(columns ='Unnamed: 0')
 
     distributioncelllength.index = distributioncelllength['index_right']
     distribtionlength = distributioncelllength.drop(['Unnamed: 0', 'index_right', 'elec'], axis = 1)
 
-    distribution_total = distributionlines.multiply(distribtionlength.distribution_header, axis = "rows")
+    distribution_total = distribution.multiply(distribtionlength.LV_km, axis = "rows")
     peakdemand.index = peakdemand[('cell')]
     a = distribution_total.index
     peakdemand_divided_km = peakdemand.apply(lambda x: (x/distribution_total.loc[x['cell']][0] if (x['cell']==a).any() else print('not same')), axis=1)
@@ -145,4 +152,4 @@ def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv
 
     TRLV_TRLVM = peakdemand_divided_km_cleaned.append(peakdemandLVM_divided_km_cleaned)
 
-    TRLV_TRLVM.to_csv(os.path.join(tofolder,'peakdemand.csv'))
+    TRLV_TRLVM.to_csv(os.path.join(tofolder,'%i_%i_peakdemand.csv') %(spatail, demand_scneario))
