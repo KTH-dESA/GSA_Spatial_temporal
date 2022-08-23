@@ -152,7 +152,7 @@ def download(path,  Rpath, srcpath, wind, solar, token):
 
     i = 0
     try:
-        while i < len(wind)+8:
+        while i < len(wind):
 
             for x in range(i,i+8): #50/6 is 8.3 so we will upload 8 files per hour
                 if x < len(wind):
@@ -176,14 +176,14 @@ def download(path,  Rpath, srcpath, wind, solar, token):
                     csvfilesout = path + "/out_"+wind[x]
                     subprocess.call([
                          Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
-            if i >7:
-                print("Waiting to download next 50 data sets")
-                time.sleep(3601)
+                if i >7:
+                    print("Waiting to download next 50 data sets")
+                    time.sleep(3601)
             i += modulus
 
     j = 0
     try:
-        while j < len(solar)+8:
+        while j < len(solar):
             for x in range(j,j+8): #50/6 is 8.3 so we will upload 8 files per hour
                 if x < len(solar):
                     type = "solar"
@@ -191,9 +191,9 @@ def download(path,  Rpath, srcpath, wind, solar, token):
                     csvfilesout = path + "/out_"+solar[x]
                     subprocess.call([
                          Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
-            if i >7:
-                print("Waiting to download next 50 data sets")
-                time.sleep(3601)
+                if j >7:
+                    print("Waiting to download next 50 data sets")
+                    time.sleep(3601)
             j += 8
     except:
         modulus = len(solar)%8
@@ -205,9 +205,9 @@ def download(path,  Rpath, srcpath, wind, solar, token):
                     csvfilesout = path + "/out_"+solar[x]
                     subprocess.call([
                          Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
-            if i >7:
-                print("Waiting to download next 50 data sets")
-                time.sleep(3601)
+                if j >7:
+                    print("Waiting to download next 50 data sets")
+                    time.sleep(3601)
             j += modulus
 
 ##
