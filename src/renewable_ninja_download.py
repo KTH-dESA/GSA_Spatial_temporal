@@ -35,7 +35,7 @@ def project_vector(vectordata):
     return(gdf_wgs84)
 
 #Make CSV files for the download loop
-def csv_make(coordinates):
+def csv_make(coordinates, path):
     """This function extracts the coordinates for the csv build to renewable ninja
 
     :param coordinates:
@@ -79,7 +79,7 @@ def csv_make(coordinates):
                     temp.append(currentLine)
             fields = ['name', 'lat', 'lon', 'from', 'to', 'dataset', 'capacity', 'height', 'turbine']
             rows = temp
-            with open("temp/wind_%i-%i.csv" %(i, i+6), 'w') as f:
+            with open(os.path.join(path + "/wind_%i-%i.csv" %(i, i+6)), 'w') as f:
                 write = csv.writer(f)
                 write.writerow(fields)
                 write.writerows(rows)
@@ -96,7 +96,7 @@ def csv_make(coordinates):
                     temp.append(currentLine)
             fields = ['name', 'lat', 'lon', 'from', 'to', 'dataset', 'capacity', 'height', 'turbine']
             rows = temp
-            with open("temp/wind_%i-%i.csv" % (i, i + modulus), 'w') as f:
+            with open(os.path.join(path + "/wind_%i-%i.csv" % (i, i + modulus)), 'w') as f:
                 write = csv.writer(f)
                 write.writerow(fields)
                 write.writerows(rows)
@@ -115,7 +115,7 @@ def csv_make(coordinates):
                     temp.append(currentLine)
             fields = ['name', 'lat', 'lon', 'from', 'to', 'dataset', 'capacity', 'system_loss', 'tracking', 'tilt', 'azim']
             rows = temp
-            with open("temp/solar_%i-%i.csv" %(j, j+6), 'w') as f:
+            with open(os.path.join(path + "/solar_%i-%i.csv" %(j, j+6)), 'w') as f:
                 write = csv.writer(f)
                 write.writerow(fields)
                 write.writerows(rows)
@@ -132,7 +132,7 @@ def csv_make(coordinates):
                     temp.append(currentLine)
             fields = ['name', 'lat', 'lon', 'from', 'to', 'dataset', 'capacity', 'system_loss', 'tracking', 'tilt', 'azim']
             rows = temp
-            with open("temp/solar_%i-%i.csv" %(j, j+modulus), 'w') as f:
+            with open(os.path.join(path + "/solar_%i-%i.csv" %(j, j+modulus)), 'w') as f:
                 write = csv.writer(f)
                 write.writerow(fields)
                 write.writerows(rows)
@@ -153,6 +153,7 @@ def download(path,  Rpath, srcpath, wind, solar, token):
     i = 0
     try:
         while i < len(wind)+8:
+
             for x in range(i,i+8): #50/6 is 8.3 so we will upload 8 files per hour
                 if x < len(wind):
                     type = "wind"
@@ -160,9 +161,11 @@ def download(path,  Rpath, srcpath, wind, solar, token):
                     csvfilesout = path + "/out_"+wind[x]
                     subprocess.call([
                          Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
-            print("Waiting to download next 50 data sets")
-            time.sleep(3601)
+            if i >7:
+                print("Waiting to download next 50 data sets")
+                time.sleep(3601)
             i += 8
+
     except:
         modulus = len(wind)%8
         while i < len(wind)+modulus:
@@ -173,8 +176,9 @@ def download(path,  Rpath, srcpath, wind, solar, token):
                     csvfilesout = path + "/out_"+wind[x]
                     subprocess.call([
                          Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
-            print("Waiting to download next 50 data sets")
-            time.sleep(3601)
+            if i >7:
+                print("Waiting to download next 50 data sets")
+                time.sleep(3601)
             i += modulus
 
     j = 0
@@ -187,8 +191,9 @@ def download(path,  Rpath, srcpath, wind, solar, token):
                     csvfilesout = path + "/out_"+solar[x]
                     subprocess.call([
                          Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
-            print("Waiting to download next 50 data sets")
-            time.sleep(3601)
+            if i >7:
+                print("Waiting to download next 50 data sets")
+                time.sleep(3601)
             j += 8
     except:
         modulus = len(solar)%8
@@ -200,8 +205,9 @@ def download(path,  Rpath, srcpath, wind, solar, token):
                     csvfilesout = path + "/out_"+solar[x]
                     subprocess.call([
                          Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
-            print("Waiting to download next 50 data sets")
-            time.sleep(3601)
+            if i >7:
+                print("Waiting to download next 50 data sets")
+                time.sleep(3601)
             j += modulus
 
 ##
