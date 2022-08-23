@@ -96,7 +96,7 @@ def zonalstat_pathfinder(raster, polygon, scenario):
             stats="sum")
     
     df_zonal = pd.DataFrame(zonal_polygon)
-    df_zonal.to_csv("run/scenarios/%i_distributionslines.csv" %(scenario))
+    df_zonal.to_csv("run/scenarios/%i_distributionlines.csv" %(scenario))
 
 
 def pathfinder_main(path,proj_path, elec_shp, tofolder, tiffile, crs):
