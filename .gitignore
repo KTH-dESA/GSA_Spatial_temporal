@@ -37,5 +37,6 @@ src/sample_morris.csv
 .vscode/settings.json
 src/GEOSeMOSYS -Benin.ipynb
 src/run/elec.png
-src/GEOSeMOSYS -Benin.ipynb
-src/run/elec.png
+src/modelruns/scenarios/sample_morris.csv
+src/modelruns/scenarios/unique_morris.csv
+
