@@ -35,3 +35,5 @@ src/gui_workflow-gsa**
 src/sample_morris_masterdata.xlsx
 src/sample_morris.csv
 .vscode/settings.json
+src/GEOSeMOSYS -Benin.ipynb
+src/run/elec.png
