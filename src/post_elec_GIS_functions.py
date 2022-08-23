@@ -41,12 +41,10 @@ def join_elec(elec, tif, cells):
 
     cell =  gpd.read_file(cells)
     demand_cells = sjoin(settlements, cell, how="left")
-    if not os.path.exists('run/Demand'):
-        os.makedirs('run/Demand')
-    demand_cells.to_file(os.path.join(os.getcwd(), 'run\Demand\demand.shp'))
+    demand_cells.to_file(os.path.join(os.getcwd(), 'run\scenarios\Demand\demand.shp'))
     demand_cell = pd.DataFrame(demand_cells, copy=True)
-    demand_cell.to_csv('run/Demand/demand_cells.csv')
-    path = 'run/Demand/demand_cells.csv'
+    demand_cell.to_csv('run/scenarios/Demand/demand_cells.csv')
+    path = 'run/scenarios/Demand/demand_cells.csv'
     return(path)
 
 def network_length(demandcells, input, tofolder, scenario):
@@ -122,7 +120,7 @@ def elec(demandcells, scenario):
     unelec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/%i_un_elec.csv')%(scenario))
     unelec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/scenarios/%i_un_elec.csv')%(scenario))
 
-def calculate_demand(settlements, demand, scenario):
+def calculate_demand(settlements, demand, scenario, spatial):
     demand_cell = pd.read_csv(settlements)
     demand_GJ =  pd.read_csv(demand)
     ref_demand = demand_GJ[demand_GJ['Scenario']==scenario]
@@ -180,7 +178,7 @@ def calculate_demand(settlements, demand, scenario):
     ref = pd.concat(([ref_elec, ref_unelec]))
     ref.index = ref['Fuel']
     ref = ref.drop(columns =['elec', 'pop','GDP_PPP', 'elec_share', 'Fuel', 'un_elec_share'])
-    ref.to_csv('run/scenarios/%i_demand.csv' %(scenario))
+    ref.to_csv('run/scenarios/%i_demand_%i_spatialresolution.csv' %(scenario, spatial))
 
     #Vision scenario
 #    sum_pop_unelec = sum(unelec_pointid['pop'])
