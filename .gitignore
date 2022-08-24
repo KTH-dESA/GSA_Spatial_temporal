@@ -1,0 +1,46 @@
+data/**
+GIS_data/**
+Projected_files/**
+.ipynb_checkpoints/*
+src/temp/**
+src/results/**
+results/**
+*.zip
+temp/**
+GEOSeMOSYS_Kenya-master/**
+.idea/**
+src/__pycache__/**
+src/run/o.lp
+src/run/scenarios/capacityfactor_solar.csv
+src/run/scenarios/capacityfactor_wind.csv
+src/run/scenarios/capacitytoactivity.csv
+src/run/scenarios/capitalcost.csv
+src/Results_extraction.py
+src/run/scenarios/adjacencymatrix.csv
+src/run/scenarios/elec.csv
+src/run/scenarios/fixed_cost_tnd.csv
+src/run/scenarios/fuels.csv
+src/run/scenarios/GIS_data.csv
+src/run/scenarios/inputactivity.csv
+src/run/scenarios/outputactivity.csv
+src/run/scenarios/un_elec.csv
+src/run/scenarios/technologies.csv
+src/run/results/**
+src/SALib-main/**
+src/run/Demand/demand**
+New Text Document.txt
+src/.ipynb_checkpoints/GEOSeMOSYS -Benin-checkpoint.ipynb
+src/test_GEOSeMOSYS_Kenya.py
+src/gui_workflow-gsa**
+src/sample_morris_masterdata.xlsx
+src/sample_morris.csv
+.vscode/settings.json
+src/GEOSeMOSYS -Benin.ipynb
+src/run/elec.png
+src/modelruns/scenarios/sample_morris.csv
+src/modelruns/scenarios/unique_morris.csv
+
+src/run/5_elec_noHV_cells.csv
+src/run/scenarios/Demand/**
+src/run/scenarios/**
+
