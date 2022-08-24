@@ -78,18 +78,20 @@ for k in range(0,len(scenario.index)):
         print("Download Renewable Ninja files for scenario %i" %(spatial))
         # add your token for API from your own log in on Renewable Ninjas
         token = '7a3a746a559cfe5638d6730b1af467beebaf7aa4'
-        time_zone_offset = 1  # Benin is UTC + 1hours to adjust for the time zone
+        #time_zone_offset = 1  # Benin is UTC + 1hours to adjust for the time zone
+        #if not os.path.exists('temp/%i' %(spatial)):
+        #    os.makedirs('temp/%i' %(spatial))
 
         shapefile = '../Projected_files/' + point
         #Add the path to the RScript.exe under Program Files and add here
         Rpath =  'C:\\TPFAPPS\\R\\R-4.1.0\\bin\\RScript.exe'
         srcpath = os.getcwd()
         print(srcpath)
-        path = "temp/%i" %(spatial)
-        coordinates = project_vector(shapefile)
-        wind, solar = csv_make(coordinates, path)
-        down = download(path, Rpath, srcpath, wind, solar, token)
-        adjust_timezone(path, time_zone_offset)
+        #path = "temp/%i" %(spatial)
+        #coordinates = project_vector(shapefile)
+        #wind, solar = csv_make(coordinates, path)
+        #down = download(path, Rpath, srcpath, wind, solar, token)
+        #adjust_timezone(path, time_zone_offset)
 
         print("Build peakdemand, maxkmpercell, transmission technologies, capitalcostpercapacitykm")
 
@@ -113,7 +115,7 @@ for k in range(0,len(scenario.index)):
         HV = 'run/%i_HV_cells.csv' %(spatial)
         minigrid = 'run/%i_elec_noHV_cells.csv' %(spatial)
         neartable = 'run/scenarios/Demand/%i_Near_table.csv' %(spatial)
-        demand = 'run/scenarios/%i_demand.csv' %(demand_scenario)
+        demand = 'run/scenarios/%i_demand_%i_spatialresolution.csv' %(demand_scenario, spatial)
         specifieddemand= 'run/scenarios/demandprofile_rural.csv'
         capacitytoactivity = 31.536
         yearsplit = 'run/scenarios/Demand/yearsplit.csv'
@@ -142,14 +144,15 @@ for k in range(0,len(scenario.index)):
         capacitytoactivity = 31.536 #coversion MW to TJ
 
         #Solar and wind csv files
-        renewableninja(renewable_path, scenariopath)
+        renewableninja(renewable_path, scenariopath, spatial)
         #Location file
-        gisfile_ref = GIS_file(scenariopath, '../Projected_files/' + point)
-        matrix = 'run/scenarios/Demand/adjacencymatrix.csv'
+        gisfile_ref = GIS_file(scenariopath, '../Projected_files/' + point, spatial)
+        matrix = 'run/scenarios/Demand/%i_adjacencymatrix.csv' %(spatial)
 
         capital_cost_transmission_distrib(elec, noHV, HV, elec_noHV_cells, unelec, capital_cost_HV, substation, capacitytoactivity, scenariopath, matrix, gisfile_ref, diesel = True)
 
 #Read scenarios from sample file
 for m in range(0,len(scenario.index)):
     discountrate = int(scenario[2][m])
-    
+    discountr = 'input_data/Benin_discountrate.csv'
+    discountrate(discountr, discountrate)
