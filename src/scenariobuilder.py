@@ -19,12 +19,7 @@ scenario = pd.read_csv('modelruns/scenarios/unique_morris.csv', header=None)
 if not os.path.exists('run/scenarios'):
     os.makedirs('run/scenarios')
 
-#Read scenarios from sample file
-for k in range(0,len(scenario.index)):
-    demand_scenario = int(scenario[1][k])
-
-#Read scenarios from sample file
-    for j in range(0,len(scenario.index)):
+for j in range(0,len(scenario.index)):
         print("Running scenario %i" %j)
         spatial = int(scenario[0][j])
 
@@ -34,7 +29,6 @@ for k in range(0,len(scenario.index)):
 
         polygon = str(spatial) + "_polygon.shp"
         point = str(spatial) + "_point.shp"
-
 
         print('1. Aggregating the number of cells per polygon from Pathfinder')
         path_polygon = '../Projected_files/' + polygon
@@ -65,22 +59,15 @@ for k in range(0,len(scenario.index)):
 
         noHV_polygons(polygons_all, noHV, shape, crs)
 
-        date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
-        print(date)
-
-        settlements = 'run/scenarios/Demand/demand_cells.csv'
-        demand = 'input_data/Benin_demand.csv'
-        calculate_demand(settlements, demand, demand_scenario, spatial)
-
         #To be able to download you need to install the package curl from R and also have R installed on your computer
         # Easiest is to write  install.packages("curl") in the R prompt
 
         print("Download Renewable Ninja files for scenario %i" %(spatial))
         # add your token for API from your own log in on Renewable Ninjas
         token = '7a3a746a559cfe5638d6730b1af467beebaf7aa4'
-        #time_zone_offset = 1  # Benin is UTC + 1hours to adjust for the time zone
-        #if not os.path.exists('temp/%i' %(spatial)):
-        #    os.makedirs('temp/%i' %(spatial))
+        time_zone_offset = 1  # Benin is UTC + 1hours to adjust for the time zone
+        if not os.path.exists('temp/%i' %(spatial)):
+            os.makedirs('temp/%i' %(spatial))
 
         shapefile = '../Projected_files/' + point
         #Add the path to the RScript.exe under Program Files and add here
@@ -105,8 +92,6 @@ for k in range(0,len(scenario.index)):
         demandcells = os.path.join(os.getcwd(), 'run/scenarios/Demand/demand_cells.csv')
         input_data =  os.path.join(os.getcwd(), 'run/scenarios/input_data.csv')
         distribution_length_cell_ref = network_length(demandcells, input_data, refpath, spatial)
-
-        #distribution_length_cell_ref = 'run/scenarios/%i_distribution.csv' %(spatial)
         distribution = 'run/scenarios/%i_distributionlines.csv' %(spatial)
         distribution_row = "_%isum" %(spatial)
 
@@ -115,14 +100,10 @@ for k in range(0,len(scenario.index)):
         HV = 'run/%i_HV_cells.csv' %(spatial)
         minigrid = 'run/%i_elec_noHV_cells.csv' %(spatial)
         neartable = 'run/scenarios/Demand/%i_Near_table.csv' %(spatial)
-        demand = 'run/scenarios/%i_demand_%i_spatialresolution.csv' %(demand_scenario, spatial)
-        specifieddemand= 'run/scenarios/demandprofile_rural.csv'
-        capacitytoactivity = 31.536
         yearsplit = 'run/scenarios/Demand/yearsplit.csv'
         reffolder = 'run/scenarios'
         distr_losses = 0.83
 
-        peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV, distribution, distribution_row, distribution_length_cell_ref, reffolder, spatial, demand_scenario)
         transmission_matrix(neartable, noHV, HV, minigrid, topath)
 
         date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
@@ -151,8 +132,64 @@ for k in range(0,len(scenario.index)):
 
         capital_cost_transmission_distrib(elec, noHV, HV, elec_noHV_cells, unelec, capital_cost_HV, substation, capacitytoactivity, scenariopath, matrix, gisfile_ref, spatial, diesel = True)
 
+demand_scenario_nan = scenario[1]
+demand_scenario_list = [x for x in demand_scenario_nan if str(x) != 'nan']
 #Read scenarios from sample file
-for m in range(0,len(scenario.index)):
-    discountrate = int(scenario[2][m])
+for k in range(0,len(demand_scenario_list)):
+
+    demand_scenario = int(demand_scenario_list[k])
+
+    #Scenarios that are sensitive to spatial and demand simultaneously
+    for j in range(0,len(scenario.index)):
+        print("Running scenario %i" %j)
+        spatial = int(scenario[0][j])
+
+        #TODO Modify the Pathfinder file to run zonal statistics sum on polygon.
+        #TODO Add demand as scenario parameter
+    #######################
+
+        polygon = str(spatial) + "_polygon.shp"
+        point = str(spatial) + "_point.shp"
+        print("Build Demand")
+        date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
+        print(date)
+
+        settlements = 'run/scenarios/Demand/demand_cells.csv'
+        demand = 'input_data/Benin_demand.csv'
+        calculate_demand(settlements, demand, demand_scenario, spatial)
+
+        print("Build peakdemand")
+
+        date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
+        print(date)
+        from Distribution import *
+        from post_elec_GIS_functions import network_length
+        
+        refpath = 'run/scenarios'
+        demandcells = os.path.join(os.getcwd(), 'run/scenarios/Demand/demand_cells.csv')
+        input_data =  os.path.join(os.getcwd(), 'run/scenarios/input_data.csv')
+        distribution_length_cell_ref = 'run/scenarios/%i_distribution.csv' %(spatial)
+        distribution = 'run/scenarios/%i_distributionlines.csv' %(spatial)
+        distribution_row = "_%isum" %(spatial)
+
+        topath = 'run/scenarios/Demand'
+        noHV = 'run/%i_noHV_cells.csv' %(spatial)
+        HV = 'run/%i_HV_cells.csv' %(spatial)
+        minigrid = 'run/%i_elec_noHV_cells.csv' %(spatial)
+        neartable = 'run/scenarios/Demand/%i_Near_table.csv' %(spatial)
+        demand = 'run/scenarios/%i_demand_%i_spatialresolution.csv' %(demand_scenario, spatial)
+        specifieddemand= 'run/scenarios/demandprofile_rural.csv'
+        capacitytoactivity = 31.536
+        yearsplit = 'run/scenarios/Demand/yearsplit.csv'
+        reffolder = 'run/scenarios'
+        distr_losses = 0.83
+
+        peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV, distribution, distribution_row, distribution_length_cell_ref, reffolder, spatial, demand_scenario)
+
+dr_scenario_nan = scenario[1]
+dr_scenario_list = [x for x in dr_scenario_nan if str(x) != 'nan']
+#Read scenarios from sample file
+for m in range(0,len(dr_scenario_list)):
+    dr = int(dr_scenario_list[m])
     discountr = 'input_data/Benin_discountrate.csv'
-    discountrate(discountr, discountrate)
+    discountrate_csv(discountr, dr)
