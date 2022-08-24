@@ -18,7 +18,7 @@ import fnmatch
 pd.options.mode.chained_assignment = None
 
 
-def renewableninja(path, dest):
+def renewableninja(path, dest, spatial):
     """
     This function organize the data to the required format of a matrix with the
     location name on the x axis and hourly data on the y axis so that it can be fed into https://github.com/KTH-dESA/GEOSeMOSYS code
@@ -56,16 +56,16 @@ def renewableninja(path, dest):
     solarbase.columns = new_header
 
     #solarbase.drop('Unnamed: 0', axis='columns', inplace=True)
-    solarbase.to_csv(os.path.join(dest, 'capacityfactor_solar.csv'))
+    solarbase.to_csv(os.path.join(dest, '%i_capacityfactor_solar.csv' %(spatial)))
 
     header = windbase.columns
     new_header = [x.replace('X','') for x in header]
     windbase.columns = new_header
     #windbase.drop('Unnamed: 0', axis='columns', inplace=True)
-    windbase.to_csv(os.path.join(dest, 'capacityfactor_wind.csv'))
+    windbase.to_csv(os.path.join(dest, '%i_capacityfactor_wind.csv' %(spatial)))
     return()
 
-def GIS_file(dest, point):
+def GIS_file(dest, point, spatial):
     """
     Creates the GIS location file which determins the spatial resolution
     :param dest:
@@ -75,8 +75,8 @@ def GIS_file(dest, point):
     GIS_data = point.index
     grid = pd.DataFrame(GIS_data, copy=True)
     grid.columns = ['Location']
-    grid.to_csv(os.path.join(dest, 'GIS_data.csv'), index=False)
-    return(os.path.join(dest, 'GIS_data.csv'))
+    grid.to_csv(os.path.join(dest, '%i_GIS_data.csv' %(spatial)), index=False)
+    return(os.path.join(dest, '%i_GIS_data.csv' %(spatial)))
 
 ## Build files with elec/unelec aspects
 def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_file, unelec, capital_cost_HV, substation, capacitytoactivity, path, adjacencymatrix,gis_file, diesel):
