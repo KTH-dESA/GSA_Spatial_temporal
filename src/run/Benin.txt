@@ -21,6 +21,16 @@ set STORAGE:=;
 #
 # Units are TJ, MW and kUSD
 
+param Peakdemand default 999999999:=
+;
+
+param MaxKmPerTech default 9999999999 :=
+;
+
+param CapitalCostkmkW default 0 :=
+;
+
+
 
 param TotalTechnologyAnnualActivityUpperLimit default 999999999999999999999 :=
 [Benin,*,*]:																									
