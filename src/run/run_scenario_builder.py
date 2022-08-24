@@ -14,7 +14,7 @@ import argparse
 import sys
 import logging
 from datetime import datetime
-from build_data_file_ref import load_csvs, make_outputfile, functions_to_run, write_to_file
+from build_osemosysdatafiles import load_csvs, make_outputfile, functions_to_run, write_to_file
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +25,6 @@ def parse_args(args):
     Returns:
       :obj:`argparse.Namespace`: command line parameters namespace
 
-    # paths = (os.getcwd() + '\data')
-    # path = os.getcwd()
-    # file_object= os.getcwd() + r'\results\GIS.txt'
     param_file = '/osemosys_shell_param.txt'
 
     """
@@ -56,13 +53,25 @@ def run(argv):
     """Entry point for console_scripts
     """
     args = parse_args(argv)
-
     dict_df = load_csvs(args.data_path)
     outPutFile = make_outputfile(args.template)
-    outPutFile = functions_to_run(dict_df, outPutFile)
-    #write data file
-    write_to_file(args.output_path, outPutFile)
 
+    ### Scenario settings ###
+
+    #TODO Integrate the scenario generator with SNAKEMAKE file. To understand is if I send a number or if I send a file.
+    scenario = pd.read_csv('modelruns/scenarios/unique_comb_morris.csv', header=None)
+    for m in range(0,len(scenario.index)):
+        spatial = int(scenario[0][m])
+        demand_scenario = int(scenario[1][m])
+        discountrate = int(scenario[2][m])
+        outPutFile = functions_to_run(dict_df, outPutFile, spatial, demand_scenario, discountrate)
+        comb = 'Benin'+str(spatial)+str(demand_scenario)+str(discountrate)+'.txt'
+        #write data file
+        if not os.path.exists('run/output'):
+            os.makedirs('run/output')
+        write_to_file(args.output_path, outPutFile, comb)
 
 if __name__ == "__main__":
     run(sys.argv[1:])
+    
+
