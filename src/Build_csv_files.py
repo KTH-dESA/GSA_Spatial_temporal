@@ -79,7 +79,7 @@ def GIS_file(dest, point, spatial):
     return(os.path.join(dest, '%i_GIS_data.csv' %(spatial)))
 
 ## Build files with elec/unelec aspects
-def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_file, unelec, capital_cost_HV, substation, capacitytoactivity, path, adjacencymatrix,gis_file, diesel):
+def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_file, unelec, capital_cost_HV, substation, capacitytoactivity, path, adjacencymatrix,gis_file, scenario, diesel):
     """Reads the transmission lines shape file, creates empty files for inputactivity, outputactivity, capitalcost for transmission lines.
 
     :param distribution_network: a csv file with number of cells included in Pathfinder
@@ -352,13 +352,13 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
     outputactivity.dropna(subset=['Technology'], inplace=True)
     capitalcost.dropna(subset=['Technology'], inplace=True)
 
-    fixedcost.to_csv(os.path.join(path, 'fixed_cost_tnd.csv'))
-    capitalcost.to_csv(os.path.join(path, 'capitalcost.csv'))
-    inputactivity.to_csv(os.path.join(path, 'inputactivity.csv'))
-    outputactivity.to_csv(os.path.join(path, 'outputactivity.csv'))
-    capacitytoactiv.to_csv(os.path.join(path, 'capacitytoactivity.csv'))
-    fuels.to_csv(os.path.join(path, 'fuels.csv'))
-    technolgies.to_csv(os.path.join(path, 'technologies.csv'))
+    fixedcost.to_csv(os.path.join(path, '%i_fixed_cost_tnd.csv' %(scenario)))
+    capitalcost.to_csv(os.path.join(path, '%i_capitalcost.csv' %(scenario)))
+    inputactivity.to_csv(os.path.join(path, '%i_inputactivity.csv' %(scenario)))
+    outputactivity.to_csv(os.path.join(path, '%i_outputactivity.csv'%(scenario)))
+    capacitytoactiv.to_csv(os.path.join(path, '%i_capacitytoactivity.csv'%(scenario)))
+    fuels.to_csv(os.path.join(path, '%i_fuels.csv'%(scenario)))
+    technolgies.to_csv(os.path.join(path, '%i_technologies.csv'%(scenario)))
 
 def near_dist(pop_shp, un_elec_cells, path, CR):
 

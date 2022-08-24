@@ -149,7 +149,7 @@ for k in range(0,len(scenario.index)):
         gisfile_ref = GIS_file(scenariopath, '../Projected_files/' + point, spatial)
         matrix = 'run/scenarios/Demand/%i_adjacencymatrix.csv' %(spatial)
 
-        capital_cost_transmission_distrib(elec, noHV, HV, elec_noHV_cells, unelec, capital_cost_HV, substation, capacitytoactivity, scenariopath, matrix, gisfile_ref, diesel = True)
+        capital_cost_transmission_distrib(elec, noHV, HV, elec_noHV_cells, unelec, capital_cost_HV, substation, capacitytoactivity, scenariopath, matrix, gisfile_ref, spatial, diesel = True)
 
 #Read scenarios from sample file
 for m in range(0,len(scenario.index)):
