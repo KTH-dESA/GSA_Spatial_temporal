@@ -182,7 +182,7 @@ def calculate_demand(settlements, demand, scenario, spatial):
 
     return ()
 
-def discountrate(discountrate, scenario):
+def discountrate_csv(discountrate, scenario):
     dr =  pd.read_csv(discountrate)
     dr_scenario = dr[dr['Scenario']==scenario]
     dr_scenario = dr_scenario['Discountrate']
