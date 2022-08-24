@@ -180,55 +180,10 @@ def calculate_demand(settlements, demand, scenario, spatial):
     ref = ref.drop(columns =['elec', 'pop','GDP_PPP', 'elec_share', 'Fuel', 'un_elec_share'])
     ref.to_csv('run/scenarios/%i_demand_%i_spatialresolution.csv' %(scenario, spatial))
 
-    #Vision scenario
-#    sum_pop_unelec = sum(unelec_pointid['pop'])
-#    un_elec_list= []
-#    for i, row in unelec_pointid.iterrows():
-#        row['un_elec_share'] = row['pop']/sum_pop_unelec
-#        pointid = int(i)
-#        row['Fuel'] = 'EL3_'+ str(pointid) + '_0'
-#        startyear = 2016
-#        while startyear <=2040:
-#            unelec_vision = vision_demand[vision_demand['demand GJ'].str.contains('unelectrified')]
-#            r = unelec_vision.index[0]
-#            col = str(startyear)
-#            row[col] = unelec_vision.loc[r,col]*row['un_elec_share']
-#            startyear +=1
-
-        #un_elec_list.append(row)
-        #ind = row.index
-
-
-#    vision_unelec = pd.DataFrame(un_elec_list, columns=ind)
-#
-#    #The case of electrified
-#    elec = demand_cols[demand_cols['elec'] == 1]
-#    elec_pointid = elec.groupby(["index_right"]).sum()
-#    elec_pointid.reset_index()
-
-#    sum_pop_elec = sum(elec_pointid['pop'])
-#    sum_gdp_elec = sum(elec_pointid['GDP_PPP'])
-
-#    elec_list = []
-#    for i, row in elec_pointid.iterrows():
-#        row['elec_share'] = 0.5*row['pop']/sum_pop_elec+0.5*row['GDP_PPP']/sum_gdp_elec
-#        pointid = int(i)
-#        row['Fuel'] = 'EL3_'+ str(pointid) + '_1'
-#        startyear = 2016
-#        while startyear <=2040:
-#            vision_demand = vision_demand[vision_demand['demand GJ'].str.contains('Electrified')]
-#            r = vision_demand.index[0]
-#            col = str(startyear)
-#            row[col] = vision_demand.loc[r,col]*row['elec_share']
-#            startyear +=1
-#        elec_list.append(row)
-#        ind = row.index
-
-#    vision_elec = pd.DataFrame(elec_list, columns=ind)
-#    vision = pd.concat(([vision_elec, vision_unelec]))
-#    vision.index = vision['Fuel']
-#    vision = vision.drop(columns =['elec', 'pop','GDP_PPP', 'elec_share', 'Fuel', 'un_elec_share'])
-#    vision.to_csv('run/vision/vision_demand.csv')
-#    vision.to_csv('run/dryvision/vision_demand.csv')
-
     return ()
+
+def discountrate(discountrate, scenario):
+    dr =  pd.read_csv(discountrate)
+    dr_scenario = dr[dr['Scenario']==scenario]
+    dr_scenario = dr_scenario['Discountrate']
+    dr_scenario.to_csv('run/scenarios/%i_discountrate.csv' %(scenario))
