@@ -23,25 +23,25 @@ crs = "EPSG:32631"
 date = datetime. now(). strftime("%Y_%m_%d-%I:%M:%S_%p")
 print(date)
 print("1. The files in input_data/GIS_data are downloaded and placed in a temp folder.")
-URL_viirs = 'https://eogdata.mines.edu/nighttime_light/annual/v20/2020/VNL_v2_npp_2020_global_vcmslcfg_c202102150000.average_masked.tif.gz'
+#URL_viirs = 'https://eogdata.mines.edu/nighttime_light/annual/v20/2020/VNL_v2_npp_2020_global_vcmslcfg_c202102150000.average_masked.tif.gz'
 
-download_url_data('input_data/GIS_URL.txt', 'temp')
-download_viirs(URL_viirs, 'temp')
-unzip_all('input_data/GIS_unzip.txt', '../temp', '../GIS_data')
+#download_url_data('input_data/GIS_URL.txt', 'temp')
+#download_viirs(URL_viirs, 'temp')
+#unzip_all('input_data/GIS_unzip.txt', '../temp', '../GIS_data')
 
 # 2. The files are then projected and clipped to the administrative boundaries.
 date = datetime. now(). strftime("%Y_%m_%d-%I:%M:%S_%p")
 print(date)
 print("2. The files are then projected and clipped to the administrative boundaries.")
 
-project_main('../GIS_Data', '../Projected_files', files, crs)
+#project_main('../GIS_Data', '../Projected_files', files, crs)
 # 3. Through QGIS make raster to point layer and save (MANUAL STEP)
 date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
 print(date)
 print("3. Through QGIS make raster to point layer and save (download from zenodo)")
 #Make sure you are in the /src directory when you start this script
 print(os.getcwd())
-download_url_data("input_data/zenodo.txt", "Projected_files")
+#download_url_data("input_data/zenodo.txt", "Projected_files")
 
 # 4. The GIS layers are prepared to for a heuristic approximation for electrified settlements
 date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
