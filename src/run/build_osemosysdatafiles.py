@@ -144,6 +144,11 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
     else:
         print('No discountrate file')
 
+    if '%i_technologies' %(spatial) or '%i_fuels' %(spatial) in dict_df:
+        outPutFile = SETS(outPutFile, dict_df['%i_technologies' %(spatial)], dict_df['%i_fuels' %(spatial)])
+    else:
+        print('No discountrate file')
+
     ################################################################
 
     if ('%i_capacityfactor_solar' %(spatial) or '%i_capacityfactor_wind'%(spatial)) in dict_df.keys():
@@ -154,6 +159,35 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
     ###############################################################################
 
     return(outPutFile)
+
+def SETS(outPutFile, technology, fuel):
+
+    dataToInsert = ""
+    print("FUEL SET", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    param = "set FUEL := "
+    startIndex = outPutFile.index(param) + len(param)
+    
+    fuel = fuel['Fuel']
+    fu = [x for x in fuel if str(x) != 'nan']
+    s = ", ".join(map(str, fu))
+    dataToInsert = s
+
+    outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
+
+    dataToInsert = ""
+    print("Technology SET", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    param = "set TECHNOLOGY := "
+    startIndex = outPutFile.index(param) + len(param)
+
+    technology = technology['Technology']
+    tech = [x for x in technology if str(x) != 'nan']
+    t = ", ".join(map(str, tech))
+    dataToInsert = t
+
+    outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
+
+    return(outPutFile)
+
 
 def operational_life(outPutFile, input_data, operational_life):
     """
@@ -171,8 +205,6 @@ def operational_life(outPutFile, input_data, operational_life):
     param = "param OperationalLife default 1 :=\n"
     startIndex = outPutFile.index(param) + len(param)
 
-    #for i, row in GIS_data.iterrows():
-        #location = row['Location']
     for m, line in operational_life.iterrows():
         t = line['Technology']
         l = line['Life']
@@ -184,18 +216,15 @@ def operational_life(outPutFile, input_data, operational_life):
 def discountrate_(outPutFile, discountr):
 
     dataToInsert = ""
-    print("Operational life", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-    param = "param DiscountRate default 0.12 :=\n"
-    startIndex = outPutFile.index(param)
+    print("Discount rate", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    param = "param DiscountRate default"
+    startIndex = outPutFile.index(param) + len(param)
 
-    #for i, row in GIS_data.iterrows():
-        #location = row['Location']
-    dataToInsert = "param DiscountRate default %i :=" %(discountr['Discountrate'])
+    dataToInsert = " %i :=" %(discountr['Discountrate'][1])
 
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
 
     return(outPutFile)
-
 
 def peakdemand(outPutFile,input_data, peakdemand):
     dataToInsert = ""
