@@ -111,7 +111,7 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
 #################################################################################
     if 'demandprofile' in dict_df:
        outPutFile = SpecifiedDemandProfile(outPutFile, dict_df['demandprofile'], dict_df['demandprofile_rural'],
-                                            dict_df['input_data'], dict_df['%i_demand'%(demand_scenario)])
+                                            dict_df['input_data'], dict_df['%i_demand_%i_spatialresolution'%(demand_scenario,spatial)])
     else:
         print('No demandprofile file')
 ###########################################################
@@ -144,7 +144,7 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
     else:
         print('No discountrate file')
 
-    if '%i_technologies' %(spatial) or '%i_fuels' %(spatial) in dict_df:
+    if '%i_technologies' %(spatial) in dict_df:
         outPutFile = SETS(outPutFile, dict_df['%i_technologies' %(spatial)], dict_df['%i_fuels' %(spatial)])
     else:
         print('No discountrate file')
@@ -167,8 +167,8 @@ def SETS(outPutFile, technology, fuel):
     param = "set FUEL := "
     startIndex = outPutFile.index(param) + len(param)
     
-    fuel = fuel['Fuel']
-    fu = [x for x in fuel if str(x) != 'nan']
+    fuel_s = fuel['Fuel']
+    fu = [x for x in fuel_s if str(x) != 'nan']
     s = ", ".join(map(str, fu))
     dataToInsert = s
 
@@ -179,8 +179,8 @@ def SETS(outPutFile, technology, fuel):
     param = "set TECHNOLOGY := "
     startIndex = outPutFile.index(param) + len(param)
 
-    technology = technology['Technology']
-    tech = [x for x in technology if str(x) != 'nan']
+    technology_s = technology['Technology']
+    tech = [x for x in technology_s if str(x) != 'nan']
     t = ", ".join(map(str, tech))
     dataToInsert = t
 
@@ -220,7 +220,7 @@ def discountrate_(outPutFile, discountr):
     param = "param DiscountRate default"
     startIndex = outPutFile.index(param) + len(param)
 
-    dataToInsert = " %i :=" %(discountr['Discountrate'][1])
+    dataToInsert = " %f :=" %(discountr.iloc[0]['Discountrate'])
 
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
 

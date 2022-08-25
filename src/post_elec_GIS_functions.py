@@ -120,7 +120,8 @@ def elec(demandcells, scenario):
     unelec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/%i_un_elec.csv')%(scenario))
     unelec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/scenarios/%i_un_elec.csv')%(scenario))
 
-def calculate_demand(settlements, demand, scenario, spatial):
+def calculate_demand(settlements, demand, scenario, spatial, input_data_csv):
+    input_data = pd.read_csv(input_data_csv)
     demand_cell = pd.read_csv(settlements)
     demand_GJ =  pd.read_csv(demand)
     ref_demand = demand_GJ[demand_GJ['Scenario']==scenario]
@@ -138,8 +139,8 @@ def calculate_demand(settlements, demand, scenario, spatial):
         row['un_elec_share'] = row['pop']/sum_pop_unelec
         pointid = int(i)
         row['Fuel'] = 'EL3_'+ str(pointid) + '_0'
-        startyear = 2016
-        while startyear <=2040:
+        startyear = int(input_data['startyear'][0])
+        while startyear <=int(input_data['endyear'][0]):
             unelec_ref = ref_demand[ref_demand['demand TJ'].str.contains('unelectrified')]
             r = unelec_ref.index[0]
             col = str(startyear)
@@ -164,8 +165,8 @@ def calculate_demand(settlements, demand, scenario, spatial):
         row['elec_share'] = 0.5*row['pop']/sum_pop_elec+0.5*row['GDP_PPP']/sum_gdp_elec
         pointid = int(i)
         row['Fuel'] = 'EL3_'+ str(pointid) + '_1'
-        startyear = 2016
-        while startyear <=2040:
+        startyear = int(input_data['startyear'][0])
+        while startyear <=int(input_data['endyear'][0]):
             elec_ref = ref_demand[ref_demand['demand TJ'].str.contains('Electrified')]
             r = elec_ref.index[0]
             col = str(startyear)

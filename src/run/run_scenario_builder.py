@@ -53,8 +53,8 @@ def run(argv):
     """Entry point for console_scripts
     """
     args = parse_args(argv)
-    dict_df = load_csvs(args.data_path)
-    outPutFile = make_outputfile(args.template)
+    dict_df = load_csvs(args.data_path) #"src/run/scenarios") #
+    outPutFile = make_outputfile(args.template) #"src/run/Benin.txt")#
 
     ### Scenario settings ###
 
@@ -70,8 +70,8 @@ def run(argv):
         if not os.path.exists('run/output'):
             os.makedirs('run/output')
         write_to_file(args.output_path, outPutFile, comb)
+        outPutFile = make_outputfile(args.template)
 
 if __name__ == "__main__":
     run(sys.argv[1:])
     
-
