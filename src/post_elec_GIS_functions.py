@@ -19,7 +19,7 @@ from osgeo import gdal, ogr, gdalconst
 import os
 import math
 
-def join_elec(elec, tif, cells):
+def join_elec(elec, tif, cells, scenario):
     """
 
     :param elec:
@@ -43,8 +43,8 @@ def join_elec(elec, tif, cells):
     demand_cells = sjoin(settlements, cell, how="left")
     demand_cells.to_file(os.path.join(os.getcwd(), 'run\scenarios\Demand\demand.shp'))
     demand_cell = pd.DataFrame(demand_cells, copy=True)
-    demand_cell.to_csv('run/scenarios/Demand/demand_cells.csv')
-    path = 'run/scenarios/Demand/demand_cells.csv'
+    demand_cell.to_csv('run/scenarios/Demand/%i_demand_cells.csv'%(scenario))
+    path = 'run/scenarios/Demand/%i_demand_cells.csv'%(scenario)
     return(path)
 
 def network_length(demandcells, input, tofolder, scenario):

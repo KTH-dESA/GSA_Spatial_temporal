@@ -42,12 +42,12 @@ for j in range(0,len(scenario.index)):
         shape =  '../Projected_files/' + polygon
         gdp =  '../Projected_files/' + files.loc['gdp','filename']
         elec_shp = '../Projected_files/elec.shp'
-        demandcells = os.path.join(os.getcwd(), 'run/scenarios/Demand/demand_cells.csv')
+        demandcells = os.path.join(os.getcwd(), 'run/scenarios/Demand/%i_demand_cells.csv' %(spatial))
 
         if not os.path.exists('run/scenarios/Demand'):
             os.makedirs('run/scenarios/Demand')
 
-        join_elec(elec_shp, gdp, shape)
+        join_elec(elec_shp, gdp, shape, spatial)
         elec(demandcells, spatial)
 
         date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
@@ -89,7 +89,7 @@ for j in range(0,len(scenario.index)):
         
         refpath = 'run/scenarios'
 
-        demandcells = os.path.join(os.getcwd(), 'run/scenarios/Demand/demand_cells.csv')
+        demandcells = os.path.join(os.getcwd(), 'run/scenarios/Demand/%i_demand_cells.csv' %(spatial))
         input_data =  os.path.join(os.getcwd(), 'run/scenarios/input_data.csv')
         distribution_length_cell_ref = network_length(demandcells, input_data, refpath, spatial)
         distribution = 'run/scenarios/%i_distributionlines.csv' %(spatial)
@@ -154,7 +154,7 @@ for k in range(0,len(demand_scenario_list)):
         date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
         print(date)
 
-        settlements = 'run/scenarios/Demand/demand_cells.csv'
+        settlements = 'run/scenarios/Demand/%i_demand_cells.csv' %(spatial)
         demand = 'input_data/Benin_demand.csv'
         calculate_demand(settlements, demand, demand_scenario, spatial)
 
@@ -166,7 +166,7 @@ for k in range(0,len(demand_scenario_list)):
         from post_elec_GIS_functions import network_length
         
         refpath = 'run/scenarios'
-        demandcells = os.path.join(os.getcwd(), 'run/scenarios/Demand/demand_cells.csv')
+        demandcells = os.path.join(os.getcwd(), 'run/scenarios/Demand/%i_demand_cells.csv' %(spatial))
         input_data =  os.path.join(os.getcwd(), 'run/scenarios/input_data.csv')
         distribution_length_cell_ref = 'run/scenarios/%i_distribution.csv' %(spatial)
         distribution = 'run/scenarios/%i_distributionlines.csv' %(spatial)
