@@ -276,23 +276,23 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
     #For all cells
     for k in range(0,len(gis)):
 
-        output_temp = [0,  "EL2_%i" % (k+1),"SOMG8c_%i" %(k+1), 1, 1]
+        output_temp = [0,  "EL2_%i" % (k+1),"SOMG8c_%i" %(k), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0,  "EL2_%i" % (k+1),"WI_%i" %(k+1), 1, 1]
+        output_temp = [0,  "EL2_%i" % (k+1),"WI_%i" %(k), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
         if diesel == True:
-            output_temp = [0,  "EL2_%i" % (k+1),"DSGEN_%i" %(k+1), 1, 1]
+            output_temp = [0,  "EL2_%i" % (k+1),"DSGEN_%i" %(k), 1, 1]
             outputactivity.loc[-1] = output_temp  # adding a row
             outputactivity.index = outputactivity.index + 1  # shifting index
             outputactivity = outputactivity.sort_index()
 
-            input_temp = [0,  "KEDS", "DSGEN_%i" %(k+1), 4, 1]
+            input_temp = [0,  "KEDS", "DSGEN_%i" %(k), 4, 1]
             inputactivity.loc[-1] = input_temp  # adding a row
             inputactivity.index = inputactivity.index + 1  # shifting index
             inputactivity = inputactivity.sort_index()
