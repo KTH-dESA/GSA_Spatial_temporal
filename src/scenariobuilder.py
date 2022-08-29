@@ -14,7 +14,7 @@ crs = "EPSG:32631"
 ### Scenario settings ###
 
 #TODO Integrate the scenario generator with SNAKEMAKE file. To understand is if I send a number or if I send a file.
-scenario = pd.read_csv('modelruns/scenarios/unique_morris.csv', header=None)
+scenario = pd.read_csv('sensitivity/unique_morris.csv', header=None)
 
 if not os.path.exists('run/scenarios'):
     os.makedirs('run/scenarios')
