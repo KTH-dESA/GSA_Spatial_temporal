@@ -72,3 +72,5 @@ src/run/QGIS_5_distributionlines.csv
 src/run/QGIS_13_distributionlines.csv
 src/run/output/**
 src/run/__pycache__/**
+src/run/capacity_factor_other.xlsx
+src/run/Benin_modified.txt
