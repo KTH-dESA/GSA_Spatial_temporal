@@ -144,10 +144,20 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
     else:
         print('No discountrate file')
 
+    ###########################################################
+
     if '%i_technologies' %(spatial) in dict_df:
         outPutFile = SETS(outPutFile, dict_df['%i_technologies' %(spatial)], dict_df['%i_fuels' %(spatial)])
     else:
         print('No discountrate file')
+    
+    ###########################################################
+
+    if 'capacity_factor_other' in dict_df:
+        outPutFile = capacityfactor_modification(outPutFile, dict_df['input_data'], dict_df['capacity_factor_other'])
+    else:
+        print('No capacityfactors for power plants file')
+
 
     ################################################################
 
@@ -187,6 +197,107 @@ def SETS(outPutFile, technology, fuel):
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
 
     return(outPutFile)
+
+def capacityfactor_modification(outPutFile,input_data, capacityfactor_other):
+    """
+    builds the Capacityfactor(Region, Technolgy, Timeslice, Year, CapacityFactor)
+    This method is for capacityfactor which does not use storage equations but still model batteries
+    -------------
+    Arguments
+    outPutFile, df, capacityfactor_solar, input_data, capitalcost_RET
+        outPutFile: is a string containing the OSeMOSYS parameters file
+        df: is the location specific data which is used to iterate the data
+        battery: contains meta data on technologies that you want ot model batteries, time and capacityfactor
+        input_data: contains meta data such as region, start year, end year, months, timeslices
+        capitalcost_RET: --
+    """
+    print("Capacity factor other", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    param = "param CapacityFactor default 1 :=\n"
+    startIndex = outPutFile.index(param) + len(param)
+    dataToInsert = ""
+
+    #read input data
+    def convert(value):
+        try:
+            return int(value)
+        except ValueError:
+            try:
+                return float(value)
+            except ValueError:
+                return value
+    timeslice_ = input_data['Timeslice']
+    timeslice = [x for x in timeslice_ if str(x) != 'nan']
+
+    timeslicemonthstart_ = input_data['Timeslicemonthstart']
+    timeslicemonthstart_ = [convert(value) for value in timeslicemonthstart_]
+    timeslicemonthstart = [x for x in timeslicemonthstart_ if str(x) != 'nan']
+    #timeslicemonthstart = ['{:02d}'.format(x) for x in timeslicemonthstart]
+
+    timeslicemonthend_ = input_data['Timeslicemonthend']
+    timeslicemonthend_ = [convert(value) for value in timeslicemonthend_]
+    timeslicemonthend = [x for x in timeslicemonthend_ if str(x) != 'nan']
+    #timeslicemonthend = ['{:02d}'.format(x) for x in timeslicemonthend]
+
+    daysplit_ = input_data['Daysplit']
+    daysplit = [x for x in daysplit_ if str(x) != 'nan']
+
+    daysplitstart_ = input_data['Daysplitstart']
+    daysplitstart = [x for x in daysplitstart_ if str(x) != 'nan']
+
+    daysplitend_ = input_data['Daysplitend']
+    daysplitend = [x for x in daysplitend_ if str(x) != 'nan']
+
+    region = input_data['region'][0]
+    startyear = input_data['startyear'][0]
+    endyear = input_data['endyear'][0]
+    type = input_data.groupby('renewable ninjafile')
+    solar = type.get_group('capacityfactor_solar')
+    solar_tech = solar['Tech']
+    wind = type.get_group('capacityfactor_wind')
+    wind_tech = wind['Tech']
+
+    #deep copy renewable ninja data
+    df_ = capacityfactor_other.columns.drop('adjtime')
+    capacityfactor_solar_ = capacityfactor_other.copy()
+    capacityfactor_solar_p = pd.to_datetime(capacityfactor_solar_['adjtime'], errors='coerce', format='%Y/%m/%d %H:%M')
+    capacityfactor_solar_.index = capacityfactor_solar_p
+    capacityfactor_solar_pv = capacityfactor_solar_.drop(columns=['adjtime'])
+    capacityfactor_solar_pv = capacityfactor_solar_pv.dropna(how='all')
+
+
+    def calculate_average(data, startdate, enddate, sliceStart, sliceEnd, location):
+        mask = (data.index > startdate) & (data.index <= enddate)
+        thisMonthOnly = data.loc[mask]
+        slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
+        try:
+            average = ((slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd))))
+        except ZeroDivisionError:
+            average = 0
+        return (average)
+
+    #SolarPV
+    for k in df_:
+        location = k
+        year = startyear
+        while year <= endyear:
+            m = 0
+            while m < len(timeslice):
+                startDate = pd.to_datetime("2016-%s" % (timeslicemonthstart[m]))
+                endDate = pd.to_datetime("2016-%s" % (timeslicemonthend[m]))
+                average_solar_day = calculate_average(capacityfactor_solar_pv, startDate, endDate, daysplitstart[0], daysplitend[0], location)
+                tsday = timeslice[m] + "_" + daysplit[0]
+                average_solar_evening = calculate_average(capacityfactor_solar_pv, startDate, endDate, daysplitstart[1], daysplitend[1], location)
+                tsevening = timeslice[m] + "_" + daysplit[1]
+                average_solar_night = calculate_average(capacityfactor_solar_pv, startDate, endDate, daysplitstart[2], daysplitend[2], location)
+                tsnight = timeslice[m] + "_" + daysplit[2]
+                dataToInsert += "%s\t%s\t%s\t%i\t%f\n" % (region, k, tsday, year, average_solar_day)
+                dataToInsert += "%s\t%s\t%s\t%i\t%f\n" % (region, k, tsevening, year, average_solar_evening)
+                dataToInsert += "%s\t%s\t%s\t%i\t%f\n" % (region, k, tsnight, year, average_solar_night)
+                m +=1
+            year += 1
+    outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
+    return (outPutFile)
+
 
 
 def operational_life(outPutFile, input_data, operational_life):
@@ -333,10 +444,8 @@ def emissionactivity(df, outPutFile, input_data, emissions):
            t = line['Technology']
            k = line['Modeofoperation']
            CO2 = line['CO2']
-           NOx = line['NOx']
            while year <=  int(input_data['endyear'][0]):
                dataToInsert += "%s\t%s_%i\tCO2\t%i\t%i\t%f\n" % (input_data['region'][0], t, location, k, year, CO2)
-               dataToInsert += "%s\t%s_%i\tNOX\t%i\t%i\t%f\n" % (input_data['region'][0], t, location, k, year, NOx)
                year += 1
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return (outPutFile)
