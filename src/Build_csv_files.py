@@ -100,7 +100,9 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
 
     capitalcost = pd.DataFrame(columns=['Technology', 'Capitalcost'], index=range(0,5000)) # dtype = {'Technology':'object', 'Capitalcost':'float64'}
 
-    fixedcost = pd.DataFrame(columns=['Technology', 'Fixed Cost'], index=range(0,5000)) # dtype = {'Technology':'object', 'Capitalcost':'float64'}
+    fixedcost = pd.DataFrame(columns=['Technology', 'Fixed Cost'], index=range(0,5000)) # dtype = {'Technology':'object', 'Fixed cost':'float64'}
+
+    variablecost = pd.DataFrame(columns=['Technology', 'Variable Cost', 'ModeofOperation'], index=range(0,5000)) # dtype = {'Technology':'object', 'Variable cost':'float64',}
 
     inputactivity = pd.DataFrame(columns=['Column','Fuel','Technology','Inputactivity','ModeofOperation'], index=range(0,10000))
 
@@ -181,6 +183,11 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
+        fixedcost_temp = ["SOPV8r_%i_0" % (k), 96]
+        fixedcost.loc[-1] = fixedcost_temp  # adding a row
+        fixedcost.index = fixedcost.index + 1  # shifting index
+        fixedcost = fixedcost.sort_index()
+
         output_temp = [0, "EL3_%i_0" % (k),  "SOPV8r_%i_0" % (k), 1,1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
@@ -195,6 +202,11 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
+
+        fixedcost_temp = ["SOPV_%i_0" % (k), 18]
+        fixedcost.loc[-1] = fixedcost_temp  # adding a row
+        fixedcost.index = fixedcost.index + 1  # shifting index
+        fixedcost = fixedcost.sort_index()
 
     # Electrified by minigrid in base year
     for m in elec_noHV_cells['index_right']:
@@ -238,6 +250,11 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
+        fixedcost_temp = ["SOPV8r_%i_0" % (m), 96]
+        fixedcost.loc[-1] = fixedcost_temp  # adding a row
+        fixedcost.index = fixedcost.index + 1  # shifting index
+        fixedcost = fixedcost.sort_index()
+
         output_temp = [0, "EL3_%i_1" % (m),  "SOPV_%i_1" % (m), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
@@ -247,6 +264,11 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
+
+        fixedcost_temp = ["SOPV_%i_0" % (m), 18]
+        fixedcost.loc[-1] = fixedcost_temp  # adding a row
+        fixedcost.index = fixedcost.index + 1  # shifting index
+        fixedcost = fixedcost.sort_index()
 
     # No electrified cells in the base year
     for j in noHV['index_right']:
@@ -270,27 +292,48 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
+        
+        fixedcost_temp = ["SOPV8r_%i_0" % (j), 96]
+        fixedcost.loc[-1] = fixedcost_temp  # adding a row
+        fixedcost.index = fixedcost.index + 1  # shifting index
+        fixedcost = fixedcost.sort_index()
 
         output_temp = [0,"EL3_%i_0" % (j),"SOPV_%i_0" % (j), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
+        fixedcost_temp = ["SOPV_%i_0" % (j), 18]
+        fixedcost.loc[-1] = fixedcost_temp  # adding a row
+        fixedcost.index = fixedcost.index + 1  # shifting index
+        fixedcost = fixedcost.sort_index()
+
     #For all cells
     for k in range(0,len(gis)):
 
-        output_temp = [0,  "EL2_%i" % (k+1),"SOMG8c_%i" %(k), 1, 1]
+        output_temp = [0,  "EL2_%i" % (k),"SOMG8c_%i" %(k), 1, 1]
+        outputactivity.loc[-1] = output_temp  # adding a row
+        outputactivity.index = outputactivity.index + 1  # shifting index
+        outputactivity = outputactivity.sort_index()
+        
+        fixedcost_temp = ["SOMG8c_%i" %(k), 44]
+        fixedcost.loc[-1] = fixedcost_temp  # adding a row
+        fixedcost.index = fixedcost.index + 1  # shifting index
+        fixedcost = fixedcost.sort_index()
+
+        output_temp = [0,  "EL2_%i" % (k),"WI_%i" %(k), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0,  "EL2_%i" % (k+1),"WI_%i" %(k), 1, 1]
-        outputactivity.loc[-1] = output_temp  # adding a row
-        outputactivity.index = outputactivity.index + 1  # shifting index
-        outputactivity = outputactivity.sort_index()
+        fixedcost_temp = ["WI_%i" %(k), 39]
+        fixedcost.loc[-1] = fixedcost_temp  # adding a row
+        fixedcost.index = fixedcost.index + 1  # shifting index
+        fixedcost = fixedcost.sort_index()
+        
 
         if diesel == True:
-            output_temp = [0,  "EL2_%i" % (k+1),"DSGEN_%i" %(k), 1, 1]
+            output_temp = [0,  "EL2_%i" % (k),"DSGEN_%i" %(k), 1, 1]
             outputactivity.loc[-1] = output_temp  # adding a row
             outputactivity.index = outputactivity.index + 1  # shifting index
             outputactivity = outputactivity.sort_index()
@@ -299,6 +342,16 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
             inputactivity.loc[-1] = input_temp  # adding a row
             inputactivity.index = inputactivity.index + 1  # shifting index
             inputactivity = inputactivity.sort_index()
+
+            variablecost.loc[k]['Variable Cost'] = 4.17
+            variablecost.loc[k]['Technology'] = "DSGEN_%i" %(k)
+            variablecost.loc[k]['ModeofOperation'] =1 
+
+            fixedcost_temp = ["DSGEN_%i" %(k), 15]
+            fixedcost.loc[-1] = fixedcost_temp  # adding a row
+            fixedcost.index = fixedcost.index + 1  # shifting index
+            fixedcost = fixedcost.sort_index()
+            
     try:
         output_matrix = matrix.drop(['INFUEL','SendTech','Unnamed: 0'], axis=1)
 
@@ -322,11 +375,21 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         tech_matrix = matrix.drop(['SendTech','INFUEL','OUTFUEL','Unnamed: 0'], axis=1)
         tech_matr = tech_matrix.drop_duplicates()
         for h in tech_matr.index:
-            capitalcost.loc[m]['Capitalcost'] = tech_matr.loc[h]['DISTANCE'] /1000*capital_cost_HV + substation  #kUSD/MW divided by 1000 as it is in meters
-            capitalcost.loc[m]['Technology'] =  matrix.loc[h]['INTECH']
+            #capitalcost.loc[m]['Capitalcost'] = tech_matr.loc[h]['DISTANCE'] /1000*capital_cost_HV + substation  #kUSD/MW divided by 1000 as it is in meters
+            #capitalcost.loc[m]['Technology'] =  matrix.loc[h]['INTECH']
 
-            fixedcost.loc[m]['Fixed Cost'] = tech_matr.loc[h]['DISTANCE']/1000*capital_cost_HV*0.025 + substation*0.025  #kUSD/MW divided by 1000 as it is in meters
-            fixedcost.loc[m]['Technology'] =  matrix.loc[h]['INTECH']
+            fixedcost_temp = [matrix.loc[h]['INTECH'],tech_matr.loc[h]['DISTANCE'] /1000*capital_cost_HV + substation]
+            fixedcost.loc[-1] = fixedcost_temp  # adding a row
+            fixedcost.index = fixedcost.index + 1  # shifting index
+            fixedcost = fixedcost.sort_index()
+
+            #fixedcost.loc[m]['Fixed Cost'] = tech_matr.loc[h]['DISTANCE']/1000*capital_cost_HV*0.025 + substation*0.025  #kUSD/MW divided by 1000 as it is in meters
+            #fixedcost.loc[m]['Technology'] =  matrix.loc[h]['INTECH']
+            
+            fixedcost_temp = [matrix.loc[h]['INTECH'], tech_matr.loc[h]['DISTANCE']/1000*capital_cost_HV*0.025 + substation*0.025 ]
+            fixedcost.loc[-1] = fixedcost_temp  # adding a row
+            fixedcost.index = fixedcost.index + 1  # shifting index
+            fixedcost = fixedcost.sort_index()
             m = m+1
     except:
         pass
@@ -354,8 +417,11 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
     capacitytoactiv.dropna(subset=[1], inplace=True)
     outputactivity.dropna(subset=['Technology'], inplace=True)
     capitalcost.dropna(subset=['Technology'], inplace=True)
+    variablecost.dropna(subset=['Technology'], inplace=True)
+    fixedcost.dropna(subset=['Technology'], inplace=True)
 
-    fixedcost.to_csv(os.path.join(path, '%i_fixed_cost_tnd.csv' %(scenario)))
+    fixedcost.to_csv(os.path.join(path, '%i_fixed_cost.csv' %(scenario)))
+    variablecost.to_csv(os.path.join(path, '%i_variable_cost.csv' %(scenario)))
     capitalcost.to_csv(os.path.join(path, '%i_capitalcost.csv' %(scenario)))
     inputactivity.to_csv(os.path.join(path, '%i_inputactivity.csv' %(scenario)))
     outputactivity.to_csv(os.path.join(path, '%i_outputactivity.csv'%(scenario)))
