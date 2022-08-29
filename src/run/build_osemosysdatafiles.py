@@ -53,8 +53,8 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
         dict_df: is a dictionary which contains all the csv files as dataframes from load_csv. Key is the name of the csv file
         outPutFile: is a string with the empty OSeMOSYS parameters file from make_outputfile
     """
-    if 'operational_life' in dict_df:
-        outPutFile = operational_life(outPutFile, dict_df['input_data'], dict_df['operational_life'])
+    if '%i_operationallife.csv' %(spatial) in dict_df:
+        outPutFile = operational_life(outPutFile, dict_df['input_data'], dict_df['%i_operationallife.csv' %(spatial)])
     else:
         print('No operational_life file')
 #######################################################################

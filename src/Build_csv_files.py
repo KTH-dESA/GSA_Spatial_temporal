@@ -108,6 +108,9 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
 
     outputactivity = pd.DataFrame(columns=['Column','Fuel',	'Technology','Outputactivity','ModeofOperation'], index=range(0,10000))
 
+    operationallife = pd.DataFrame(columns=['Technology', 'Life'], index=range(0,5000)) # dtype = {'Technology':'object', 'Variable cost':'float64',}
+
+
     elec = pd.read_csv(elec)
     gis = pd.read_csv(gis_file)
     try:
@@ -188,6 +191,13 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         fixedcost.index = fixedcost.index + 1  # shifting index
         fixedcost = fixedcost.sort_index()
 
+        
+        operationallife_temp = ["SOPV8r_%i_0" % (k), 30]
+        operationallife.loc[-1] = operationallife_temp  # adding a row
+        operationallife.index = operationallife.index + 1  # shifting index
+        operationallife = operationallife.sort_index()
+
+
         output_temp = [0, "EL3_%i_0" % (k),  "SOPV8r_%i_0" % (k), 1,1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
@@ -207,6 +217,11 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         fixedcost.loc[-1] = fixedcost_temp  # adding a row
         fixedcost.index = fixedcost.index + 1  # shifting index
         fixedcost = fixedcost.sort_index()
+
+        operationallife_temp = ["SOPV_%i_0" % (k), 30]
+        operationallife.loc[-1] = operationallife_temp  # adding a row
+        operationallife.index = operationallife.index + 1  # shifting index
+        operationallife = operationallife.sort_index()
 
     # Electrified by minigrid in base year
     for m in elec_noHV_cells['index_right']:
@@ -255,6 +270,11 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         fixedcost.index = fixedcost.index + 1  # shifting index
         fixedcost = fixedcost.sort_index()
 
+        operationallife_temp = ["SOPV8r_%i_0" % (m), 30]
+        operationallife.loc[-1] = operationallife_temp  # adding a row
+        operationallife.index = operationallife.index + 1  # shifting index
+        operationallife = operationallife.sort_index()
+
         output_temp = [0, "EL3_%i_1" % (m),  "SOPV_%i_1" % (m), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
@@ -269,6 +289,11 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         fixedcost.loc[-1] = fixedcost_temp  # adding a row
         fixedcost.index = fixedcost.index + 1  # shifting index
         fixedcost = fixedcost.sort_index()
+
+        operationallife_temp = ["SOPV_%i_0" % (m), 30]
+        operationallife.loc[-1] = operationallife_temp  # adding a row
+        operationallife.index = operationallife.index + 1  # shifting index
+        operationallife = operationallife.sort_index()
 
     # No electrified cells in the base year
     for j in noHV['index_right']:
@@ -298,6 +323,11 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         fixedcost.index = fixedcost.index + 1  # shifting index
         fixedcost = fixedcost.sort_index()
 
+        operationallife_temp = ["SOPV8r_%i_0" % (j), 30]
+        operationallife.loc[-1] = operationallife_temp  # adding a row
+        operationallife.index = operationallife.index + 1  # shifting index
+        operationallife = operationallife.sort_index()
+
         output_temp = [0,"EL3_%i_0" % (j),"SOPV_%i_0" % (j), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
@@ -307,6 +337,11 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         fixedcost.loc[-1] = fixedcost_temp  # adding a row
         fixedcost.index = fixedcost.index + 1  # shifting index
         fixedcost = fixedcost.sort_index()
+
+        operationallife_temp = ["SOPV_%i_0" % (j), 30]
+        operationallife.loc[-1] = operationallife_temp  # adding a row
+        operationallife.index = operationallife.index + 1  # shifting index
+        operationallife = operationallife.sort_index()
 
     #For all cells
     for k in range(0,len(gis)):
@@ -321,6 +356,11 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         fixedcost.index = fixedcost.index + 1  # shifting index
         fixedcost = fixedcost.sort_index()
 
+        operationallife_temp = ["SOMG8c_%i" %(k), 30]
+        operationallife.loc[-1] = operationallife_temp  # adding a row
+        operationallife.index = operationallife.index + 1  # shifting index
+        operationallife = operationallife.sort_index()
+
         output_temp = [0,  "EL2_%i" % (k),"WI_%i" %(k), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
@@ -331,6 +371,10 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         fixedcost.index = fixedcost.index + 1  # shifting index
         fixedcost = fixedcost.sort_index()
         
+        operationallife_temp = ["WI_%i" %(k), 20]
+        operationallife.loc[-1] = operationallife_temp  # adding a row
+        operationallife.index = operationallife.index + 1  # shifting index
+        operationallife = operationallife.sort_index()
 
         if diesel == True:
             output_temp = [0,  "EL2_%i" % (k),"DSGEN_%i" %(k), 1, 1]
@@ -351,6 +395,11 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
             fixedcost.loc[-1] = fixedcost_temp  # adding a row
             fixedcost.index = fixedcost.index + 1  # shifting index
             fixedcost = fixedcost.sort_index()
+
+            operationallife_temp = ["DSGEN_%i" %(k), 15]
+            operationallife.loc[-1] = operationallife_temp  # adding a row
+            operationallife.index = operationallife.index + 1  # shifting index
+            operationallife = operationallife.sort_index()
             
     try:
         output_matrix = matrix.drop(['INFUEL','SendTech','Unnamed: 0'], axis=1)
@@ -419,9 +468,11 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
     capitalcost.dropna(subset=['Technology'], inplace=True)
     variablecost.dropna(subset=['Technology'], inplace=True)
     fixedcost.dropna(subset=['Technology'], inplace=True)
+    operationallife.dropna(subset=['Technology'], inplace=True)
 
     fixedcost.to_csv(os.path.join(path, '%i_fixed_cost.csv' %(scenario)))
     variablecost.to_csv(os.path.join(path, '%i_variable_cost.csv' %(scenario)))
+    operationallife.to_csv(os.path.join(path, '%i_operationallife.csv' %(scenario)))
     capitalcost.to_csv(os.path.join(path, '%i_capitalcost.csv' %(scenario)))
     inputactivity.to_csv(os.path.join(path, '%i_inputactivity.csv' %(scenario)))
     outputactivity.to_csv(os.path.join(path, '%i_outputactivity.csv'%(scenario)))
