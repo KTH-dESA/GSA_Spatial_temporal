@@ -76,7 +76,7 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
 ############################################################################################################
 
     if '%i_fixed_cost' %(spatial) in dict_df:
-            outPutFile = fixedcost(dict_df['%i_GIS_data' %(spatial)], outPutFile, dict_df['input_data'], dict_df['fixed_cost_ref'])
+            outPutFile = fixedcost(dict_df['%i_GIS_data' %(spatial)], outPutFile, dict_df['input_data'], dict_df['%i_fixed_cost' %(spatial) ])
     else:
         print('No fixed_cost file')
 #####################################################################################
@@ -122,8 +122,8 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
     else:
         print('No emissions file')
 ########################################################
-    if 'variable_cost' in dict_df:
-        outPutFile = variblecost(dict_df['%i_GIS_data' %(spatial)], outPutFile, dict_df['input_data'], dict_df['variable_cost'])
+    if '%i_variable_cost' %(spatial) in dict_df:
+        outPutFile = variblecost(dict_df['%i_GIS_data' %(spatial)], outPutFile, dict_df['input_data'], dict_df['%i_variable_cost' %(spatial)])
     else:
         print('No variable_cost file')
 #############################################################
