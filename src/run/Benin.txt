@@ -21,6 +21,9 @@ set STORAGE:=;
 #
 # Units are TJ, MW and kUSD
 
+param ResultsPath :=
+;
+
 param Peakdemand default 999999999:=
 ;
 
@@ -338,7 +341,6 @@ NERELBENBP00	0	0	0	0	0	0	0	0	0	0	30	30	30	30	30	30	30	30	30	30	30
 NGAELBENBP00	0	0	0	0	0	0	0	65	126	173	130	494	494	494	494	494	494	494	494	494	494
 NGAGABENBP00	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
 TGOELBENBP00	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
-
 ;
 
 
