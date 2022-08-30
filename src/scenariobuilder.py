@@ -187,7 +187,7 @@ for k in range(0,len(demand_scenario_list)):
 
         peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV, distribution, distribution_row, distribution_length_cell_ref, reffolder, spatial, demand_scenario)
 
-dr_scenario_nan = scenario[1]
+dr_scenario_nan = scenario[2]
 dr_scenario_list = [x for x in dr_scenario_nan if str(x) != 'nan']
 #Read scenarios from sample file
 for m in range(0,len(dr_scenario_list)):

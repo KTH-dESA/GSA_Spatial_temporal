@@ -53,8 +53,8 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
         dict_df: is a dictionary which contains all the csv files as dataframes from load_csv. Key is the name of the csv file
         outPutFile: is a string with the empty OSeMOSYS parameters file from make_outputfile
     """
-    if '%i_operationallife.csv' %(spatial) in dict_df:
-        outPutFile = operational_life(outPutFile, dict_df['input_data'], dict_df['%i_operationallife.csv' %(spatial)])
+    if '%i_operationallife' %(spatial) in dict_df:
+        outPutFile = operational_life(outPutFile, dict_df['input_data'], dict_df['%i_operationallife' %(spatial)])
     else:
         print('No operational_life file')
 #######################################################################
@@ -143,6 +143,9 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
         outPutFile = discountrate_(outPutFile, dict_df['%i_discountrate' %(discountrate_scenario)])
     else:
         print('No discountrate file')
+##################################################
+    #ResultsPath
+    outPutFile = resultspath(outPutFile, spatial, demand_scenario, discountrate_scenario)
 
     ###########################################################
 
@@ -197,6 +200,22 @@ def SETS(outPutFile, technology, fuel):
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
 
     return(outPutFile)
+
+
+def resultspath(outPutFile, spatial, demand_scenario, discountrate_scenario):
+
+    dataToInsert = ""
+    print("Resultspath", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    param = "param ResultsPath :="
+    startIndex = outPutFile.index(param) + len(param)
+    
+    dataToInsert = " 'Benin%i%i%i'" %(spatial, demand_scenario, discountrate_scenario)
+
+    outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
+
+    return(outPutFile)
+
+
 
 def capacityfactor_modification(outPutFile,input_data, capacityfactor_other):
     """
