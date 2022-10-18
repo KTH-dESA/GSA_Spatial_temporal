@@ -75,3 +75,5 @@ src/run/__pycache__/**
 src/run/capacity_factor_other.xlsx
 src/run/Benin_modified.txt
 tech naming temba.xlsx
+src/sensitivity/**
+
