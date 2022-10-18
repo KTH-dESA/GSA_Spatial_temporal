@@ -10,11 +10,15 @@ __licence__ = "mit"
 import pandas as pd
 import numpy as np
 import os
+import csv
 import argparse
 import sys
 import logging
 from datetime import datetime
-from build_osemosysdatafiles import load_csvs, make_outputfile, functions_to_run, write_to_file
+from run.build_osemosysdatafiles import load_csvs, make_outputfile, functions_to_run, write_to_file
+sys.path.insert(1, '../')
+from create_sample import createsample
+from expand_sample import expand
 
 logger = logging.getLogger(__name__)
 
@@ -49,29 +53,45 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
-def run(argv):
+def run(): #argv
     """Entry point for console_scripts
     """
-    args = parse_args(argv)
-    dict_df = load_csvs(args.data_path) #"src/run/scenarios") #
-    outPutFile = make_outputfile(args.template) #"src/run/Benin.txt")#
+    #args = parse_args(argv)
+    dict_df = load_csvs("src/run/scenarios") #args.data_path) #
+    outPutFile = make_outputfile("src/run/Benin.txt")#args.template) #
 
     ### Scenario settings ###
-
+    
     #TODO Integrate the scenario generator with SNAKEMAKE file. To understand is if I send a number or if I send a file.
-    scenario = pd.read_csv('sensitivity/sample_morris.csv', header=None)
+    sample_file = 'src/sensitivity/sample_morris.csv'
+    parameters_file = 'src/config/parameters.csv'
+    replicates = 10
+    with open(parameters_file, 'r') as csv_file:
+        reader = list(csv.DictReader(csv_file))
+    createsample(reader, sample_file, replicates)
+    
+    output_files = 'src/sensitivity/runs'
+    with open(parameters_file, 'r') as csv_file:
+        parameter_list = list(csv.DictReader(csv_file))
+    morris_sample = np.loadtxt(sample_file, delimiter=",")
+    expand(morris_sample, parameter_list, output_files)
+
+    scenario = pd.read_csv(sample_file, header=None)
     for m in range(0,len(scenario.index)):
         spatial = int(scenario[0][m])
         demand_scenario = int(scenario[1][m])
         discountrate = int(scenario[2][m])
         outPutFile = functions_to_run(dict_df, outPutFile, spatial, demand_scenario, discountrate)
-        comb = 'Benin'+str(spatial)+str(demand_scenario)+str(discountrate)+'.txt'
+
         #write data file
-        if not os.path.exists('run/output'):
-            os.makedirs('run/output')
-        write_to_file(args.output_path, outPutFile, comb)
-        outPutFile = make_outputfile(args.template)
+        if not os.path.exists('src/run/output'):
+            os.makedirs('src/run/output')
+
+        #write to DD-file
+        comb = 'Benin'+str(spatial)+str(demand_scenario)+str(discountrate)+'.txt'
+        write_to_file('src/run/output', outPutFile, comb)      #args.output_path
+
 
 if __name__ == "__main__":
-    run(sys.argv[1:])
+    run() #sys.argv[1:]
     
