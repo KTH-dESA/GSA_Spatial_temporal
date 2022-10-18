@@ -19,7 +19,7 @@ from run.build_osemosysdatafiles import load_csvs, make_outputfile, functions_to
 sys.path.insert(1, '../')
 from create_sample import createsample
 from expand_sample import expand
-
+from create_modelrun import modify_parameters
 logger = logging.getLogger(__name__)
 
 def parse_args(args):
@@ -74,7 +74,13 @@ def run(): #argv
     with open(parameters_file, 'r') as csv_file:
         parameter_list = list(csv.DictReader(csv_file))
     morris_sample = np.loadtxt(sample_file, delimiter=",")
-    expand(morris_sample, parameter_list, output_files)
+    samplelist = expand(morris_sample, parameter_list, output_files)
+
+    scenario_ouput = "src/run/scenarios"
+    for sample in samplelist:
+        with open(sample, 'r') as csv_file:
+            sample_list = list(csv.DictReader(csv_file))
+        modify_parameters(dict_df['input_data'], sample_list, sample, scenario_ouput)
 
     scenario = pd.read_csv(sample_file, header=None)
     for m in range(0,len(scenario.index)):

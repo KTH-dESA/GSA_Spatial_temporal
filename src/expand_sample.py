@@ -40,8 +40,10 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 def expand(morris_sample, parameters, output_files):
+    sample_list = []
     for model_run, sample_row in enumerate(morris_sample):
         filepath = output_files + '/sample_'+str(int(model_run))+".txt"
+        sample_list += [filepath]
         with open(filepath, 'w') as csvfile:
 
             fieldnames = ['name', 'indexes', 'value_base_year', 'value_end_year', 'action', 'interpolation_index']
@@ -70,3 +72,4 @@ def expand(morris_sample, parameters, output_files):
                         'interpolation_index': param['interpolation_index']}
                 writer.writerow(data)
 
+    return sample_list
