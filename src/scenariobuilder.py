@@ -1,10 +1,16 @@
 from datetime import datetime
 import os
 import pandas as pd
-from Build_csv_files import *
-from renewable_ninja_download import *
-from post_elec_GIS_functions import *
-from Pathfinder_processing_step import *
+import json
+from modelgenerator.Build_csv_files import *
+from modelgenerator.renewable_ninja_download import *
+from modelgenerator.post_elec_GIS_functions import *
+from modelgenerator.Pathfinder_processing_step import *
+from create_sample import createsample
+from expand_sample import expand
+from create_modelrun import modify_parameters
+from run.build_osemosysdatafiles import load_csvs
+from modelgenerator.Distribution import *
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -12,20 +18,64 @@ files = pd.read_csv('input_data/Benin_GIS_files.csv', index_col=0)
 crs = "EPSG:32631"
 
 ### Scenario settings ###
+dict_df = load_csvs("run/scenarios") 
+sample_file = 'sensitivity/sample_morris.csv'
+parameters_file = 'config/parameters.csv'
+replicates = 10
+with open(parameters_file, 'r') as csv_file:
+    reader = list(csv.DictReader(csv_file))
+createsample(reader, sample_file, replicates)
 
-#TODO Integrate the scenario generator with SNAKEMAKE file. To understand is if I send a number or if I send a file.
-scenario = pd.read_csv('sensitivity/unique_morris.csv', header=None)
+output_files = 'sensitivity/runs'
+with open(parameters_file, 'r') as csv_file:
+    parameter_list = list(csv.DictReader(csv_file))
+morris_sample = np.loadtxt(sample_file, delimiter=",")
+samplelist = expand(morris_sample, parameter_list, output_files)
+
+scenario_ouput = "run/sensitivity_range/"
+for sample in samplelist:
+    with open(sample, 'r') as csv_file:
+        sample_list = list(csv.DictReader(csv_file))
+        stxt = sample.split('/')[-1]
+        s = stxt.split('.')[0]
+    modify_parameters(dict_df['input_data'], sample_list, s, scenario_ouput)
+
+# morris = pd.read_csv(sample_file, header=None)
+# param =  pd.read_csv(parameters_file)
+# range = param.iloc[0]['max_value_base_year'] - param.iloc[0]['min_value_base_year']
+# scenario_sample = morris.apply(lambda x: x*range + param.iloc[0]['min_value_base_year'])
+# scenario_sample_r = scenario_sample.round()
+# scenario_array = scenario_sample_r[0].unique()
+# spatial_scenarios = scenario_array.tolist()
 
 if not os.path.exists('run/scenarios'):
     os.makedirs('run/scenarios')
 
-for j in range(0,len(scenario.index)):
-        print("Running scenario %i" %j)
-        spatial = int(scenario[0][j])
+dict_modelruns = load_csvs("run/sensitivity_range")
 
-        #TODO Modify the Pathfinder file to run zonal statistics sum on polygon.
-        #TODO Add demand as scenario parameter
-    #######################
+scenario_runs = {}
+for j in dict_modelruns.keys():
+    print("Running scenario %s" %j)
+    modelrun = dict_modelruns[j]
+    spatial = int(float(modelrun.iloc[0][1]))
+    #Cleaning bad data
+    DemandElectrified_raw = modelrun.iloc[1][1]
+    DemandElectrified_ = DemandElectrified_raw.replace(']', '')
+    DemandElectrified__ = DemandElectrified_.replace('[', '')
+    DemandElectr = DemandElectrified__.split(',')
+    DemandElectrified = [float(i) for i in DemandElectr]
+    #Cleaning bad data
+    DemandUnelectrified_raw = modelrun.iloc[2][1]
+    DemandUnelectrified_ = DemandUnelectrified_raw.replace(']', '')
+    DemandUnelectrified__ = DemandUnelectrified_.replace('[', '')
+    DemandUnelec = DemandUnelectrified__.split(',')
+    DemandUnelectrified = [float(i) for i in DemandUnelec]
+
+    DiscountRate = float(modelrun.iloc[3][1])
+
+    id = spatial + DemandElectrified[35] + DemandUnelectrified[35] + DiscountRate
+
+    if id != scenario_runs.values():
 
         polygon = str(spatial) + "_polygon.shp"
         point = str(spatial) + "_point.shp"
@@ -38,7 +88,7 @@ for j in range(0,len(scenario.index)):
         #Make sure you are in the /src directory when you start this script
         print(os.getcwd())
         print("2. Create the demandcells.csv file and the classifications")
-        from post_elec_GIS_functions import *
+        
         shape =  '../Projected_files/' + polygon
         gdp =  '../Projected_files/' + files.loc['gdp','filename']
         elec_shp = '../Projected_files/elec.shp'
@@ -84,8 +134,6 @@ for j in range(0,len(scenario.index)):
 
         date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
         print(date)
-        from Distribution import *
-        from post_elec_GIS_functions import network_length
         
         refpath = 'run/scenarios'
 
@@ -115,7 +163,7 @@ for j in range(0,len(scenario.index)):
         unelec = 'run/%i_un_elec.csv' %(spatial)
         noHV = 'run/%i_noHV_cells.csv' %(spatial)
         HV = 'run/%i_HV_cells.csv' %(spatial)
-        elec = 'run/%i_elec.csv' %(spatial)
+        elec_ = 'run/%i_elec.csv' %(spatial)
         Projected_files_path = '../Projected_files/'
 
         scenariopath = 'run/scenarios'
@@ -130,7 +178,8 @@ for j in range(0,len(scenario.index)):
         gisfile_ref = GIS_file(scenariopath, '../Projected_files/' + point, spatial)
         matrix = 'run/scenarios/Demand/%i_adjacencymatrix.csv' %(spatial)
 
-        capital_cost_transmission_distrib(elec, noHV, HV, elec_noHV_cells, unelec, capital_cost_HV, substation, capacitytoactivity, scenariopath, matrix, gisfile_ref, spatial, diesel = True)
+        capital_cost_transmission_distrib(elec_, noHV, HV, elec_noHV_cells, unelec, capital_cost_HV, substation, capacitytoactivity, scenariopath, matrix, gisfile_ref, spatial, diesel = True)
+        scenario_runs[j] = id
 
 demand_scenario_nan = scenario[1]
 demand_scenario_list = [x for x in demand_scenario_nan if str(x) != 'nan']
@@ -142,7 +191,7 @@ for k in range(0,len(demand_scenario_list)):
     #Scenarios that are sensitive to spatial and demand simultaneously
     for j in range(0,len(scenario.index)):
         print("Running scenario %i" %j)
-        spatial = int(scenario[0][j])
+        spatial = int(scenario[j])
 
         #TODO Modify the Pathfinder file to run zonal statistics sum on polygon.
         #TODO Add demand as scenario parameter
