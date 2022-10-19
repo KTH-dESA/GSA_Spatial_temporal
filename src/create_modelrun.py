@@ -91,7 +91,8 @@ def modify_parameters(
     """
     first_year = inputdata['startyear'][0]
     end_year = inputdata['endyear'][0]
-    expanded_data = {}
+    expanded_data = []
+    name_ = []
     for parameter in parameters:
 
         name = parameter['name']
@@ -115,19 +116,21 @@ def modify_parameters(
         if inter_index == 'YEAR':
             #logger.info("Updating values for {} in {}".format(index, name))
             try:
-                expanded_data[name]= new_values
+                expanded_data.append(new_values.tolist())
+                name_.append(name)
             except ValueError as ex:
                 msg = "Error raised in parameter {} by index {}"
         else:
             try:
-                expanded_data[name] = new_values[0]
+                expanded_data.append(new_values[0])
+                name_.append(name)
 
             except ValueError as ex:
                 msg = "Error raised in parameter {} by index {}"
                 raise ValueError(ex)
-    df = pd.DataFrame(expanded_data.items(), columns = ['name', 'parameters'])
+    df = pd.DataFrame(expanded_data, index=name_)
     df.to_csv(os.path.join(tofolder+sample+'.csv'))
-    return df
+    return expanded_data
 
 def main(input_filepath, output_filepath, parameters: List[Dict[str, Union[str, int, float]]]):
 
