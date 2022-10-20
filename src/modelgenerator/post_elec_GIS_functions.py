@@ -120,12 +120,10 @@ def elec(demandcells, scenario):
     unelec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/%i_un_elec.csv')%(scenario))
     unelec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/scenarios/%i_un_elec.csv')%(scenario))
 
-def calculate_demand(settlements, demand, scenario, spatial, input_data_csv):
+def calculate_demand(settlements, elecdemand, unelecdemand, scenario, spatial, input_data_csv):
     input_data = pd.read_csv(input_data_csv)
     demand_cell = pd.read_csv(settlements)
-    demand_GJ =  pd.read_csv(demand)
-    ref_demand = demand_GJ[demand_GJ['Scenario']==scenario]
-    #vision_demand = demand_GJ[demand_GJ['Scenario'].str.contains('Vision')]
+    demand_GJ =  elecdemand
 
     demand_cols =  demand_cell[['elec', 'index_right', 'pop', 'GDP_PPP']]
     #The case of unelectrified
@@ -141,10 +139,8 @@ def calculate_demand(settlements, demand, scenario, spatial, input_data_csv):
         row['Fuel'] = 'EL3_'+ str(pointid) + '_0'
         startyear = int(input_data['startyear'][0])
         while startyear <=int(input_data['endyear'][0]):
-            unelec_ref = ref_demand[ref_demand['demand TJ'].str.contains('unelectrified')]
-            r = unelec_ref.index[0]
             col = str(startyear)
-            row[col] = unelec_ref.loc[r,col]*row['un_elec_share']
+            row[col] = unelecdemand.loc[col,0]*row['un_elec_share']
             startyear +=1
 
         un_elec_list.append(row)
@@ -167,10 +163,8 @@ def calculate_demand(settlements, demand, scenario, spatial, input_data_csv):
         row['Fuel'] = 'EL3_'+ str(pointid) + '_1'
         startyear = int(input_data['startyear'][0])
         while startyear <=int(input_data['endyear'][0]):
-            elec_ref = ref_demand[ref_demand['demand TJ'].str.contains('Electrified')]
-            r = elec_ref.index[0]
             col = str(startyear)
-            row[col] = elec_ref.loc[r,col]*row['elec_share']
+            row[col] = elecdemand.loc[col,0]*row['elec_share']
             startyear +=1
         elec_list.append(row)
         ind = row.index
