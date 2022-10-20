@@ -40,13 +40,6 @@ for sample in samplelist:
         s = stxt.split('.')[0]
     modify_parameters(dict_df['input_data'], sample_list, s, scenario_ouput)
 
-# morris = pd.read_csv(sample_file, header=None)
-# param =  pd.read_csv(parameters_file)
-# range = param.iloc[0]['max_value_base_year'] - param.iloc[0]['min_value_base_year']
-# scenario_sample = morris.apply(lambda x: x*range + param.iloc[0]['min_value_base_year'])
-# scenario_sample_r = scenario_sample.round()
-# scenario_array = scenario_sample_r[0].unique()
-# spatial_scenarios = scenario_array.tolist()
 
 if not os.path.exists('run/scenarios'):
     os.makedirs('run/scenarios')
@@ -54,6 +47,7 @@ if not os.path.exists('run/scenarios'):
 dict_modelruns = load_csvs("run/sensitivity_range")
 
 scenario_runs = {}
+demand_runs = {}
 for j in dict_modelruns.keys():
     print("Running scenario %s" %j)
     modelrun = dict_modelruns[j]
@@ -64,16 +58,19 @@ for j in dict_modelruns.keys():
     DemandElectrified__ = DemandElectrified_.replace('[', '')
     DemandElectr = DemandElectrified__.split(',')
     DemandElectrified = [float(i) for i in DemandElectr]
+    elecdemand_df = pd.DataFrame(DemandElectrified, index = ['2020', '2021', '2022',	'2023',	'2024',	'2025',	'2026',	'2027',	'2028',	'2029',	'2030',	'2031',	'2032',	'2033',	'2034',	'2035',	'2036',	'2037',	'2038',	'2039',	'2040',	'2041',	'2042',	'2043',	'2044',	'2045',	'2046',	'2047',	'2048',	'2049',	'2050',	'2051',	'2052',	'2053',	'2054',	'2055'])
     #Cleaning bad data
     DemandUnelectrified_raw = modelrun.iloc[2][1]
     DemandUnelectrified_ = DemandUnelectrified_raw.replace(']', '')
     DemandUnelectrified__ = DemandUnelectrified_.replace('[', '')
     DemandUnelec = DemandUnelectrified__.split(',')
     DemandUnelectrified = [float(i) for i in DemandUnelec]
+    unelecdemand_df = pd.DataFrame(DemandUnelectrified, index = ['2020', '2021', '2022',	'2023',	'2024',	'2025',	'2026',	'2027',	'2028',	'2029',	'2030',	'2031',	'2032',	'2033',	'2034',	'2035',	'2036',	'2037',	'2038',	'2039',	'2040',	'2041',	'2042',	'2043',	'2044',	'2045',	'2046',	'2047',	'2048',	'2049',	'2050',	'2051',	'2052',	'2053',	'2054',	'2055'])
+
 
     DiscountRate = float(modelrun.iloc[3][1])
 
-    id = spatial + DemandElectrified[35] + DemandUnelectrified[35] + DiscountRate
+    id = spatial
 
     if id != scenario_runs.values():
 
@@ -180,18 +177,18 @@ for j in dict_modelruns.keys():
 
         capital_cost_transmission_distrib(elec_, noHV, HV, elec_noHV_cells, unelec, capital_cost_HV, substation, capacitytoactivity, scenariopath, matrix, gisfile_ref, spatial, diesel = True)
         scenario_runs[j] = id
+    else:
+        print('Scenario already run')
 
-demand_scenario_nan = scenario[1]
-demand_scenario_list = [x for x in demand_scenario_nan if str(x) != 'nan']
+#demand_scenario_nan = scenario[1]
+#demand_scenario_list = [x for x in demand_scenario_nan if str(x) != 'nan']
 #Read scenarios from sample file
-for k in range(0,len(demand_scenario_list)):
 
-    demand_scenario = int(demand_scenario_list[k])
+    id_demand = spatial + DemandElectrified[35]
 
-    #Scenarios that are sensitive to spatial and demand simultaneously
-    for j in range(0,len(scenario.index)):
-        print("Running scenario %i" %j)
-        spatial = int(scenario[j])
+    if id_demand != demand_runs.values():
+        #Scenarios that are sensitive to spatial and demand simultaneously
+        print("Running scenario %s" %j)
 
         #TODO Modify the Pathfinder file to run zonal statistics sum on polygon.
         #TODO Add demand as scenario parameter
@@ -206,14 +203,12 @@ for k in range(0,len(demand_scenario_list)):
         settlements = 'run/scenarios/Demand/%i_demand_cells.csv' %(spatial)
         demand = 'input_data/Benin_demand.csv'
         input_data =  os.path.join(os.getcwd(), 'run/scenarios/input_data.csv')
-        calculate_demand(settlements, demand, demand_scenario, spatial, input_data)
+        calculate_demand(settlements, demand, elecdemand_df, unelecdemand_df, spatial, input_data)
 
         print("Build peakdemand")
 
         date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
         print(date)
-        from Distribution import *
-        from post_elec_GIS_functions import network_length
         
         refpath = 'run/scenarios'
         demandcells = os.path.join(os.getcwd(), 'run/scenarios/Demand/%i_demand_cells.csv' %(spatial))
@@ -235,11 +230,4 @@ for k in range(0,len(demand_scenario_list)):
         distr_losses = 0.83
 
         peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV, distribution, distribution_row, distribution_length_cell_ref, reffolder, spatial, demand_scenario)
-
-dr_scenario_nan = scenario[2]
-dr_scenario_list = [x for x in dr_scenario_nan if str(x) != 'nan']
-#Read scenarios from sample file
-for m in range(0,len(dr_scenario_list)):
-    dr = int(dr_scenario_list[m])
-    discountr = 'input_data/Benin_discountrate.csv'
-    discountrate_csv(discountr, dr)
+        demand_runs[j] = id_demand
