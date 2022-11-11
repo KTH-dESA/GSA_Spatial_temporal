@@ -1,5 +1,6 @@
 name,group,indexes,min_value_base_year,max_value_base_year,min_value_end_year,max_value_end_year,dist,interpolation_index,action
 Spatial,spatial,GLOBAL,1,13,1,13,unif,None,fixed
-Demand,demand,GLOBAL,1,2,1,2,unif,None,fixed
-DiscountRate,discountrate,GLOBAL,0.05,0.5,0.05,0.2,unif,None,fixed
+DemandElectrified,demand,GLOBAL,5018.218086,5018.218086,22654.36347,103439.9344,unif,YEAR,interpolate
+DemandUnelectrified,demand,GLOBAL,0,0,2.180322997,21.80322998,unif,YEAR,interpolate
+DiscountRate,discountrate,GLOBAL,0.05,0.2,0.05,0.2,unif,None,fixed
 CapitalCost,cost,SOPV,2200,2200,1100,1800,unif,YEAR,interpolate
