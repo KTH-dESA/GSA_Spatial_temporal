@@ -20,29 +20,27 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 config = ConfigParser()
 config.read('config/config_input.ini')
 
-print(config['geospatialdata']['crs'])
+crs = config['geospatialdata']['crs']
 
 
-sample_file = 'sensitivity/sample_morris.csv'
-scenarios_folder = "run/scenarios"
-parameters_file = 'config/parameters.csv'
-replicates = 10
-elec_shp = '../Projected_files/elec.shp'
-scenario_ouput = "run/sensitivity_range/"
-output_files = 'sensitivity/runs'
-pathfinder_raster_country = os.path.join('temp/dijkstra','path_cleaned.tif')
-files = pd.read_csv('input_data/Benin_GIS_files.csv', index_col=0)
-crs = "EPSG:32631"
-substation = 2.4 #kUSD/MW
-capital_cost_HV = 3.3 #kUSD MW-km
-capacitytoactivity = 31.536 #coversion MW to TJ
-distr_losses = 0.83
-token = '7a3a746a559cfe5638d6730b1af467beebaf7aa4'
-time_zone_offset = 1  # Benin is UTC + 1hours to adjust for the time zone
-capacitytoactivity = 31.536
-distr_losses = 0.83
-Rpath =  'C:\\TPFAPPS\\R\\R-4.1.0\\bin\\RScript.exe'
-year_array = ['2020', '2021', '2022','2023','2024',	'2025',	'2026',	'2027',	'2028',	'2029',	'2030',	'2031',	'2032',	'2033',	'2034',	'2035',	'2036',	'2037',	'2038',	'2039',	'2040',	'2041',	'2042',	'2043',	'2044',	'2045',	'2046',	'2047',	'2048',	'2049',	'2050',	'2051',	'2052',	'2053',	'2054',	'2055']
+sample_file = config['sensitivityanalysis']['sample_file']
+parameters_file = config['sensitivityanalysis']['parameters_file']
+replicates =  int(config['sensitivityanalysis']['replicates'])
+scenarios_folder = config['inputfiles']['scenarios_folder']
+elec_shp = config['inputfiles']['elec_shp']
+scenario_ouput = config['sensitivityanalysis']['scenario_ouput']
+output_files_sample = config['sensitivityanalysis']['output_files_sample']
+pathfinder_raster_country = config['inputfiles']['pathfinder_raster_country']
+files = pd.read_csv(config['inputfiles']['gisfiles'], index_col=0)
+substation = float(config['model_settings']['substation'])
+capital_cost_HV = float(config['model_settings']['capital_cost_HV'])
+capacitytoactivity = float(config['model_settings']['capacitytoactivity'])
+distr_losses = float(config['model_settings']['distr_losses'])
+token = config['renewableninja']['token']
+time_zone_offset = int(config['renewableninja']['time_zone_offset'])
+Rpath = config['renewableninja']['Rpath']
+year_array = ['2020', '2021', '2022','2023','2024','2025','2026','2027','2028','2029',	'2030',	'2031',	'2032',	'2033',	'2034',	'2035',	'2036',	'2037',	'2038',	'2039',	'2040',	'2041',	'2042',	'2043',	'2044',	'2045',	'2046',	'2047',	'2048',	'2049',	'2050',	'2051',	'2052',	'2053',	'2054',	'2055']
+
 
 def split_data_onecell(data):
     data_ = data.replace(']', '')
@@ -62,7 +60,7 @@ createsample(reader, sample_file, replicates)
 with open(parameters_file, 'r') as csv_file:
     parameter_list = list(csv.DictReader(csv_file))
 morris_sample = np.loadtxt(sample_file, delimiter=",")
-samplelist = expand(morris_sample, parameter_list, output_files)
+samplelist = expand(morris_sample, parameter_list, output_files_sample)
 
 for sample in samplelist:
     with open(sample, 'r') as csv_file:
