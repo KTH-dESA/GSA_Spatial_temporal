@@ -20,7 +20,7 @@ The easiest way to install the Python packages is to use miniconda.
 Obtain the miniconda package (https://docs.conda.io/en/latest/miniconda.html):
 1) Add the conda-forge channel: **conda config --add channels conda-forge**
 2) Create a new Python environment: **conda env create -f environment.yml**
-3) Activate the new environment: **conda activate geosemosys**
+3) Activate the new environment: **conda activate GSA**
 
 # R
 To download the capacityfactors for solar and wind you need to have R on your computer.
