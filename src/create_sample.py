@@ -54,6 +54,15 @@ def createsample(parameters: List, sample_file: str, replicates: int):
 
     sample = morris.sample(problem, N=50, optimal_trajectories=replicates,
                            local_optimization=True, seed=42)
+
+    #modified_values = sample.copy()
+
+    # We then `floor` the values for the categorical inputs
+    # e.g., everything < 1 will be mapped to 0, between 1.0 and 2.0 as 1, etc
+
+
+
+    #modified_values[:, 0:len(parameters)] = np.floor(modified_values[:, 0:len(parameters)])
     np.savetxt(sample_file, sample, delimiter=',')
 
 

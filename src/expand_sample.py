@@ -38,7 +38,7 @@ import sys
 from logging import getLogger
 
 logger = getLogger(__name__)
-
+#TODO an if-then statement and set CapacityOfOneTechnologyUnit to 1 if the sample value is >=0.5 and 0 otherwise.
 def expand(morris_sample, parameters, output_files):
     sample_list = []
     for model_run, sample_row in enumerate(morris_sample):
@@ -46,7 +46,7 @@ def expand(morris_sample, parameters, output_files):
         sample_list += [filepath]
         with open(filepath, 'w') as csvfile:
 
-            fieldnames = ['name', 'indexes', 'value_base_year', 'value_end_year', 'action', 'interpolation_index']
+            fieldnames = ['name', 'indexes', 'value_base_year', 'value_end_year', 'action', 'interpolation_index', 'floor']
             writer = csv.DictWriter(csvfile, fieldnames)
             writer.writeheader()
 
@@ -60,16 +60,20 @@ def expand(morris_sample, parameters, output_files):
                 except ValueError as ex:
                     print(param)
                     raise ValueError(str(ex))
-
-                value_base_year = (max_by - min_by) * column + min_by
-                value_end_year =  (max_ey - min_ey) * column + min_ey
+                if param['floor'] == 'Y':
+                    value_base_year = round((max_by - min_by) * column + min_by)
+                    value_end_year =  round((max_ey - min_ey) * column + min_ey)
+                else:
+                    value_base_year = (max_by - min_by) * column + min_by
+                    value_end_year =  (max_ey - min_ey) * column + min_ey
 
                 data = {'name': param['name'],
                         'indexes': param['indexes'],
                         'value_base_year': value_base_year,
                         'value_end_year': value_end_year,
                         'action': param['action'],
-                        'interpolation_index': param['interpolation_index']}
+                        'interpolation_index': param['interpolation_index'],
+                        'floor': param['floor']}
                 writer.writerow(data)
 
     return sample_list
