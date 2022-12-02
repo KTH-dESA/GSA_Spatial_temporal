@@ -1,15 +1,15 @@
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 def yearsplit_calculation(dayslices, seasonAprSep, seasonOctMarch, savepath, years):
     slicearray = {}
     hoursofyear = 8760
-    hours_per_day = round(24/dayslices)
-    assert hours_per_day*dayslices == 24
-    print('hours of day adds up to 24')
+    hours_per_day = 24/dayslices
+    #assert hours_per_day*dayslices == 24
+    #print('hours of day adds up to 24')
     #no_timeslices = hours_per_day * round(365/seasonAprSep)
 
-    for i in range(1,int(dayslices)+1):
+    for i in range(1,round(dayslices)+1):
         ts_sum = 'SUMMER'+str(i)
         ts_wint = 'WINTER'+str(i)
         slicearray[ts_sum] = hours_per_day*seasonAprSep/hoursofyear
@@ -34,9 +34,9 @@ def demandprofile_calculation(profile, dayslices, seasonAprSep, seasonOctMarch, 
     minute_profile.index = pd.to_datetime(minute_profile['Minute'], format='%H:%M')
 
     slicearray = {}
-    hours_per_day = round(24/dayslices)
-    assert hours_per_day*dayslices == 24
-    print('hours of day adds up to 24')
+    hours_per_day = 24/dayslices
+    #assert hours_per_day*dayslices == 24
+    #print('hours of day adds up to 24')
     #no_timeslices = hours_per_day * round(365/seasonAprSep)
 
     def calculate_sum(data, startdate, enddate):
@@ -57,7 +57,7 @@ def demandprofile_calculation(profile, dayslices, seasonAprSep, seasonOctMarch, 
         return summer_ts, winter_ts
 
 
-    for i in range(1,int(dayslices)+1):
+    for i in range(1,round(dayslices)+1):
         ts_sum = 'SUMMER'+str(i)
         ts_wint = 'WINTER'+str(i)
         m = i-1
