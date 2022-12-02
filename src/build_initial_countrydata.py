@@ -3,6 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import geopandas as gpd
 import pandas as pd
+from configparser import ConfigParser
 import numpy as np
 import seaborn as sns
 from Download_files import *
@@ -17,17 +18,20 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 files = pd.read_csv('input_data/Benin_GIS_files.csv', index_col=0)
 import os
 
-crs = "EPSG:32631"
+config = ConfigParser()
+config.read('config/config_input.ini')
+
+crs = config['geospatialdata']['crs']
 
 # 1. The files in "input_data/GIS_data" are downloaded and placed in a "temp" folder.
 date = datetime. now(). strftime("%Y_%m_%d-%I:%M:%S_%p")
 print(date)
 print("1. The files in input_data/GIS_data are downloaded and placed in a temp folder.")
-#URL_viirs = 'https://eogdata.mines.edu/nighttime_light/annual/v20/2020/VNL_v2_npp_2020_global_vcmslcfg_c202102150000.average_masked.tif.gz'
+URL_viirs = 'https://eogdata.mines.edu/nighttime_light/annual/v20/2020/VNL_v2_npp_2020_global_vcmslcfg_c202102150000.average_masked.tif.gz'
 
-#download_url_data('input_data/GIS_URL.txt', 'temp')
-#download_viirs(URL_viirs, 'temp')
-#unzip_all('input_data/GIS_unzip.txt', '../temp', '../GIS_data')
+download_url_data('input_data/GIS_URL.txt', 'temp')
+download_viirs(URL_viirs, 'temp')
+unzip_all('input_data/GIS_unzip.txt', '../temp', '../GIS_data')
 
 # 2. The files are then projected and clipped to the administrative boundaries.
 date = datetime. now(). strftime("%Y_%m_%d-%I:%M:%S_%p")
