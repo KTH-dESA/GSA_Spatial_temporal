@@ -15,8 +15,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from __future__ import with_statement
 
-from Pathfinder import *
-from Pathfinder_GIS_steps import *
+from modelgenerator.Pathfinder import *
+from modelgenerator.Pathfinder_GIS_steps import *
 import numpy as np
 import pandas as pd
 import os
