@@ -19,7 +19,7 @@ def yearsplit_calculation(dayslices, seasonAprSep, seasonOctMarch, savepath, yea
     print('yearsplit adds up to 1')
 
     df = pd.DataFrame.from_dict([slicearray])
-    df.T
+    df = df.T
     df.index.names = ['Timeslice']
     multiple = pd.concat([df.T]*36).T
     multiple.columns = years
@@ -81,10 +81,11 @@ def demandprofile_calculation(profile, dayslices, seasonAprSep, seasonOctMarch, 
 
     return savepath
 
-profile = "src/input_data/T3_load profile_Narayan.csv"
-dayslices = 2
-seasonAprSep = 183
-seasonOctMarch = 182
-savepath = 'src/run/scenarios/demandprofile_rural_test.csv'
+# profile = "src/input_data/T3_load profile_Narayan.csv"
+# dayslices = 2
+# seasonAprSep = 183
+# seasonOctMarch = 182
+# savepath = 'src/run/scenarios/demandprofile_rural_test.csv'
 year_array = ['2020', '2021', '2022','2023','2024','2025','2026','2027','2028','2029',	'2030',	'2031',	'2032',	'2033',	'2034',	'2035',	'2036',	'2037',	'2038',	'2039',	'2040',	'2041',	'2042',	'2043',	'2044',	'2045',	'2046',	'2047',	'2048',	'2049',	'2050',	'2051',	'2052',	'2053',	'2054',	'2055']
-system = demandprofile_calculation(profile, dayslices, seasonAprSep, seasonOctMarch, savepath, year_array)
+# system = demandprofile_calculation(profile, dayslices, seasonAprSep, seasonOctMarch, savepath, year_array)
+yearsplit = yearsplit_calculation(2,182 , 183, 'run/scenarios/Demand/yearsplit_2.csv', year_array)
