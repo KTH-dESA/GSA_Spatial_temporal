@@ -56,7 +56,7 @@ def demandprofile_calculation(profile, dayslices, seasonAprSep, seasonOctMarch, 
 
         return summer_ts, winter_ts
 
-
+    times = []
     for i in range(1,round(dayslices)+1):
         ts_sum = 'SUMMER'+str(i)
         ts_wint = 'WINTER'+str(i)
@@ -65,6 +65,7 @@ def demandprofile_calculation(profile, dayslices, seasonAprSep, seasonOctMarch, 
         endDay = pd.to_datetime('1900-01-01 23:59:00')
         startDate = pd.to_datetime('1900-01-01 00:00:00')+ timedelta(hours = m*hours_per_timeslice)
         endDate = pd.to_datetime('1900-01-01 00:00:00') + timedelta(hours = m*hours_per_timeslice+hours_per_timeslice)
+        times += [(startDate.strftime('%H:%M'), endDate.strftime('%H:%M'), i)]
         slicearray[ts_sum],slicearray[ts_wint] = calculate_slice(minute_profile, startDate, endDate, seasonAprSep, seasonOctMarch, startDay, endDay)
 
     assert 0.99<sum(slicearray.values())<1.01
@@ -79,4 +80,11 @@ def demandprofile_calculation(profile, dayslices, seasonAprSep, seasonOctMarch, 
     multiple.index = df.index
     multiple.to_csv(savepath)
 
-    return savepath
+    return savepath, times
+
+def addtimestep(time, inputdata, savepath):
+    input_data_df = pd.read_csv(inputdata)
+    timeslices =  pd.DataFrame(time, columns =['Daysplitstart','Daysplitend','Daysplit'])
+    inputdata_timestep = pd.concat((input_data_df, timeslices),axis=1)
+
+    inputdata_timestep.to_csv(savepath)
