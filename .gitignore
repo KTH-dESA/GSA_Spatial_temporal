@@ -77,3 +77,8 @@ src/run/Benin_modified.txt
 tech naming temba.xlsx
 src/sensitivity/**
 
+src/run/sensitivity_range/**
+src/modelgenerator/__pycache__/**
+src/convert.py
+src/input_data/T3_load profile_Narayan.xls
+.gitignore
