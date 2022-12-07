@@ -11,6 +11,8 @@ from expand_sample import expand
 from create_modelrun import modify_parameters
 from run.build_osemosysdatafiles import load_csvs
 from modelgenerator.Distribution import *
+from modelgenerator.temporal_calculations import *
+from run.build_osemosysdatafiles import load_csvs, make_outputfile, functions_to_run, write_to_file
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -21,7 +23,6 @@ config = ConfigParser()
 config.read('config/config_input.ini')
 
 crs = config['geospatialdata']['crs']
-
 
 sample_file = config['sensitivityanalysis']['sample_file']
 parameters_file = config['sensitivityanalysis']['parameters_file']
@@ -39,8 +40,13 @@ distr_losses = float(config['model_settings']['distr_losses'])
 token = config['renewableninja']['token']
 time_zone_offset = int(config['renewableninja']['time_zone_offset'])
 Rpath = config['renewableninja']['Rpath']
+seasonAprSept = int(config['model_settings']['seasonAprSept'])
+seasonOctMarch = int(config['model_settings']['seasonOctMarch'])
+profile = config['inputfiles']['rural_profile']
+text_file = config['inputfiles']['text_file']
+country = text_file = config['inputfiles']['country']
+output_folder = text_file = config['inputfiles']['output_folder']
 year_array = ['2020', '2021', '2022','2023','2024','2025','2026','2027','2028','2029',	'2030',	'2031',	'2032',	'2033',	'2034',	'2035',	'2036',	'2037',	'2038',	'2039',	'2040',	'2041',	'2042',	'2043',	'2044',	'2045',	'2046',	'2047',	'2048',	'2049',	'2050',	'2051',	'2052',	'2053',	'2054',	'2055']
-
 
 def split_data_onecell(data):
     data_ = data.replace(']', '')
@@ -76,6 +82,8 @@ dict_modelruns = load_csvs(scenario_ouput)
 
 scenario_runs = {}
 demand_runs = {}
+temporal_runs = {}
+
 for j in dict_modelruns.keys():
     print("Running scenario %s" %j)
     modelrun = dict_modelruns[j]
@@ -88,6 +96,7 @@ for j in dict_modelruns.keys():
     unelecdemand_df = split_data_onecell(DemandUnelectrified_raw)
 
     DiscountRate = float(modelrun.iloc[3][1])
+
 
     id = spatial
 
@@ -167,7 +176,6 @@ for j in dict_modelruns.keys():
         pop_shp = '../Projected_files/' + files.loc['pop_raster','filename']
         unelec = 'run/%i_un_elec.csv' %(spatial)
         elec_ = 'run/%i_elec.csv' %(spatial)
-        Projected_files_path = '../Projected_files/'
 
         #Solar and wind csv files
         renewableninja(renewable_path, scenarios_folder, spatial)
@@ -188,8 +196,6 @@ for j in dict_modelruns.keys():
         #Scenarios that are sensitive to spatial and demand simultaneously
         print("Running scenario %s" %j)
 
-        #TODO Modify the Pathfinder file to run zonal statistics sum on polygon.
-        #TODO Add demand as scenario parameter
     #######################
 
         polygon = str(spatial) + "_polygon.shp"
@@ -199,8 +205,8 @@ for j in dict_modelruns.keys():
         print(date)
 
         settlements = 'run/scenarios/Demand/%i_demand_cells.csv' %(spatial)
-        input_data =  os.path.join(os.getcwd(), 'run/scenarios/input_data.csv')
-        calculate_demand(settlements, elecdemand_df, unelecdemand_df,elecdemand_df.iloc[35][0], spatial, input_data)
+        inputdata =  os.path.join(os.getcwd(), 'run/scenarios/input_data.csv')
+        calculate_demand(settlements, elecdemand_df, unelecdemand_df,elecdemand_df.iloc[35][0], spatial, inputdata)
 
         print("Build peakdemand")
 
@@ -209,23 +215,40 @@ for j in dict_modelruns.keys():
         
         refpath = 'run/scenarios'
         demandcells = os.path.join(os.getcwd(), 'run/scenarios/Demand/%i_demand_cells.csv' %(spatial))
-        input_data =  os.path.join(os.getcwd(), 'run/scenarios/input_data.csv')
         distribution_length_cell_ref = 'run/scenarios/%i_distribution.csv' %(spatial)
         distribution = 'run/scenarios/%i_distributionlines.csv' %(spatial)
         distribution_row = "_%isum" %(spatial)
 
-        topath = 'run/scenarios/Demand'
         noHV = 'run/%i_noHV_cells.csv' %(spatial)
         HV_file = 'run/%i_HV_cells.csv' %(spatial)
         minigrid = 'run/%i_elec_noHV_cells.csv' %(spatial)
         neartable = 'run/scenarios/Demand/%i_Near_table.csv' %(spatial)
         demand = 'run/scenarios/%i_demand_%i_spatialresolution.csv' %(elecdemand_df.iloc[35][0], spatial)
-        specifieddemand= 'run/scenarios/demandprofile_rural.csv'
-
-        yearsplit = 'run/scenarios/Demand/yearsplit.csv'
-        reffolder = 'run/scenarios'
-
-        peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV_file, distribution, distribution_row, distribution_length_cell_ref, scenarios_folder, spatial, elecdemand_df.iloc[35][0])
+        
+        temporal_id = float(modelrun.iloc[4][1])
+        if temporal_id not in temporal_runs.values():
+            yearsplit = yearsplit_calculation(temporal_id,seasonAprSept , seasonOctMarch, 'run/scenarios/Demand/yearsplit_%f.csv' %(temporal_id), year_array)
+            specifieddemand, timesteps = demandprofile_calculation(profile, temporal_id, seasonAprSept, seasonOctMarch, 'run/scenarios/specifiedrural_demandt_%i.csv' %(int(temporal_id)), year_array)
+            peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV_file, distribution, distribution_row, distribution_length_cell_ref, scenarios_folder, spatial, elecdemand_df.iloc[35][0])
+            addtimestep(timesteps,input_data, 'run/scenarios/input_data_%i.csv' %(int(temporal_id)))
+            temporal_runs[j] = temporal_id
         demand_runs[j] = id_demand
+            
     else:
         print('Scenario already run')
+
+
+
+    ####################### Make txt file #############################
+    dict_df = load_csvs(scenarios_folder) #args.data_path) #
+    outPutFile = make_outputfile(text_file)#args.template) #
+
+    outPutFile = functions_to_run(dict_df, outPutFile, spatial, id_demand, DiscountRate, temporal_id)
+
+    #write data file
+    if not os.path.exists(output_folder):
+        os.makedirs('src/run/output')
+
+    #write to DD-file
+    comb = country+str(j)+'.txt'
+    write_to_file('src/run/output', outPutFile, comb)      #args.output_path
