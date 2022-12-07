@@ -44,7 +44,7 @@ def make_outputfile(param_file):
     outPutFile = allLinesFromXy
     return outPutFile
 
-def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_scenario):
+def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_scenario, temporal):
     """Runs all the functions for the different parameters
 
     Arguments
@@ -54,87 +54,87 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
         outPutFile: is a string with the empty OSeMOSYS parameters file from make_outputfile
     """
     if '%i_operationallife' %(spatial) in dict_df:
-        outPutFile = operational_life(outPutFile, dict_df['input_data'], dict_df['%i_operationallife' %(spatial)])
+        outPutFile = operational_life(outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['%i_operationallife' %(spatial)])
     else:
         print('No operational_life file')
 #######################################################################
     if '%i_%i_peakdemand' %(spatial, demand_scenario) in dict_df:
-        outPutFile = peakdemand(outPutFile, dict_df['input_data'], dict_df['%i_%i_peakdemand' %(spatial, demand_scenario)])
+        outPutFile = peakdemand(outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['%i_%i_peakdemand' %(spatial, demand_scenario)])
     else:
         print('No peakdemand file')
 #################################################################################
     if '%i_distributionlines' %(spatial) in dict_df:
-        outPutFile = maxkm(outPutFile, dict_df['input_data'], dict_df['%i_distributionlines' %(spatial) ], dict_df['%i_distribution' %(spatial)], dict_df['%i_elec' %(spatial)])
+        outPutFile = maxkm(outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['%i_distributionlines' %(spatial) ], dict_df['%i_distribution' %(spatial)], dict_df['%i_elec' %(spatial)])
     else:
         print('No distributionlines file')
 ########################################################################################################
     if 'capitalcostkm' in dict_df:
-        outPutFile = capitalcostkmkW(outPutFile, dict_df['input_data'], dict_df['capitalcostkm'], dict_df['%i_%i_peakdemand'%(spatial, demand_scenario)])
+        outPutFile = capitalcostkmkW(outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['capitalcostkm'], dict_df['%i_%i_peakdemand'%(spatial, demand_scenario)])
 
     else:
         print('No distributionlines file')
 ############################################################################################################
 
     if '%i_fixed_cost' %(spatial) in dict_df:
-            outPutFile = fixedcost(dict_df['%i_GIS_data' %(spatial)], outPutFile, dict_df['input_data'], dict_df['%i_fixed_cost' %(spatial) ])
+            outPutFile = fixedcost(dict_df['%i_GIS_data' %(spatial)], outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['%i_fixed_cost' %(spatial) ])
     else:
         print('No fixed_cost file')
 #####################################################################################
     if 'total_annual_technology_limit' in dict_df:
-        outPutFile = totaltechnologyannualactivityupperlimit(dict_df['%i_GIS_data' %(spatial)], outPutFile, dict_df['input_data'], dict_df['total_annual_technology_limit'])
+        outPutFile = totaltechnologyannualactivityupperlimit(dict_df['%i_GIS_data' %(spatial)], outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['total_annual_technology_limit'])
     else:
         print('No total_annual_technology_limit file')
 ########################################################################################################
     if '%i_demand_%i_spatialresolution'%(demand_scenario, spatial) in dict_df:
-            outPutFile = specifiedannualdemand(outPutFile, dict_df['%i_demand_%i_spatialresolution'%(demand_scenario, spatial) ], dict_df['input_data'])
+            outPutFile = specifiedannualdemand(outPutFile, dict_df['%i_demand_%i_spatialresolution'%(demand_scenario, spatial) ], dict_df['input_data_%i'%(temporal)])
     else:
         print('No demand file')
 ####################################################################################
     if 'capitalcost_RET_ref' in dict_df:
             outPutFile = capitalcost_dynamic(dict_df['%i_GIS_data' %(spatial)], outPutFile, dict_df['capitalcost_RET_ref'],
                                          dict_df['%i_capacityfactor_wind' %(spatial)], dict_df['%i_capacityfactor_solar' %(spatial)],
-                                         dict_df['input_data'],dict_df['%i_elec' %(spatial)],dict_df['%i_un_elec' %(spatial)], dict_df['battery'])
+                                         dict_df['input_data_%i'%(temporal)],dict_df['%i_elec' %(spatial)],dict_df['%i_un_elec' %(spatial)], dict_df['battery'])
     else:
         print('No capitalcost_RET file')
 ###########################################################################
     if '%i_capitalcost'%(spatial) in dict_df:
-        outPutFile = capitalcost(outPutFile, dict_df['%i_capitalcost'%(spatial)], dict_df['input_data'])
+        outPutFile = capitalcost(outPutFile, dict_df['%i_capitalcost'%(spatial)], dict_df['input_data_%i'%(temporal)])
     else:
         print('No capitalcost file')
 
 # ################################################################################
 
     if '%i_capacitytoactivity' %(spatial) in dict_df:
-        outPutFile = capacitytoactivity(dict_df['%i_capacitytoactivity'%(spatial)], outPutFile, dict_df['input_data'])
+        outPutFile = capacitytoactivity(dict_df['%i_capacitytoactivity'%(spatial)], outPutFile, dict_df['input_data_%i'%(temporal)])
     else:
         print('No capacitytoactivity file')
 #################################################################################
     if 'demandprofile' in dict_df:
        outPutFile = SpecifiedDemandProfile(outPutFile, dict_df['demandprofile'], dict_df['demandprofile_rural'],
-                                            dict_df['input_data'], dict_df['%i_demand_%i_spatialresolution'%(demand_scenario,spatial)])
+                                            dict_df['input_data_%i'%(temporal)], dict_df['%i_demand_%i_spatialresolution'%(demand_scenario,spatial)])
     else:
         print('No demandprofile file')
 ###########################################################
 ###################### Mode of operation parameters######################
 
     if 'emissions' in dict_df:
-        outPutFile = emissionactivity(dict_df['%i_GIS_data'%(spatial)], outPutFile, dict_df['input_data'], dict_df['emissions'])
+        outPutFile = emissionactivity(dict_df['%i_GIS_data'%(spatial)], outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['emissions'])
     else:
         print('No emissions file')
 ########################################################
     if '%i_variable_cost' %(spatial) in dict_df:
-        outPutFile = variblecost(dict_df['%i_GIS_data' %(spatial)], outPutFile, dict_df['input_data'], dict_df['%i_variable_cost' %(spatial)])
+        outPutFile = variblecost(dict_df['%i_GIS_data' %(spatial)], outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['%i_variable_cost' %(spatial)])
     else:
         print('No variable_cost file')
 #############################################################
     if '%i_inputactivity'%(spatial) in dict_df:
-        outPutFile = inputact(outPutFile, dict_df['%i_inputactivity'%(spatial)], dict_df['input_data'])
+        outPutFile = inputact(outPutFile, dict_df['%i_inputactivity'%(spatial)], dict_df['input_data_%i'%(temporal)])
     else:
         print('No inputactivity file')
 
 ################################################################
     if '%i_outputactivity'%(spatial) in dict_df:
-        outPutFile = outputactivity(outPutFile, dict_df['%i_outputactivity'%(spatial)], dict_df['input_data'])
+        outPutFile = outputactivity(outPutFile, dict_df['%i_outputactivity'%(spatial)], dict_df['input_data_%i'%(temporal)])
     else:
         print('No outputactivity file')
 ################################################################
@@ -157,7 +157,7 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
     ###########################################################
 
     if 'capacity_factor_other' in dict_df:
-        outPutFile = capacityfactor_modification(outPutFile, dict_df['input_data'], dict_df['capacity_factor_other'])
+        outPutFile = capacityfactor_modification(outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['capacity_factor_other'])
     else:
         print('No capacityfactors for power plants file')
 
@@ -165,7 +165,7 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
     ################################################################
 
     if ('%i_capacityfactor_solar' %(spatial) or '%i_capacityfactor_wind'%(spatial)) in dict_df.keys():
-       outPutFile = capacityfactor(outPutFile, dict_df['%i_GIS_data'%(spatial)], dict_df['battery'], dict_df['input_data'],
+       outPutFile = capacityfactor(outPutFile, dict_df['%i_GIS_data'%(spatial)], dict_df['battery'], dict_df['input_data_%i'%(temporal)],
                                   dict_df['%i_capacityfactor_wind'%(spatial)], dict_df['%i_capacityfactor_solar'%(spatial)], dict_df['%i_elec'%(spatial)], dict_df['%i_un_elec'%(spatial)])
     else:
        print('No capacityfactor_solar or capacityfactor_wind file')
@@ -200,6 +200,20 @@ def SETS(outPutFile, technology, fuel):
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
 
     return(outPutFile)
+
+def yearsplit_generator(outPutFile, yearsplit):
+    
+    dataToInsert = ""
+    print("FUEL SET", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    param = "param YearSplit default 0 :"
+    startIndex = outPutFile.index(param) + len(param)
+    
+    dataToInsert = yearsplit
+
+    outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
+
+    return(outPutFile)
+
 
 
 def resultspath(outPutFile, spatial, demand_scenario, discountrate_scenario):
@@ -300,24 +314,17 @@ def capacityfactor_modification(outPutFile,input_data, capacityfactor_other):
         year = startyear
         while year <= endyear:
             m = 0
-            while m < len(timeslice):
-                startDate = pd.to_datetime("2016-%s" % (timeslicemonthstart[m]))
-                endDate = pd.to_datetime("2016-%s" % (timeslicemonthend[m]))
-                average_solar_day = calculate_average(capacityfactor_solar_pv, startDate, endDate, daysplitstart[0], daysplitend[0], location)
-                tsday = timeslice[m] + "_" + daysplit[0]
-                average_solar_evening = calculate_average(capacityfactor_solar_pv, startDate, endDate, daysplitstart[1], daysplitend[1], location)
-                tsevening = timeslice[m] + "_" + daysplit[1]
-                average_solar_night = calculate_average(capacityfactor_solar_pv, startDate, endDate, daysplitstart[2], daysplitend[2], location)
-                tsnight = timeslice[m] + "_" + daysplit[2]
-                dataToInsert += "%s\t%s\t%s\t%i\t%f\n" % (region, k, tsday, year, average_solar_day)
-                dataToInsert += "%s\t%s\t%s\t%i\t%f\n" % (region, k, tsevening, year, average_solar_evening)
-                dataToInsert += "%s\t%s\t%s\t%i\t%f\n" % (region, k, tsnight, year, average_solar_night)
+            while m < len(daysplit):
+                for g in timeslice:
+                    startDate = pd.to_datetime("2016-%s" % (timeslicemonthstart[g]))
+                    endDate = pd.to_datetime("2016-%s" % (timeslicemonthend[g]))
+                    average_solar = calculate_average(capacityfactor_solar_pv, startDate, endDate, daysplitstart[m], daysplitend[m], location)
+                    tsday = timeslice[g] + "_" + daysplit[m]
+                    dataToInsert += "%s\t%s\t%s\t%i\t%f\n" % (region, k, tsday, year, average_solar)
                 m +=1
             year += 1
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return (outPutFile)
-
-
 
 def operational_life(outPutFile, input_data, operational_life):
     """
@@ -687,32 +694,21 @@ def capacityfactor(outPutFile, df, battery, input_data, capacityfactor_wind, cap
         year = startyear
         while year <= endyear:
             m = 0
-            while m < len(timeslice):
-                startDate = pd.to_datetime("2016-%s" % (timeslicemonthstart[m]))
-                endDate = pd.to_datetime("2016-%s" % (timeslicemonthend[m]))
-                average_solar_day = calculate_average(capacityfactor_solar_pv, startDate, endDate, daysplitstart[0], daysplitend[0], location)
-                tsday = timeslice[m] + "_" + daysplit[0]
-                average_solar_evening = calculate_average(capacityfactor_solar_pv, startDate, endDate, daysplitstart[1], daysplitend[1], location)
-                tsevening = timeslice[m] + "_" + daysplit[1]
-                average_solar_night = calculate_average(capacityfactor_solar_pv, startDate, endDate, daysplitstart[2], daysplitend[2], location)
-                tsnight = timeslice[m] + "_" + daysplit[2]
-                for t in solar_tech:
-                    if t == 'SOPV':
-                        if elec['index_right'].eq(row['Location']).any():
-                            dataToInsert += "%s\t%s_%s_1\t%s\t%i\t%f\n" % (region, t, location, tsday, year, average_solar_day)
-                            dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsday, year, average_solar_day)
-                            dataToInsert += "%s\t%s_%s_1\t%s\t%i\t%f\n" % (region, t, location, tsevening, year, average_solar_evening)
-                            dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsevening, year, average_solar_evening)
-                            dataToInsert += "%s\t%s_%s_1\t%s\t%i\t%f\n" % (region, t, location, tsnight, year, average_solar_night)
-                            dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsnight, year, average_solar_night)
-                        if un_elec['index_right'].eq(row['Location']).any():
-                            dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsday, year, average_solar_day)
-                            dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsevening, year, average_solar_evening)
-                            dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsnight, year, average_solar_night)
-                    else:
-                        dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location, tsday, year, average_solar_day)
-                        dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location, tsevening, year, average_solar_evening)
-                        dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location, tsnight, year, average_solar_night)
+            while m < len(daysplit):
+                for g in timeslice:
+                    startDate = pd.to_datetime("2016-%s" % (timeslicemonthstart[g]))
+                    endDate = pd.to_datetime("2016-%s" % (timeslicemonthend[g]))
+                    average_solar = calculate_average(capacityfactor_solar_pv, startDate, endDate, daysplitstart[m], daysplitend[m], location)
+                    tsday = timeslice[g] + "_" + daysplit[m]
+                    for t in solar_tech:
+                        if t == 'SOPV':
+                            if elec['index_right'].eq(row['Location']).any():
+                                dataToInsert += "%s\t%s_%s_1\t%s\t%i\t%f\n" % (region, t, location, tsday, year, average_solar)
+                                dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsday, year, average_solar)
+                            if un_elec['index_right'].eq(row['Location']).any():
+                                dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsday, year, average_solar)
+                        else:
+                            dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location, tsday, year, average_solar)
                 m +=1
             year += 1
     if battery is None:
@@ -762,35 +758,21 @@ def capacityfactor(outPutFile, df, battery, input_data, capacityfactor_wind, cap
                 year = startyear
                 while year <= endyear:
                     m = 0
-                    while m < len(timeslice):
-                        startDate = pd.to_datetime("2016-%s" % (timeslicemonthstart[m]))
-                        endDate = pd.to_datetime("2016-%s" % (timeslicemonthend[m]))
-                        average_solar_day = calculate_average(capacityfactor_solar_battery,  startDate, endDate, daysplitstart[0], daysplitend[0], location)
-                        tsday = timeslice[m] + "_" + daysplit[0]
-                        average_solar_evening = calculate_average(capacityfactor_solar_battery,  startDate, endDate, daysplitstart[1], daysplitend[1], location)
-                        tsevening = timeslice[m] + "_" + daysplit[1]
-                        average_solar_night = calculate_average(capacityfactor_solar_battery,  startDate, endDate, daysplitstart[2], daysplitend[2], location)
-                        tsnight = timeslice[m] + "_" + daysplit[2]
-
-                        if line['Technology'] == 'SOPV':
-                            if elec['index_right'].eq(row['Location']).any():
-                                dataToInsert += "%s\t%s%ir_%s_1\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsday, year, average_solar_day)
-                                dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (
-                                region, line['Technology'], line['BatteryTime'], location, tsday, year, average_solar_day)
-                                dataToInsert += "%s\t%s%ir_%s_1\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsevening, year, average_solar_evening)
-                                dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (
-                                region, line['Technology'], line['BatteryTime'], location, tsevening, year, average_solar_evening)
-                                dataToInsert += "%s\t%s%ir_%s_1\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsnight, year, average_solar_night)
-                                dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (
-                                region, line['Technology'], line['BatteryTime'], location, tsnight, year, average_solar_night)
-                            if un_elec['index_right'].eq(row['Location']).any():
-                                dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsday, year, average_solar_day)
-                                dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsevening, year, average_solar_evening)
-                                dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsnight, year, average_solar_night)
-                        else:
-                            dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsday, year, average_solar_day)
-                            dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsevening, year, average_solar_evening)
-                            dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsnight, year, average_solar_night)
+                    while m < len(daysplit):
+                        for g in timeslice:
+                            startDate = pd.to_datetime("2016-%s" % (timeslicemonthstart[g]))
+                            endDate = pd.to_datetime("2016-%s" % (timeslicemonthend[g]))
+                            average_solar = calculate_average(capacityfactor_solar_battery,  startDate, endDate, daysplitstart[m], daysplitend[m], location)
+                            tsday = timeslice[m] + "_" + daysplit[m]
+                            if line['Technology'] == 'SOPV':
+                                if elec['index_right'].eq(row['Location']).any():
+                                    dataToInsert += "%s\t%s%ir_%s_1\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsday, year, average_solar)
+                                    dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (
+                                    region, line['Technology'], line['BatteryTime'], location, tsday, year, average_solar)
+                                if un_elec['index_right'].eq(row['Location']).any():
+                                    dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsday, year, average_solar)
+                            else:
+                                dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsday, year, average_solar)
                         m +=1
                     year +=1
 
@@ -806,149 +788,16 @@ def capacityfactor(outPutFile, df, battery, input_data, capacityfactor_wind, cap
         while year <= endyear:
             m = 0
             while m < len(timeslice):
-                startDate = pd.to_datetime("2016-%s" % (timeslicemonthstart[m]))
-                endDate = pd.to_datetime("2016-%s" % (timeslicemonthend[m]))
-                average_wind_day = calculate_average(capacityfactor_windcopy, startDate, endDate,
-                                                      daysplitstart[0], daysplitend[0], location)
-                tsday = timeslice[m] + "_" + daysplit[0]
-                average_wind_evening = calculate_average(capacityfactor_windcopy, startDate, endDate,
-                                                          daysplitstart[1], daysplitend[1], location)
-                tsevening = timeslice[m] + "_" + daysplit[1]
-                average_wind_night = calculate_average(capacityfactor_windcopy, startDate, endDate,
-                                                        daysplitstart[2], daysplitend[2], location)
-                tsnight = timeslice[m] + "_" + daysplit[2]
-
-                for t in wind_tech:
-                    dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location , tsday, year, average_wind_day)
-                    dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location, tsevening, year, average_wind_evening)
-                    dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location, tsnight, year, average_wind_night)
+                for g in timeslice:
+                    startDate = pd.to_datetime("2016-%s" % (timeslicemonthstart[g]))
+                    endDate = pd.to_datetime("2016-%s" % (timeslicemonthend[g]))
+                    average_wind_day = calculate_average(capacityfactor_windcopy, startDate, endDate,
+                                                        daysplitstart[m], daysplitend[m], location)
+                    tsday = timeslice[m] + "_" + daysplit[m]
+                    for t in wind_tech:
+                        dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location , tsday, year, average_wind_day)
                 m = m + 1
             year = year + 1
-    # if battery is None:
-    #     pass
-    # else:
-    #     tech = battery.groupby('renewable ninjafile')
-    #     wind_battery = tech.get_group('capacityfactor_wind')
-    #     for j, line in wind_battery.iterrows():
-    #         capacityfactor_wind_batt = capacityfactor_wind.copy()  # deep copy
-    #         for k, row in df.iterrows():
-    #             location = str(row['Location'])
-    #             batteryCapacityFactor = line['Batterycapacityfactor']
-    #             batteryTime = line['BatteryTime']
-    #             lastRowWasZero = False
-    #             batteryConsumed = False
-    #             index = 0
-    #             for solarCapacity in capacityfactor_wind_batt[location].values:
-    #                 currentRowIsZero = solarCapacity == 0
-    #                 if not currentRowIsZero:
-    #                    # This will happen when the current row is not zero. We should "reset" everything.
-    #                    batteryTime = line['BatteryTime']
-    #                    batteryCapacityFactor = line['Batterycapacityfactor']
-    #                    batteryConsumed = False
-    #                    lastRowWasZero = False
-    #                 elif batteryTime == int(0):
-    #                    # This will happen when the current value is 0, the last value was zero and there is no batterytime left.
-    #                    batteryConsumed = True
-    #                    batteryTime = line['BatteryTime']
-    #                    batteryCapacityFactor = line['Batterycapacityfactor']
-    #                 elif solarCapacity == 0 and lastRowWasZero and not batteryConsumed:
-    #                    # This will happen when the last row was zero and the current row is 0.
-    #                    capacityfactor_wind_batt.at[index, location] = batteryCapacityFactor
-    #                    lastRowWasZero = True
-    #                    batteryTime -= 1
-    #                 elif not batteryConsumed:
-    #                    # This will happen when the last row was not zero and the current row is 0. Same as above?
-    #                    capacityfactor_wind_batt.at[index, location] = batteryCapacityFactor
-    #                    lastRowWasZero = True
-    #                    batteryTime -= 1
-    #                 index += 1
-    #
-    #             capacityfactor_wind_b = capacityfactor_wind_batt.copy()
-    #             capacityfactor_wind_b.index = capacityfactor_windc
-    #             capacityfactor_wind_battery = capacityfactor_wind_b.drop(columns=['adjtime'])
-    #
-    #             year = startyear
-    #             while year <= endyear:
-    #                 m = 0
-    #                 while m < 11:
-    #                     currentMonth = months[m]
-    #                     startDate = pd.to_datetime("2016-%s-01" % (currentMonth))
-    #                     endDate = pd.to_datetime("2016-%s-01" % (months[m + 1]))
-    #                     mask = (capacityfactor_wind_battery.index > startDate) & (capacityfactor_wind_battery.index <= endDate)
-    #                     thisMonthOnly = capacityfactor_wind_battery.loc[mask]
-    #                     sliceStart = timesliceDN
-    #                     sliceEnd = timesliceDE
-    #                     ts = "%iD" % (m + 1)
-    #                     slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
-    #                     try:
-    #                        average_wind = ((slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd)._values)))
-    #                     except ZeroDivisionError:
-    #                        average_wind = 0
-    #                     dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, ts, year, average_wind)
-    #
-    #                     sliceStart = timesliceED
-    #                     sliceEnd = timesliceEN
-    #                     ts = "%iE" % (m + 1)
-    #                     slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
-    #                     try:
-    #                        average_wind = (
-    #                            (slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd)._values)))
-    #                     except ZeroDivisionError:
-    #                        average_wind = 0
-    #                     dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, ts, year, average_wind)
-    #
-    #                     sliceStart = timesliceNE
-    #                     sliceEnd = timesliceND
-    #                     ts = "%iN" % (m + 1)
-    #                     slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
-    #                     try:
-    #                        average_wind = (
-    #                            (slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd)._values)))
-    #                     except ZeroDivisionError:
-    #                        average_wind = 0
-    #                     dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, ts, year, average_wind)
-    #                     m = m + 1
-    #
-    #                 while m == 11:
-    #                     currentMonth = months[m]
-    #                     startDate = pd.to_datetime("2016-%s-01" % (currentMonth))
-    #                     endDate = pd.to_datetime("2016-%s-31" % (months[m]))
-    #                     mask = (capacityfactor_wind_battery.index > startDate) & (capacityfactor_wind_battery.index <= endDate)
-    #                     thisMonthOnly = capacityfactor_wind_battery.loc[mask]
-    #
-    #                     sliceStart = timesliceDN
-    #                     sliceEnd = timesliceDE
-    #                     ts = "%iD" % (m + 1)
-    #                     slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
-    #                     try:
-    #                        average_wind = (
-    #                            (slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd)._values)))
-    #                     except ZeroDivisionError:
-    #                        average_wind = 0
-    #                     dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, ts, year, average_wind)
-    #
-    #                     sliceStart = timesliceED
-    #                     sliceEnd = timesliceEN
-    #                     ts = "%iE" % (m + 1)
-    #                     slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
-    #                     try:
-    #                        average_wind = (slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd)._values))
-    #                     except ZeroDivisionError:
-    #                        average_wind = 0
-    #                     dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, ts, year, average_wind)
-    #
-    #                     sliceStart = timesliceNE
-    #                     sliceEnd = timesliceND
-    #                     ts = "%iN" % (m + 1)
-    #                     slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
-    #                     try:
-    #                        average_wind = (
-    #                            (slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd)._values)))
-    #                     except ZeroDivisionError:
-    #                        average_wind = 0
-    #                     dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, ts, year, average_wind)
-    #                     m = m + 1
-    #                 year = year + 1
 
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return (outPutFile)
