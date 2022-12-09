@@ -28,10 +28,10 @@ def yearsplit_calculation(dayslices, seasonAprSep, seasonOctMarch, savepath, yea
 
     return savepath
 
-def demandprofile_calculation(profile, dayslices, seasonAprSep, seasonOctMarch, savepath, years):
+def demandprofile_calculation(profile, dayslices, seasonAprSep, seasonOctMarch, savepath, years, header):
     minute_profile = pd.read_csv(profile)
     hours_per_timeslice = 24/dayslices
-    minute_profile.index = pd.to_datetime(minute_profile['Minute'], format='%H:%M')
+    minute_profile.index = pd.to_datetime(minute_profile[header], format='%H:%M')
 
     slicearray = {}
     hours_per_day = 24/dayslices
