@@ -44,8 +44,8 @@ seasonAprSept = int(config['model_settings']['seasonAprSept'])
 seasonOctMarch = int(config['model_settings']['seasonOctMarch'])
 profile = config['inputfiles']['rural_profile']
 text_file = config['inputfiles']['text_file']
-country = text_file = config['inputfiles']['country']
-output_folder = text_file = config['inputfiles']['output_folder']
+country = config['inputfiles']['country']
+output_folder = config['inputfiles']['output_folder']
 year_array = ['2020', '2021', '2022','2023','2024','2025','2026','2027','2028','2029',	'2030',	'2031',	'2032',	'2033',	'2034',	'2035',	'2036',	'2037',	'2038',	'2039',	'2040',	'2041',	'2042',	'2043',	'2044',	'2045',	'2046',	'2047',	'2048',	'2049',	'2050',	'2051',	'2052',	'2053',	'2054',	'2055']
 
 def split_data_onecell(data):
@@ -83,6 +83,7 @@ dict_modelruns = load_csvs(scenario_ouput)
 scenario_runs = {}
 demand_runs = {}
 temporal_runs = {}
+CapacityOfone_runs = {}
 
 for j in dict_modelruns.keys():
     print("Running scenario %s" %j)
@@ -94,8 +95,10 @@ for j in dict_modelruns.keys():
    #split mulityear parameter to dataframe
     DemandUnelectrified_raw = modelrun.iloc[2][1]
     unelecdemand_df = split_data_onecell(DemandUnelectrified_raw)
+    CapacityOfOneTechnologyUnit = float(modelrun.iloc[5][1])
 
     DiscountRate = float(modelrun.iloc[3][1])
+
 
 
     id = spatial
@@ -239,11 +242,12 @@ for j in dict_modelruns.keys():
 
 
 
+
     ####################### Make txt file #############################
     dict_df = load_csvs(scenarios_folder) #args.data_path) #
     outPutFile = make_outputfile(text_file)#args.template) #
 
-    outPutFile = functions_to_run(dict_df, outPutFile, spatial, id_demand, DiscountRate, temporal_id)
+    outPutFile = functions_to_run(dict_df, outPutFile, spatial, elecdemand_df.iloc[35][0], DiscountRate, temporal_id,CapacityOfOneTechnologyUnit)
 
     #write data file
     if not os.path.exists(output_folder):
