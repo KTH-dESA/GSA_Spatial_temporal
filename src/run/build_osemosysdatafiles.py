@@ -44,7 +44,7 @@ def make_outputfile(param_file):
     outPutFile = allLinesFromXy
     return outPutFile
 
-def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_scenario, temporal):
+def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_scenario, temporal, capacityofonetech):
     """Runs all the functions for the different parameters
 
     Arguments
@@ -70,6 +70,12 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
 ########################################################################################################
     if 'capitalcostkm' in dict_df:
         outPutFile = capitalcostkmkW(outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['capitalcostkm'], dict_df['%i_%i_peakdemand'%(spatial, demand_scenario)])
+
+    else:
+        print('No distributionlines file')
+########################################################################################################
+    if '%i_capitalcost'%(spatial) in dict_df:
+        outPutFile = capapacityofonetech(outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['%i_capitalcostkm' %(spatial)], capacityofonetech)
 
     else:
         print('No distributionlines file')
@@ -102,7 +108,7 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
     else:
         print('No capitalcost file')
 
-# ################################################################################
+#################################################################################
 
     if '%i_capacitytoactivity' %(spatial) in dict_df:
         outPutFile = capacitytoactivity(dict_df['%i_capacitytoactivity'%(spatial)], outPutFile, dict_df['input_data_%i'%(temporal)])
@@ -214,7 +220,24 @@ def yearsplit_generator(outPutFile, yearsplit):
 
     return(outPutFile)
 
+def capapacityofonetech(outPutFile, input_data, capitalcostkm, capacityofonetech, capacity):
+    dataToInsert = ""
+    print("CapacityofOneTechnologyUnit", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    param = "param CapacityOfOneTechnologyUnit default 0 :="
+    startIndex = outPutFile.index(param) + len(param)
+    
+    tech = capitalcostkm['Technology'].str.contains('TRHV')
+    if capacityofonetech == 1:
+        for t in tech:
+            while year <= int(input_data['endyear'][0]):
+                dataToInsert += "%s\t%s\t%i\t%i\n" % (input_data['region'][0],t, year,capacity)
+            year += 1
+    else:
+        dataToInsert = ''
 
+    outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
+
+    return(outPutFile)
 
 def resultspath(outPutFile, spatial, demand_scenario, discountrate_scenario):
 
