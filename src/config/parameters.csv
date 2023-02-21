@@ -3,14 +3,15 @@ Spatial,spatial,GLOBAL,1,13,1,13,unif,None,fixed,Y
 DemandElectrified,demand,GLOBAL,5018.218086,5018.218086,22654.36347,103439.9344,unif,YEAR,interpolate,N
 DemandUnelectrified,demand,GLOBAL,0,0,2.180322997,21.80322998,unif,YEAR,interpolate,N
 DiscountRate,discountrate,GLOBAL,0.05,0.2,0.05,0.2,unif,None,fixed,N
-Dailytemporalresolution,time,GLOBAL,1,12,1,12,unif,None,fixed,Y
+Dailytemporalresolution,time,GLOBAL,1,24,1,24,unif,None,fixed,Y
+CapacityOfOneTechnologyUnit,MIP,TRHV,0,1,0,1,unif,None,fixed,Y
 CapitalCost,cost,SOPV,2200,2200,1100,1800,unif,YEAR,interpolate,N
 CapitalCost,costbattery,battery,2200,2200,1100,1800,unif,YEAR,interpolate,N
 CapitalCost,costwi,WI,2200,2200,1100,1800,unif,YEAR,interpolate,N
 CapitalCost,costpp,Powerplants,2200,2200,1100,1800,unif,YEAR,interpolate,N
-CapacityOfOneTechnologyUnit,MIP,TRHV,0,1,0,1,unif,None,fixed,Y
+CapitalCost,costnetwork,Transmission,2,4,2,4,unif,None,fixed,N
+CapitalCost,costdistribution,Distribution,10000,28000,10000,28000,unif,None,fixed,N
 CapacityFactor,capacityfactor,"SOPV, SOPV_battery, WI, SOMG",-0.05,0.05,-0.05,0.05,unif,None,fixed,N
-BatteryTime,costbattery,SOPV_battery,4,10,4,10,unif,None,fixed,Y
 DemandProfileTier,demandprofile,GLOBAL,1,5,1,5,unif,None,fixed,Y
 FuelpriceNG,fuel,Natural gas,3,3,3,8,unif,YEAR,interpolate,N
 FuelpriceDIESEL,fuel,Diesel,17,17,10,30,unif,YEAR,interpolate,N
