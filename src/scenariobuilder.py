@@ -121,8 +121,6 @@ for j in dict_modelruns.keys():
     FuelpriceCOAL = split_data_onecell(FuelpriceCOAL_raw)
 
 
-
-
     id = spatial
 
     if id not in scenario_runs.values():
