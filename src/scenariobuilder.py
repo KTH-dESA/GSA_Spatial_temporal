@@ -42,7 +42,8 @@ time_zone_offset = int(config['renewableninja']['time_zone_offset'])
 Rpath = config['renewableninja']['Rpath']
 seasonAprSept = int(config['model_settings']['seasonAprSept'])
 seasonOctMarch = int(config['model_settings']['seasonOctMarch'])
-profile = config['inputfiles']['rural_profile']
+tier_profile = config['inputfiles']['rural_profile']
+urban_profile = config['inputfiles']['urban_profile']
 text_file = config['inputfiles']['text_file']
 country = config['inputfiles']['country']
 output_folder = config['inputfiles']['output_folder']
@@ -87,6 +88,8 @@ CapacityOfone_runs = {}
 
 for j in dict_modelruns.keys():
     print("Running scenario %s" %j)
+
+    # The parameters are defined
     modelrun = dict_modelruns[j]
     spatial = int(float(modelrun.iloc[0][1]))
     #split mulityear parameter to dataframe
@@ -96,8 +99,27 @@ for j in dict_modelruns.keys():
     DemandUnelectrified_raw = modelrun.iloc[2][1]
     unelecdemand_df = split_data_onecell(DemandUnelectrified_raw)
     CapacityOfOneTechnologyUnit = float(modelrun.iloc[5][1])
-
+    Dailytemporalresolution= int(modelrun.iloc[4][1])
     DiscountRate = float(modelrun.iloc[3][1])
+    CapitalCost_PV_raw = modelrun.iloc[6][1]
+    CapitalCost_PV = split_data_onecell(CapitalCost_PV_raw)
+    CapitalCost_batt_raw = modelrun.iloc[7][1]
+    CapitalCost_batt = split_data_onecell(CapitalCost_batt_raw)
+    CapitalCost_WI_raw = modelrun.iloc[8][1]
+    CapitalCost_WI = split_data_onecell(CapitalCost_WI_raw)
+    CapitalCost_powerplant_raw = modelrun.iloc[9][1]
+    CapitalCost_powerplant = split_data_onecell(CapitalCost_powerplant_raw)
+    CapitalCost_transm = float(modelrun.iloc[10][1])
+    CapitalCost_distribution = float(modelrun.iloc[11][1])
+    CapacityFactor_adj = float(modelrun.iloc[12][1])
+    DemandProfileTier = int(modelrun.iloc[13][1])
+    FuelpriceNG_raw = modelrun.iloc[14][1]
+    FuelpriceNG = split_data_onecell(FuelpriceNG_raw)
+    FuelpriceDIESEL_raw = modelrun.iloc[15][1]
+    FuelpriceDIESEL = split_data_onecell(FuelpriceDIESEL_raw)
+    FuelpriceCOAL_raw = modelrun.iloc[16][1]
+    FuelpriceCOAL = split_data_onecell(FuelpriceCOAL_raw)
+
 
 
 
@@ -152,7 +174,7 @@ for j in dict_modelruns.keys():
         #down = download(path, Rpath, srcpath, wind, solar, token)
         #adjust_timezone(path, time_zone_offset)
 
-        print("5. Build peakdemand, maxkmpercell, transmission technologies, capitalcostpercapacitykm")
+        print("5. Build transmission technologies")
 
         date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
         print(date)
@@ -203,7 +225,7 @@ for j in dict_modelruns.keys():
 
         polygon = str(spatial) + "_polygon.shp"
         point = str(spatial) + "_point.shp"
-        print("Build Demand")
+        print("6. Build Demand for location %s" %(id))
         date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
         print(date)
 
@@ -211,7 +233,7 @@ for j in dict_modelruns.keys():
         inputdata =  os.path.join(os.getcwd(), 'run/scenarios/input_data.csv')
         calculate_demand(settlements, elecdemand_df, unelecdemand_df,elecdemand_df.iloc[35][0], spatial, inputdata)
 
-        print("Build peakdemand")
+        print("7. Build peakdemand")
 
         date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
         print(date)
@@ -231,7 +253,8 @@ for j in dict_modelruns.keys():
         temporal_id = float(modelrun.iloc[4][1])
         if temporal_id not in temporal_runs.values():
             yearsplit = yearsplit_calculation(temporal_id,seasonAprSept , seasonOctMarch, 'run/scenarios/Demand/yearsplit_%f.csv' %(temporal_id), year_array)
-            specifieddemand, timesteps = demandprofile_calculation(profile, temporal_id, seasonAprSept, seasonOctMarch, 'run/scenarios/specifiedrural_demandt_%i.csv' %(int(temporal_id)), year_array)
+            specifieddemand, timesteps = demandprofile_calculation(tier_profile, temporal_id, seasonAprSept, seasonOctMarch, 'run/scenarios/specifiedrural_demand_%i.csv' %(int(temporal_id)), year_array, 'Minute')
+            specifieddemandurban, timesteps = demandprofile_calculation(urban_profile, temporal_id, seasonAprSept, seasonOctMarch, 'run/scenarios/specifieddemand_%i.csv' %(int(temporal_id)), year_array, 'hour')
             peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV_file, distribution, distribution_row, distribution_length_cell_ref, scenarios_folder, spatial, elecdemand_df.iloc[35][0])
             addtimestep(timesteps,input_data, 'run/scenarios/input_data_%i.csv' %(int(temporal_id)))
             temporal_runs[j] = temporal_id
@@ -239,9 +262,6 @@ for j in dict_modelruns.keys():
             
     else:
         print('Scenario already run')
-
-
-
 
     ####################### Make txt file #############################
     dict_df = load_csvs(scenarios_folder) #args.data_path) #
