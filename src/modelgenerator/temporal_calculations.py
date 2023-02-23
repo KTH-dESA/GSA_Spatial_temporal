@@ -10,10 +10,10 @@ def yearsplit_calculation(dayslices, seasonAprSep, seasonOctMarch, savepath, yea
     #no_timeslices = hours_per_day * round(365/seasonAprSep)
 
     for i in range(1,round(dayslices)+1):
-        ts_sum = 'SUMMER'+str(i)
-        ts_wint = 'WINTER'+str(i)
+        ts_sum = 's'+str(i)
+        #ts_wint = 'WINTER'+str(i)
         slicearray[ts_sum] = hours_per_day*seasonAprSep/hoursofyear
-        slicearray[ts_wint] = hours_per_day*seasonOctMarch/hoursofyear
+        #slicearray[ts_wint] = hours_per_day*seasonOctMarch/hoursofyear
 
     assert 0.99<sum(slicearray.values())<1.01
     print('yearsplit adds up to 1')
@@ -54,19 +54,19 @@ def demandprofile_calculation(profile, dayslices, seasonAprSep, seasonOctMarch, 
         summer_ts = slice*summer/totalloadyear
         winter_ts = slice*winter/totalloadyear
 
-        return summer_ts, winter_ts
+        return summer_ts
 
     times = []
     for i in range(1,round(dayslices)+1):
-        ts_sum = 'SUMMER'+str(i)
-        ts_wint = 'WINTER'+str(i)
+        ts_sum = 's'+str(i)
+        #ts_wint = 'WINTER'+str(i)
         m = i-1
         startDay =pd.to_datetime('1900-01-01 00:00:00')
         endDay = pd.to_datetime('1900-01-02 00:00:00')
         startDate = pd.to_datetime('1900-01-01 00:00:00')+ timedelta(hours = m*hours_per_timeslice)
         endDate = pd.to_datetime('1900-01-01 00:00:00') + timedelta(hours = m*hours_per_timeslice+hours_per_timeslice)- timedelta(minutes=1)
         times += [(startDate.strftime('%H:%M'), endDate.strftime('%H:%M'), i)]
-        slicearray[ts_sum],slicearray[ts_wint] = calculate_slice(minute_profile, startDate, endDate, seasonAprSep, seasonOctMarch, startDay, endDay)
+        slicearray[ts_sum]= calculate_slice(minute_profile, startDate, endDate, seasonAprSep, seasonOctMarch, startDay, endDay)
 
     assert 0.99<sum(slicearray.values())<1.017
     print("Demandprofile sum is 1 over the year")
