@@ -79,7 +79,7 @@ def GIS_file(dest, point, spatial):
     return(os.path.join(dest, '%i_GIS_data.csv' %(spatial)))
 
 ## Build files with elec/unelec aspects
-def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_file, unelec, capital_cost_HV, substation, capacitytoactivity, path, adjacencymatrix,gis_file, scenario, diesel):
+def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_file, unelec, capital_cost_HV, substation, capacitytoactivity, path, adjacencymatrix,gis_file, scenario,distribu_cost, diesel):
     """Reads the transmission lines shape file, creates empty files for inputactivity, outputactivity, capitalcost for transmission lines.
 
     :param distribution_network: a csv file with number of cells included in Pathfinder
@@ -151,7 +151,7 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
 
-        capitalcost.loc[k]['Capitalcost'] = 80
+        capitalcost.loc[k]['Capitalcost'] = distribu_cost
         capitalcost.loc[k]['Technology'] =  "KEEL00d_%i" %(k)
 
         output_temp = [0, "EL3_%i_1" % (k), "KEEL00d_%i" % (k), 0.83, 1]
