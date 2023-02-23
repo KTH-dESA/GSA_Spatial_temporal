@@ -46,8 +46,7 @@ def make_outputfile(param_file):
     return outPutFile
 
 def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_scenario, temporal, capacityofonetech, CapitalCost_PV, 
-                                  CapitalCost_batt, CapitalCost_WI, CapitalCost_powerplant, CapitalCost_transm, CapitalCost_distribution, CapacityFactor_adj, 
-                                  DemandProfileTier, FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, CapitalCost_distribution_ext):
+                                  CapitalCost_batt, CapitalCost_WI, CapitalCost_powerplant, CapitalCost_distribution, CapacityFactor_adj, FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL):
     """Runs all the functions for the different parameters
 
     Arguments
@@ -128,7 +127,7 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
         print('No emissions file')
 ########################################################
     if '%i_variable_cost' %(spatial) in dict_df:
-        outPutFile = variblecost(dict_df['%i_GIS_data' %(spatial)], outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['%i_variable_cost' %(spatial)])
+        outPutFile = variblecost(dict_df['%i_GIS_data' %(spatial)], outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['%i_variable_cost' %(spatial)],FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL)
     else:
         print('No variable_cost file')
 #############################################################
@@ -543,7 +542,7 @@ def emissionactivity(df, outPutFile, input_data, emissions):
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return (outPutFile)
 
-def variblecost(df, outPutFile, input_data, variable_cost, gas, coal, diesel):
+def variblecost(df, outPutFile, input_data, variable_cost, gas, diesel, coal):
     """
     Builds the Variable cost (Region, Technology, ModeofOperation, Year, Variablecost)
     -------------
