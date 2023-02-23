@@ -266,8 +266,8 @@ for j in dict_modelruns.keys():
     outPutFile = make_outputfile(text_file)#args.template) #
 
     outPutFile = functions_to_run(dict_df, outPutFile, spatial, elecdemand_df.iloc[35][0], DiscountRate, temporal_id,CapacityOfOneTechnologyUnit, CapitalCost_PV, 
-                                  CapitalCost_batt, CapitalCost_WI, CapitalCost_powerplant, CapitalCost_transm, CapitalCost_distribution, CapacityFactor_adj, 
-                                  DemandProfileTier, FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, CapitalCost_distribution_ext)
+                                  CapitalCost_batt, CapitalCost_WI, CapitalCost_powerplant, CapitalCost_distribution, CapacityFactor_adj, 
+                                  FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL)
 
     #write data file
     if not os.path.exists(output_folder):
