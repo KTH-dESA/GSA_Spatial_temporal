@@ -252,7 +252,7 @@ def yearsplit_generator(outPutFile, yearsplit):
     yearsplit2 = pd.DataFrame(yearsplit) 
     yearsplit2.columns = years
     
-    dataToInsert += yearsplit.to_string()
+    dataToInsert += yearsplit.to_string(index = False)
 
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
 
