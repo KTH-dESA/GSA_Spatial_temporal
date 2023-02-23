@@ -34,7 +34,7 @@ output_files_sample = config['sensitivityanalysis']['output_files_sample']
 pathfinder_raster_country = config['inputfiles']['pathfinder_raster_country']
 files = pd.read_csv(config['inputfiles']['gisfiles'], index_col=0)
 substation = float(config['model_settings']['substation'])
-capital_cost_HV = float(config['model_settings']['capital_cost_HV'])
+#capital_cost_HV = float(config['model_settings']['capital_cost_HV'])
 capacitytoactivity = float(config['model_settings']['capacitytoactivity'])
 distr_losses = float(config['model_settings']['distr_losses'])
 token = config['renewableninja']['token']
@@ -42,7 +42,7 @@ time_zone_offset = int(config['renewableninja']['time_zone_offset'])
 Rpath = config['renewableninja']['Rpath']
 seasonAprSept = int(config['model_settings']['seasonAprSept'])
 seasonOctMarch = int(config['model_settings']['seasonOctMarch'])
-tier_profile = config['inputfiles']['rural_profile']
+
 urban_profile = config['inputfiles']['urban_profile']
 text_file = config['inputfiles']['text_file']
 country = config['inputfiles']['country']
@@ -89,17 +89,15 @@ CapacityOfone_runs = {}
 for j in dict_modelruns.keys():
     print("Running scenario %s" %j)
 
-    # The parameters are defined
+    # The parameters are defined and split
     modelrun = dict_modelruns[j]
     spatial = int(float(modelrun.iloc[0][1]))
-    #split mulityear parameter to dataframe
     DemandElectrified_raw = modelrun.iloc[1][1]
     elecdemand_df = split_data_onecell(DemandElectrified_raw)
-   #split mulityear parameter to dataframe
     DemandUnelectrified_raw = modelrun.iloc[2][1]
     unelecdemand_df = split_data_onecell(DemandUnelectrified_raw)
-    CapacityOfOneTechnologyUnit = float(modelrun.iloc[5][1])
-    Dailytemporalresolution= int(modelrun.iloc[4][1])
+    CapacityOfOneTechnologyUnit = int(float(modelrun.iloc[5][1]))
+    Dailytemporalresolution= int(float(modelrun.iloc[4][1]))
     DiscountRate = float(modelrun.iloc[3][1])
     CapitalCost_PV_raw = modelrun.iloc[6][1]
     CapitalCost_PV = split_data_onecell(CapitalCost_PV_raw)
@@ -112,14 +110,16 @@ for j in dict_modelruns.keys():
     CapitalCost_transm = float(modelrun.iloc[10][1])
     CapitalCost_distribution = float(modelrun.iloc[11][1])
     CapacityFactor_adj = float(modelrun.iloc[12][1])
-    DemandProfileTier = int(modelrun.iloc[13][1])
+    DemandProfileTier = int(float(modelrun.iloc[13][1]))
     FuelpriceNG_raw = modelrun.iloc[14][1]
     FuelpriceNG = split_data_onecell(FuelpriceNG_raw)
     FuelpriceDIESEL_raw = modelrun.iloc[15][1]
     FuelpriceDIESEL = split_data_onecell(FuelpriceDIESEL_raw)
     FuelpriceCOAL_raw = modelrun.iloc[16][1]
     FuelpriceCOAL = split_data_onecell(FuelpriceCOAL_raw)
+    CapitalCost_distribution_ext = float(modelrun.iloc[17][1])
 
+    tier_profile = 'input_data/T%i_load profile_Narayan.csv' %(DemandProfileTier)
 
     id = spatial
 
@@ -179,7 +179,7 @@ for j in dict_modelruns.keys():
 
         demandcells = os.path.join(os.getcwd(), 'run/scenarios/Demand/%i_demand_cells.csv' %(spatial))
         input_data =  os.path.join(os.getcwd(), 'run/scenarios/input_data.csv')
-        distribution_length_cell_ref = network_length(demandcells, input_data, scenarios_folder, spatial)
+        #distribution_length_cell_ref = network_length(demandcells, input_data, scenarios_folder, spatial)
         distribution = 'run/scenarios/%i_distributionlines.csv' %(spatial)
         distribution_row = "_%isum" %(spatial)
 
@@ -206,7 +206,7 @@ for j in dict_modelruns.keys():
         gisfile_ref = GIS_file(scenarios_folder, '../Projected_files/' + point, spatial)
         matrix = 'run/scenarios/Demand/%i_adjacencymatrix.csv' %(spatial)
 
-        capital_cost_transmission_distrib(elec_, noHV, HV_file, elec_noHV_cells, unelec, capital_cost_HV, substation, capacitytoactivity, scenarios_folder, matrix, gisfile_ref, spatial, diesel = True)
+        capital_cost_transmission_distrib(elec_, noHV, HV_file, elec_noHV_cells, unelec, CapitalCost_transm, substation, capacitytoactivity, scenarios_folder, matrix, gisfile_ref, spatial, CapitalCost_distribution_ext, diesel = True)
         scenario_runs[j] = id
     else:
         print('Scenario already run')
@@ -250,7 +250,7 @@ for j in dict_modelruns.keys():
         
         temporal_id = float(modelrun.iloc[4][1])
         if temporal_id not in temporal_runs.values():
-            yearsplit = yearsplit_calculation(temporal_id,seasonAprSept , seasonOctMarch, 'run/scenarios/Demand/yearsplit_%f.csv' %(temporal_id), year_array)
+            yearsplit = yearsplit_calculation(temporal_id,seasonAprSept , seasonOctMarch, 'run/scenarios/yearsplit_%f.csv' %(temporal_id), year_array)
             specifieddemand, timesteps = demandprofile_calculation(tier_profile, temporal_id, seasonAprSept, seasonOctMarch, 'run/scenarios/specifiedrural_demand_%i.csv' %(int(temporal_id)), year_array, 'Minute')
             specifieddemandurban, timesteps = demandprofile_calculation(urban_profile, temporal_id, seasonAprSept, seasonOctMarch, 'run/scenarios/specifieddemand_%i.csv' %(int(temporal_id)), year_array, 'hour')
             peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV_file, distribution, distribution_row, distribution_length_cell_ref, scenarios_folder, spatial, elecdemand_df.iloc[35][0])
@@ -265,12 +265,14 @@ for j in dict_modelruns.keys():
     dict_df = load_csvs(scenarios_folder) #args.data_path) #
     outPutFile = make_outputfile(text_file)#args.template) #
 
-    outPutFile = functions_to_run(dict_df, outPutFile, spatial, elecdemand_df.iloc[35][0], DiscountRate, temporal_id,CapacityOfOneTechnologyUnit)
+    outPutFile = functions_to_run(dict_df, outPutFile, spatial, elecdemand_df.iloc[35][0], DiscountRate, temporal_id,CapacityOfOneTechnologyUnit, CapitalCost_PV, 
+                                  CapitalCost_batt, CapitalCost_WI, CapitalCost_powerplant, CapitalCost_transm, CapitalCost_distribution, CapacityFactor_adj, 
+                                  DemandProfileTier, FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, CapitalCost_distribution_ext)
 
     #write data file
     if not os.path.exists(output_folder):
-        os.makedirs('src/run/output')
+        os.makedirs('run/output')
 
     #write to DD-file
     comb = country+str(j)+'.txt'
-    write_to_file('src/run/output', outPutFile, comb)      #args.output_path
+    write_to_file('run/output/', outPutFile, comb)      #args.output_path
