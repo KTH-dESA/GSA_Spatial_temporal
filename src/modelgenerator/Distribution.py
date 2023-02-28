@@ -150,6 +150,6 @@ def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv
     peakdemandLVM_divided_km.index = peakdemandLVM_divided_km['Fuel']
     peakdemandLVM_divided_km_cleaned = peakdemandLVM_divided_km.drop(['cell', 'Fuel'], axis=1)
 
-    TRLV_TRLVM = peakdemand_divided_km_cleaned.append(peakdemandLVM_divided_km_cleaned)
+    TRLV_TRLVM = pd.concat([peakdemand_divided_km_cleaned, peakdemandLVM_divided_km_cleaned])
 
     TRLV_TRLVM.to_csv(os.path.join(tofolder,'%i_%i_peakdemand.csv') %(spatail, demand_scneario))
