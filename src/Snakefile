@@ -8,8 +8,9 @@ localrules: all, clean
 
 files, = glob_wildcards("run/output/{file}.txt")
 
-DDfiles = [pd.read_csv("run/output/{file}.txt") for file in files]
-MODELRUNS = range(len(DDfiles) + 1)
+#DDfiles = [pd.read_csv("run/output/{file}.txt") for file in files]
+MODELRUNS = range(len(files))
+print(files)
 
 onstart:
     print('Checking user inputs...')
