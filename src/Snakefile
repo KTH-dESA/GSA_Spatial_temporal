@@ -1,0 +1,332 @@
+import pandas as pd
+import sys
+
+localrules: all, clean
+#wildcard_constraints:
+    #result_file="[^(objective)][a-zA-Z_\-]+",  ##Maybe not
+    #model_run="\d+"
+
+files, = glob_wildcards("run/output/{file}.txt")
+
+DDfiles = [pd.read_csv("run/output/{file}.txt") for file in files]
+MODELRUNS = range(len(DDfiles) + 1)
+
+onstart:
+    print('Checking user inputs...')
+
+onsuccess:
+    print('Workflow finished successfully!')
+
+rule all:
+    input:
+        expand("run/temp/results/Benin_{model_runs}_sorted.txt", model_runs=MODELRUNS)
+        #expand("run/temp/Benin_{model_runs}.sol", model_runs=MODELRUNS)
+        #expand("run/temp/Benin_{model_runs}.lp", model_runs=MODELRUNS)
+
+rule build_lp:
+    input:
+        df_path = "run/output/Beninsample_{model_runs}.txt"
+    params:
+        model_path = "run/model.txt",
+    output:
+        temp("run/temp/Benin_{model_runs}.lp")
+    log:
+        "run/temp/{model_runs}.log"
+    threads: 1
+    resources:
+        mem_mb=4096
+    shell:
+        "glpsol -m {params.model_path} -d {input.df_path} --wlp {output} --check > {log}"
+
+rule solve_lp:
+    message: "Solving the LP for '{output}' using CPLEX"
+    input:
+        "run/temp/Benin_{model_runs}.lp"
+    output:
+        json="run/results/{model_runs}.json",
+        solution=temp("run/temp/Benin_{model_runs}.sol")
+    log:
+        "run/results/log/{model_runs}.log"
+    params:
+        ilp="run/results/{model_runs}.ilp",
+        cplex="run/results/{model_runs}.cplex",
+    benchmark:
+        "run/benchmarks/{model_runs}.tsv"
+    resources:
+        mem_mb=30000,
+        disk_mb=20000,
+        time=720
+    group: "solve"
+    threads:
+        3
+    shell:
+        """
+          echo "set threads {threads}"   > {params.cplex}
+          echo "set timelimit 43200"     >> {params.cplex}
+          echo "read {input}" 	         >> {params.cplex}
+          echo "baropt"                  >> {params.cplex}
+          echo "write {output.solution}" >> {params.cplex}
+          echo "quit"                    >> {params.cplex}
+        cplex < {params.cplex} > {log} && touch {output.json}
+        """
+
+rule transform_file:
+    message: "Transforming CPLEX sol file '{input}'"
+    input: 
+        "run/temp/Benin_{model_runs}.sol"
+    #conda: "../envs/otoole.yaml"
+    output:
+        temp("run/temp/results/Benin_{model_runs}_trans.txt")
+    shell:
+        "python run/transform_31072013.py {input} {output}"
+
+rule sort_transformed_solution:
+    message: "Sorting transformed CPLEX sol file '{input}'"
+    group: 'results'
+    input:
+        "run/temp/results/Benin_{model_runs}_trans.txt"
+    output:
+        temp("run/temp/results/Benin_{model_runs}_sorted.txt")
+    shell:
+        "sort {input} > {output}"
+
+# rule process_solution:
+#     message: "Processing CPLEX solution for '{output}'"
+#     input:
+#         solution=solver_output,
+#         data="results/{scenario}/model_{model_run}/datapackage.json"
+#     output: ["results/{{scenario}}/{{model_run, \d+}}/{}.csv".format(x) for x in RESULTS.index]
+#     conda: "../envs/otoole.yaml"
+#     log: "results/log/process_solution_{scenario}_{model_run, \d+}.log"
+#     params:
+#         folder="results/{scenario}/{model_run, \d+}"
+#     shell: """
+#         mkdir -p {params.folder}
+#         otoole -v results {config[solver]} csv {input.solution} {params.folder} --input_datapackage {input.data} &> {log}
+#         """
+
+rule make_dag:
+    output: pipe("dag.txt")
+    shell:
+        "snakemake --dag > {output}"
+
+rule plot_dag:
+    input: "dag.txt"
+    output: "dag.png"
+    conda: "env/dag.yaml"
+    shell:
+        "dot -Tpng {input} > dag.png && open dag.png"
+
+rule clean:
+    shell:
+        "rm -rf results/* && rm -rf working_directory/*"
+
+
+
+
+#RESULTS = pd.read_csv(config["results"])
+#RESULT_FILES = RESULTS['filename'].to_list()
+#ZIP = '.gz' if config['zip'] else ''
+#INPUT_FILES = pd.read_csv("run/output/Beninsample_{model_run}.txt").to_list()
+#OUTPUT_FILES = pd.read_csv('resources/otoole_files.csv')['outputs'].dropna().to_list()
+
+
+# rule all:
+#     input:
+#         expand("run/temp/Beninsample_{{model_run}}.lp{zip_extension}", model_run = MODELRUNS, zip_extension= '.gz')
+#         #expand("results/summary/SA_objective.{extension}", extension=['csv', 'png']),
+#         #expand("results/summary/SA_{result_file}.{extension}", extension=['csv', 'png'], result_file=RESULT_FILES),
+#         #expand("results/summary/SA_interactions.png"),
+#         #expand("results/model_{model_run}/results/{x}.csv", x=OUTPUT_FILES, model_run=MODELRUNS),
+#         #expand("results/summary/{result_file}_heatmap.png", result_file=RESULT_FILES)
+
+
+# rule generate_lp_file:
+#     message: "Generating the LP file for '{output}'"
+#     input:
+#         data="run/output/Beninsample_{model_run}.txt",
+#         model="run/model.txt"
+#     resources:
+#         mem_mb=64000,
+#         disk_mb=16000,
+#         time=180
+#     output:
+#         temp(expand("run/temp/Beninsample_{{model_run}}.lp{zip_extension}", zip_extension= '.gz'))
+#     benchmark:
+#         "run/benchmarks/gen_lp/{model_run}.tsv"
+#     log:
+#         "run/results/log/glpsol_{model_run}.log"
+#     conda: "env/osemosys.yml"
+#     group: "gen_lp"
+#     threads:
+#         1
+#     shell:
+#         "glpsol -m {input.model} -d {input.data} --wlp {output} --check > {log}"
+# rule unzip:
+#     message: "Unzipping LP file"
+#     input:
+#         "temp/results/{model_run}.lp.gz"
+#     group:
+#         "solve"
+#     output:
+#         temp("temp/results/{model_run}.lp")
+#     shell:
+#         "gunzip -fcq {input} > {output}"
+
+# rule solve_lp:
+#     message: "Solving the LP for '{output}' using {config[solver]}"
+#     input:
+#         "temp/results/{model_run}.lp"
+#     output:
+#         json="results/{model_run}.json",
+#         solution=temp("temp/results/{model_run}.sol")
+#     log:
+#         "results/log/solver_{scenario}_{model_run}.log"
+#     params:
+#         ilp="results/{model_run}.ilp",
+#         cplex="results/{model_run}.cplex",
+#     benchmark:
+#         "benchmarks/solver/{scenario}_{model_run}.tsv"
+#     resources:
+#         mem_mb=30000,
+#         disk_mb=20000,
+#         time=720
+#     group: "solve"
+#     threads:
+#         3
+#     shell:
+#         """
+#         if [ {config[solver]} = gurobi ]
+#         then
+#           gurobi_cl Method=2 Threads={threads} LogFile={log} LogToConsole=0 ScaleFlag=2 NumericFocus=3 ResultFile={output.solution} ResultFile={output.json} ResultFile={params.ilp} {input}
+#         elif [ {config[solver]} = cplex ]
+#         then
+#           echo "set threads {threads}"   > {params.cplex}
+#           echo "set timelimit 43200"     >> {params.cplex}
+#           echo "read {input}" 	         >> {params.cplex}
+#           echo "baropt"                  >> {params.cplex}
+#           echo "write {output.solution}" >> {params.cplex}
+#           echo "quit"                    >> {params.cplex}
+#         cplex < {params.cplex} > {log} && touch {output.json}
+#         else
+#           cbc {input} solve -sec 1500 -solu {output.solution} 2> {log} && touch {output.json}
+#         fi
+#         """
+
+# rule zip_solution:
+#     message: "Zip up solution file {input}"
+#     group: "solve"
+#     input: "temp/results/{scenario}/{model_run}.sol"
+#     output: expand("temp/results/{{scenario}}/{{model_run}}.sol)#{zip_extension}", zip_extension='')
+#     shell: "gzip -fcq {input} > {output}"
+
+# rule unzip_solution:
+#     message: "Unzip solution file {input}"
+#     group: "results"
+#     input: "temp/results/{scenario}/{model_run}.sol.gz"
+#     output: temp("temp/results/{scenario}/{model_run}.sol")
+#     shell: "gunzip -fcq {input} > {output}"
+
+# rule transform_file:
+#     message: "Transforming CPLEX sol file '{input}'"
+#     group: 'results'
+#     input: rules.unzip_solution.output
+#     #conda: "../envs/otoole.yaml"
+#     output:
+#         temp("temp/results/{scenario}/{model_run}_trans.sol")
+#     shell:
+#         "python run/transform_31072013.py {input} {output}"
+
+# rule sort_transformed_solution:
+#     message: "Sorting transformed CPLEX sol file '{input}'"
+#     group: 'results'
+#     input:
+#         "temp/results/{scenario}/{model_run}_trans.sol"
+#     output:
+#         temp("temp/results/{scenario}/{model_run}_sorted.sol")
+#     shell:
+#         "sort {input} > {output}"
+
+# rule process_solution:
+#     message: "Processing {config[solver]} solution for '{output}'"
+#     group: 'results'
+#     input:
+#         solution=solver_output,
+#         data="results/{scenario}/model_{model_run}/datapackage.json"
+#     output: ["results/{{scenario}}/{{model_run, \d+}}/{}.csv".format(x) for x in RESULTS.index]
+#     #conda: "../envs/otoole.yaml"
+#     log: "results/log/process_solution_{scenario}_{model_run, \d+}.log"
+#     params:
+#         folder="results/{scenario}/{model_run, \d+}"
+#     shell: """
+#         mkdir -p {params.folder}
+#         otoole -v results {config[solver]} csv {input.solution} {params.folder} --input_datapackage {input.data} &> {log}
+#         """
+
+# rule get_statistics:
+#     message: "Extract the {config[solver]} statistics from the sol file"
+#     input: rules.solve_lp.output.solution
+#     output: "results/{scenario}/{model_run}.stats"
+#     group: "solve"
+#     shell: 
+#         """
+#         if [ {config[solver]} = cplex ]
+#         then
+#           head -n 27 {input} | tail -n 25 > {output}
+#         else
+#           head -n 1 {input} > {output}
+#         fi
+#         """
+
+# rule get_objective_value:
+#     input: expand("results/{{scenario}}/{model_run}.stats", model_run=MODELRUNS)
+#     output: "results/objective_{scenario}.csv"
+#     shell:
+#         """
+#         echo "FILE,OBJECTIVE,STATUS" > {output}
+#         if [ {config[solver]} = cplex ]
+#         then
+#           for FILE in {input}
+#           do
+#           OBJ=$(head $FILE | grep -e 'objectiveValue' | cut -f 2 -d '=')
+#           STATUS=$(head $FILE | grep -e 'solutionStatusString' | cut -f 2 -d '=')
+#           JOB=$(echo $FILE | cut -f 3 -d '/' | cut -f 1 -d '.')
+#           echo "$JOB,$OBJ,$STATUS" >> {output}
+#           done
+#         elif [ {config[solver]} = cbc ]
+#         then
+#           i=0
+#           for FILE in {input}
+#           do
+#           OBJ=$(head $FILE | cut -f 5 -d ' ')
+#           STATUS=$(head $FILE | cut -f 1 -d ' ')
+#           JOB=$FILE
+#           echo "$JOB,$OBJ,$STATUS" >> {output}
+#           ((i=i+1))
+#           done
+#         else
+#           echo "To be done"
+#         fi
+#         """
+# rule run_model:
+#     input:
+#         lp_complete_path = "data/{scen}/lp_done.txt"
+#     params:
+#         lp_path = "data/{scen}/{scen}.lp",
+#         path = "results/{scen}/{scen}"
+#     output:
+#         done_path = "results/{scen}/{scen}-sol_done.txt"
+#     shell:
+#         "python run.py {params.lp_path} {params.path}"
+
+# rule convert_sol:
+#     input:
+#         sol_complete_path = "results/{scen}/{scen}-sol_done.txt",
+#         dp_path = "data/{scen}/datapackage.json"
+#     params:
+#         sol_path = "results/{scen}/{scen}.sol",
+#         res_folder = "results/{scen}/results_csv"
+#     output:
+#         res_path = "results/{scen}/res-csv_done.txt"
+#     shell:
+#         "python convert.py {params.sol_path} {params.res_folder} {input.dp_path}"
