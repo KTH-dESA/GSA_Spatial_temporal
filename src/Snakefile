@@ -21,8 +21,6 @@ onsuccess:
 rule all:
     input:
         expand("run/temp/results/Benin_{model_runs}_sorted.txt", model_runs=MODELRUNS)
-        #expand("run/temp/Benin_{model_runs}.sol", model_runs=MODELRUNS)
-        #expand("run/temp/Benin_{model_runs}.lp", model_runs=MODELRUNS)
 
 rule build_lp:
     input:
