@@ -46,7 +46,7 @@ def make_outputfile(param_file):
     return outPutFile
 
 def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_scenario, temporal, capacityofonetech, CapitalCost_PV, 
-                                  CapitalCost_batt, CapitalCost_WI, CapitalCost_powerplant, CapitalCost_distribution, CapacityFactor_adj, FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL):
+                                  CapitalCost_batt, CapitalCost_WI, CapitalCost_powerplant, CapitalCost_distribution, CapacityFactor_adj, FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, DemandProfileTier):
     """Runs all the functions for the different parameters
 
     Arguments
@@ -99,7 +99,7 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
         print('No demand file')
 ####################################################################################
     outPutFile = capitalcost_dynamic(dict_df['%i_GIS_data' %(spatial)], outPutFile,  CapitalCost_PV, 
-                                   CapitalCost_batt, CapitalCost_WI, dict_df['input_data_%i'%(temporal)],dict_df['%i_elec' %(spatial)],dict_df['%i_un_elec' %(spatial)])
+                                   CapitalCost_batt, CapitalCost_WI, dict_df['input_data_%i'%(temporal)],dict_df['%i_elec' %(spatial)],dict_df['%i_un_elec' %(spatial)], dict_df['capacityfactor_solar_batteries_Tier%i_loca%i' %(DemandProfileTier, spatial)], dict_df['capacityfactor_solar_batteries_urban_loca%i' %(spatial)])
 ###########################################################################
     if '%i_capitalcost'%(spatial) in dict_df:
         outPutFile = capitalcost(outPutFile, dict_df['%i_capitalcost'%(spatial)], dict_df['input_data_%i'%(temporal)])
@@ -174,7 +174,7 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
     ################################################################
 
     if ('%i_capacityfactor_solar' %(spatial) or '%i_capacityfactor_wind'%(spatial)) in dict_df.keys():
-       outPutFile = capacityfactor(outPutFile, dict_df['%i_GIS_data'%(spatial)], dict_df['battery'], dict_df['input_data_%i'%(temporal)],
+       outPutFile = capacityfactor(outPutFile, dict_df['%i_GIS_data'%(spatial)], dict_df['input_data_%i'%(temporal)],
                                   dict_df['%i_capacityfactor_wind'%(spatial)], dict_df['%i_capacityfactor_solar'%(spatial)], dict_df['%i_elec'%(spatial)], dict_df['%i_un_elec'%(spatial)])
     else:
        print('No capacityfactor_solar or capacityfactor_wind file')
@@ -687,7 +687,7 @@ def SpecifiedDemandProfile(outPutFile, demandprofile, demandprofile_rural, input
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
 
-def capacityfactor(outPutFile, df, battery, input_data, capacityfactor_wind, capacityfactor_solar, elec, un_elec):
+def capacityfactor(outPutFile, df, input_data, capacityfactor_wind, capacityfactor_solar, elec, un_elec):
     """
     builds the Capacityfactor(Region, Technolgy, Timeslice, Year, CapacityFactor)
     This method is for capacityfactor which does not use storage equations but still model batteries
@@ -944,7 +944,7 @@ def specifiedannualdemand(outPutFile, demand, input_data):
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
 
-def capitalcost_dynamic(df, outPutFile, CapitalCost_PV, CapitalCost_batt, CapitalCost_WI, input_data, elec, un_elec):
+def capitalcost_dynamic(df, outPutFile, CapitalCost_PV, CapitalCost_batt, CapitalCost_WI, input_data, elec, un_elec, PV_sizing_rural, PVsizing_urban):
     """
     builds the Capitalcost (Region, Technology, Year, CapitalCost) where the cost is dynamic. Here when the capacity factor vary for Wind
     -------------
@@ -964,6 +964,9 @@ def capitalcost_dynamic(df, outPutFile, CapitalCost_PV, CapitalCost_batt, Capita
 
     #Section the different technology types per CF and OSeMOSYS name
 
+    PV_sizing_rural.index = PV_sizing_rural['location']
+    PVsizing_urban.index = PVsizing_urban['location']
+
     for k, row in df.iterrows():
         location = str(row['Location'])
         # Wind
@@ -973,11 +976,17 @@ def capitalcost_dynamic(df, outPutFile, CapitalCost_PV, CapitalCost_batt, Capita
 
         for k in CapitalCost_PV.index:  # year is an object so I cannot match it with a number (e.g. startyear)
             pvcapitalcost = CapitalCost_PV.loc[k][0]
+            batterycost = CapitalCost_batt.loc[k][0]
+            sopvcapitalcostbatt_rural = pvcapitalcost*PV_sizing_rural.loc[row['Location']]['PV_size']+ batterycost*PV_sizing_rural.loc[row['Location']]['Battery_hours']
+            sopvcapitalcostbatt_urban = pvcapitalcost*PVsizing_urban.loc[row['Location']]['PV_size']+ batterycost*PVsizing_urban.loc[row['Location']]['Battery_hours']
             if elec['index_right'].eq(row['Location']).any():
                 dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], "SOPV", location, k, pvcapitalcost))
                 dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPV", location, k, pvcapitalcost))
+                dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], "SOPVBattery", location, k, sopvcapitalcostbatt_urban))
+                dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPVBattery", location, k, sopvcapitalcostbatt_rural))
             if un_elec['index_right'].eq(row['Location']).any():
                 dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPV", location, k, pvcapitalcost))
+                dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPVBattery", location, k, sopvcapitalcostbatt_rural))
 
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)

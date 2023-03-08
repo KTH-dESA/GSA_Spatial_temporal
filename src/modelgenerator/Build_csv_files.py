@@ -14,9 +14,90 @@ import pandas as pd
 import geopandas as gpd
 import os
 import fnmatch
+import numpy as np
+
+from modelgenerator.PV_battery_optimisation import optimize_battery_pv
 
 pd.options.mode.chained_assignment = None
 
+def battery_to_pv(loadprofile, capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pv_cost, battery_cost, tofilePV, scenario, startDate, endDate, startDate_load, endDate_load):
+    """This function re-distributes the load based on the load and capacity factor from renewable ninja
+    """
+
+    def calculate_average(data, startdate, enddate):
+        mask = (data.index > startdate) & (data.index <= enddate)
+        thisMonthOnly = data.loc[mask]
+        return (thisMonthOnly)
+
+
+    
+    def indexfix(df_path):
+        df = pd.read_csv(df_path).dropna()
+        df_copy = df.copy()
+        df_copy_datetime = pd.to_datetime(df_copy['adjtime'], errors='coerce', format='%Y/%m/%d %H:%M')
+        df_copy.index = df_copy_datetime
+        df_copy = df_copy.drop(columns=['adjtime'])
+        return df_copy
+
+    capacityf_solar = indexfix(capacityfactor_pv)
+    load = indexfix(loadprofile)
+    df = pd.read_csv(locations, index_col=0, header=0)
+    
+    PV_range = calculate_average(capacityf_solar, startDate, endDate)
+    load_range =calculate_average(load, startDate_load, endDate_load)
+
+    #normalise data
+    def reduceload_data(data):
+        max = data['Load'].max()
+        x = 1/max
+        data_list = []
+        for i in data['Load']:
+            norm = i*x
+            data_list.append(norm)
+        
+        adjusted_load = pd.DataFrame(data_list, index = data.index, columns = ['Load'])
+
+        return adjusted_load
+
+    adjusted_load = reduceload_data(load_range)
+
+    PV_size = {}
+    battery_size = {}
+    capacityf_solar_batteries = PV_range.copy() #deep copy
+    for row in df.iterrows():
+        location = str(row[0])
+        capacityf_solar_batteries_location = capacityf_solar_batteries[[location]]
+        #charging = charging_binary(capacityf_solar_batteries_location,adjusted_load, location)
+        PVadj, batterytime = optimize_battery_pv(capacityf_solar_batteries_location, location, adjusted_load, efficiency_discharge,  efficiency_charge, pv_cost, battery_cost, scenario)
+        PV_size[location]= PVadj
+        battery_size[location] = batterytime
+        print("location=", location, "PV-size =", PVadj, "Batterytime=", batterytime)
+
+    df_PV_size = pd.DataFrame(PV_size.items(), columns=['location', 'PV_size'])
+    df_battery_size = pd.DataFrame(battery_size.items(), columns=['location','Battery_hours'])
+    df_PV_battery_size = pd.merge(df_PV_size, df_battery_size)
+
+    df_PV_battery_size.to_csv(tofilePV)
+
+def annualload(minuteload, topath):
+    minutedf = pd.read_csv(minuteload)
+    minutedf['Minute'] = pd.to_datetime(minutedf['Minute'])
+
+    hourlydata = minutedf.groupby(minutedf['Minute'].dt.hour)['Load'].mean()
+    s = hourlydata.squeeze()
+    fullyearhours = pd.DataFrame(np.tile(s, 365), columns = ['Load'])
+
+    # create a new DataFrame with a datetime index that spans the entire year
+    start_date = pd.to_datetime('1900-01-01')
+    end_date = pd.to_datetime('1901-01-01')
+    idx = pd.date_range(start=start_date, end=end_date, freq='H')
+    yearly_data = pd.DataFrame(index=idx)
+
+    fullyearhours.index = yearly_data.index[:8760]
+    fullyearhours['adjtime'] = fullyearhours.index
+
+    fullyearhours.to_csv(topath)
+    return topath
 
 def renewableninja(path, dest, spatial):
     """

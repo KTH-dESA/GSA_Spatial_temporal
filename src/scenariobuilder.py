@@ -208,6 +208,7 @@ for j in dict_modelruns.keys():
 
         capital_cost_transmission_distrib(elec_, noHV, HV_file, elec_noHV_cells, unelec, CapitalCost_transm, substation, capacitytoactivity, scenarios_folder, matrix, gisfile_ref, spatial, CapitalCost_distribution_ext, diesel = True)
         scenario_runs[j] = id
+        
     else:
         print('Scenario already run')
 
@@ -249,13 +250,34 @@ for j in dict_modelruns.keys():
         demand = 'run/scenarios/%i_demand_%i_spatialresolution.csv' %(elecdemand_df.iloc[35][0], spatial)
         
         temporal_id = float(modelrun.iloc[4][1])
-        if temporal_id not in temporal_runs.values():
+        temporal_unique = float(modelrun.iloc[4][1])+id_demand+DemandProfileTier
+        if temporal_unique not in temporal_runs.values():
             yearsplit = yearsplit_calculation(temporal_id,seasonAprSept , seasonOctMarch, 'run/scenarios/yearsplit_%f.csv' %(temporal_id), year_array)
-            specifieddemand, timesteps = demandprofile_calculation(tier_profile, temporal_id, seasonAprSept, seasonOctMarch, 'run/scenarios/specifiedrural_demand_%i.csv' %(int(temporal_id)), year_array, 'Minute')
+            specifieddemand, timesteps = demandprofile_calculation(tier_profile, temporal_id, seasonAprSept, seasonOctMarch, 'run/scenarios/specifiedrural_demand_time%i_tier%i.csv' %(int(temporal_id), DemandProfileTier), year_array, 'Minute')
             specifieddemandurban, timesteps = demandprofile_calculation(urban_profile, temporal_id, seasonAprSept, seasonOctMarch, 'run/scenarios/specifieddemand_%i.csv' %(int(temporal_id)), year_array, 'hour')
+            
             peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV_file, distribution, distribution_row, distribution_length_cell_ref, scenarios_folder, spatial, elecdemand_df.iloc[35][0])
             addtimestep(timesteps,input_data, 'run/scenarios/input_data_%i.csv' %(int(temporal_id)))
+
+            load_yearly = annualload(tier_profile, 'run/scenarios/annualload_tier%i.csv' %(DemandProfileTier))
+            loadprofile_high = 'input_data/high_Jan.csv'
+            capacityfactor_pv = 'run/scenarios/%i_capacityfactor_solar.csv' %(spatial)
+            tofilePV = 'run/scenarios/capacityfactor_solar_batteries_Tier%i_loca%i.csv' %(DemandProfileTier, spatial)
+            tofilePVhigh = 'run/scenarios/capacityfactor_solar_batteries_urban_loca%i.csv' %(spatial)
+            efficiency_discharge = 0.98 # Koko (2022)
+            efficiency_charge = 0.95 # Koko (2022)
+            pvcost = 2540 #ATB 2021 version for 2021 value
+            batterycost_kWh = 522  #ATB 2021 version for 2021 value with adjusted Kenyan value
+            locations = 'run/scenarios/%i_GIS_data.csv' %(spatial)
+            scenario = temporal_id
+            startDate = pd.to_datetime("2016-01")
+            endDate = pd.to_datetime("2016-02")
+            startDate_load = pd.to_datetime("1900-01")
+            endDate_load = pd.to_datetime("1900-02")
+            battery_to_pv(load_yearly,  capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePV, scenario,  startDate, endDate, startDate_load, endDate_load)
+            battery_to_pv(loadprofile_high,  capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePVhigh, scenario,  startDate, endDate, startDate, endDate)
             temporal_runs[j] = temporal_id
+
         demand_runs[j] = id_demand
             
     else:
@@ -267,7 +289,7 @@ for j in dict_modelruns.keys():
 
     outPutFile = functions_to_run(dict_df, outPutFile, spatial, elecdemand_df.iloc[35][0], DiscountRate, temporal_id,CapacityOfOneTechnologyUnit, CapitalCost_PV, 
                                   CapitalCost_batt, CapitalCost_WI, CapitalCost_powerplant, CapitalCost_distribution, CapacityFactor_adj, 
-                                  FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL)
+                                  FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, DemandProfileTier)
 
     #write data file
     if not os.path.exists(output_folder):
