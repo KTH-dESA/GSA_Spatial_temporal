@@ -8,9 +8,13 @@ Nandi Moksnes (1) *, William Usher (1)
 1)	KTH Royal Institute of Technology
 
 To be able to run the model you need to have approx 256 GB RAM. This model has been run on a High performance cluster at KTH.
-The shell file is therefor applicable for the HPC at PDC Dardel from SNIC (Swedish National Infrastructure for Computing).
+The shell file is therefor applicable for the HPC at PDC Dardel from NAISS (National Academic Infrastructure for Supercomputing in Sweden).
 
-The whole workflow is run in Snakemake. The workflow is only tested on a Windows computer, therefore there might be small adjustements needed for other OS.
+The workflow is only tested on a Windows computer and Linux for the modelsruns (Snakemake runs file), therefore there might be small adjustements needed for other OS.
+
+As seen in the flowchart, many of the parameters influence each other in the workflow. This is related to both the temporal aspect that naturally influence parameters that are timedependent, and the spatial dimension which is based on the TECHNOLOGY parameter in OSeMOSYS and therefore affects most of the TECHNOLOGY parameters (which are spatially resolved).
+
+![Uncertainty_parameters_flow](https://user-images.githubusercontent.com/30128518/224105175-a1883943-6911-46a2-a19c-e1f8d326a673.JPG)
 
 # Python dependencies
 The workflow has a number packages that needs to be installed.
