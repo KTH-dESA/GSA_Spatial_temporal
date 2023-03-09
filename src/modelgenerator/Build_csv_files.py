@@ -99,7 +99,7 @@ def annualload(minuteload, topath):
     fullyearhours.to_csv(topath)
     return topath
 
-def renewableninja(path, dest, spatial):
+def renewableninja(path, dest, spatial, CapacityFactor_adj):
     """
     This function organize the data to the required format of a matrix with the
     location name on the x axis and hourly data on the y axis so that it can be fed into https://github.com/KTH-dESA/GEOSeMOSYS code
@@ -113,14 +113,14 @@ def renewableninja(path, dest, spatial):
     outsolar = []
     for file in files:
 
-        if fnmatch.fnmatch(file, 'timezoneoffsetout_w*'):
+        if fnmatch.fnmatch(file, "uncertainty"+str(CapacityFactor_adj)+'timezoneoffsetout_w*'):
 
             file = os.path.join(path,file)
             wind = pd.read_csv(file, index_col='adjtime')
             outwind.append(wind)
     for file in files:
 
-        if fnmatch.fnmatch(file, 'timezoneoffsetout_s*'):
+        if fnmatch.fnmatch(file, "uncertainty"+str(CapacityFactor_adj)+'timezoneoffsetout_s*'):
 
             file = os.path.join(path,file)
             solar = pd.read_csv(file, index_col='adjtime')
@@ -137,13 +137,13 @@ def renewableninja(path, dest, spatial):
     solarbase.columns = new_header
 
     #solarbase.drop('Unnamed: 0', axis='columns', inplace=True)
-    solarbase.to_csv(os.path.join(dest, '%i_capacityfactor_solar.csv' %(spatial)))
+    solarbase.to_csv(os.path.join(dest, 'uncertain%f_spatial%i_capacityfactor_solar.csv' %(CapacityFactor_adj,spatial)))
 
     header = windbase.columns
     new_header = [x.replace('X','') for x in header]
     windbase.columns = new_header
     #windbase.drop('Unnamed: 0', axis='columns', inplace=True)
-    windbase.to_csv(os.path.join(dest, '%i_capacityfactor_wind.csv' %(spatial)))
+    windbase.to_csv(os.path.join(dest, 'uncertain%f_spatial%i_capacityfactor_wind.csv' %(CapacityFactor_adj,spatial)))
     return()
 
 def GIS_file(dest, point, spatial):

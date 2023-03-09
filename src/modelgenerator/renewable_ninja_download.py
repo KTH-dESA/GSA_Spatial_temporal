@@ -229,4 +229,26 @@ def adjust_timezone(path, time_zone_offset):
         time.index = new_index
         df["adjtime"] = time
         df = df.drop(columns=['Unnamed: 0','time'])
-        df.to_csv(path+"/timezoneoffset"+f)
+        final_path= path+"/timezoneoffset"+f
+        df.to_csv(final_path)
+    return final_path
+
+def uncertainty_capacityfactor(path, CapacityFactor_adj):
+    
+    def reduce_num(x):
+        if x >= -CapacityFactor_adj:
+            return x + CapacityFactor_adj
+        else:
+            return 0
+        
+    files = [i for i in os.listdir(path) if os.path.isfile(os.path.join(path, i)) and \
+                'timezoneoffset' in i]
+
+    for f in files:
+        df = pd.read_csv(path+"/"+f)
+        adjdf = df.filter(like='adj')
+        selected_col = df.filter(like='X')
+        selected_col_reduced = selected_col.applymap(reduce_num)
+        adjusted_df = adjdf.join(selected_col_reduced)
+        final_path= path+"/uncertainty"+str(CapacityFactor_adj)+f
+        adjusted_df.to_csv(final_path)

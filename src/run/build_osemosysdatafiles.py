@@ -99,7 +99,7 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
         print('No demand file')
 ####################################################################################
     outPutFile = capitalcost_dynamic(dict_df['%i_GIS_data' %(spatial)], outPutFile,  CapitalCost_PV, 
-                                   CapitalCost_batt, CapitalCost_WI, dict_df['input_data_%i'%(temporal)],dict_df['%i_elec' %(spatial)],dict_df['%i_un_elec' %(spatial)], dict_df['capacityfactor_solar_batteries_Tier%i_loca%i' %(DemandProfileTier, spatial)], dict_df['capacityfactor_solar_batteries_urban_loca%i' %(spatial)])
+                                   CapitalCost_batt, CapitalCost_WI, dict_df['input_data_%i'%(temporal)],dict_df['%i_elec' %(spatial)],dict_df['%i_un_elec' %(spatial)], dict_df['capacityfactor_solar_batteries_Tier%i_loca%i_uncertain%f' %(DemandProfileTier, spatial, CapacityFactor_adj)], dict_df['capacityfactor_solar_batteries_urban_loca%i_uncertain%f' %(spatial, CapacityFactor_adj)])
 ###########################################################################
     if '%i_capitalcost'%(spatial) in dict_df:
         outPutFile = capitalcost(outPutFile, dict_df['%i_capitalcost'%(spatial)], dict_df['input_data_%i'%(temporal)])
@@ -114,7 +114,7 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
         print('No capacitytoactivity file')
 #################################################################################
     if 'specifieddemand_%i'%(temporal) in dict_df:
-       outPutFile = SpecifiedDemandProfile(outPutFile, dict_df['specifieddemand_%i'%(temporal)], dict_df['specifiedrural_demand_%i'%(temporal)],
+       outPutFile = SpecifiedDemandProfile(outPutFile, dict_df['specifieddemand_%i'%(temporal)], dict_df['specifiedrural_demand_time%i_tier%i'%(temporal, DemandProfileTier)],
                                             dict_df['input_data_%i'%(temporal)], dict_df['%i_demand_%i_spatialresolution'%(demand_scenario,spatial)])
     else:
         print('No demandprofile file')
@@ -173,9 +173,9 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
 
     ################################################################
 
-    if ('%i_capacityfactor_solar' %(spatial) or '%i_capacityfactor_wind'%(spatial)) in dict_df.keys():
+    if ('uncertain%f_spatial%i_capacityfactor_solar' %(CapacityFactor_adj ,spatial) or 'uncertain%f_spatial%i_capacityfactor_wind'%(CapacityFactor_adj ,spatial)) in dict_df.keys():
        outPutFile = capacityfactor(outPutFile, dict_df['%i_GIS_data'%(spatial)], dict_df['input_data_%i'%(temporal)],
-                                  dict_df['%i_capacityfactor_wind'%(spatial)], dict_df['%i_capacityfactor_solar'%(spatial)], dict_df['%i_elec'%(spatial)], dict_df['%i_un_elec'%(spatial)])
+                                  dict_df['uncertain%f_spatial%i_capacityfactor_wind'%(CapacityFactor_adj, spatial)], dict_df['uncertain%f_spatial%i_capacityfactor_solar'%(CapacityFactor_adj, spatial)], dict_df['%i_elec'%(spatial)], dict_df['%i_un_elec'%(spatial)])
     else:
        print('No capacityfactor_solar or capacityfactor_wind file')
     ###############################################################################

@@ -109,7 +109,7 @@ for j in dict_modelruns.keys():
     CapitalCost_powerplant = split_data_onecell(CapitalCost_powerplant_raw)
     CapitalCost_transm = float(modelrun.iloc[10][1])
     CapitalCost_distribution = float(modelrun.iloc[11][1])
-    CapacityFactor_adj = float(modelrun.iloc[12][1])
+    CapacityFactor_adj = round(float(modelrun.iloc[12][1]), 4)
     DemandProfileTier = int(float(modelrun.iloc[13][1]))
     FuelpriceNG_raw = modelrun.iloc[14][1]
     FuelpriceNG = split_data_onecell(FuelpriceNG_raw)
@@ -122,8 +122,9 @@ for j in dict_modelruns.keys():
     tier_profile = 'input_data/T%i_load profile_Narayan.csv' %(DemandProfileTier)
 
     id = spatial
+    combined = spatial + CapacityFactor_adj
 
-    if id not in scenario_runs.values():
+    if combined not in scenario_runs.values():
 
         print('1. Aggregating the number of cells per polygon from Pathfinder')
         polygon = str(spatial) + "_polygon.shp"
@@ -166,11 +167,12 @@ for j in dict_modelruns.keys():
         #Add the path to the RScript.exe under Program Files and add here
 
         srcpath = os.path.dirname(os.path.abspath(__file__))
-        #path = "temp/%i" %(spatial)
+        path = "temp/%i" %(spatial)
         #coordinates = project_vector(shapefile)
         #wind, solar = csv_make(coordinates, path)
         #down = download(path, Rpath, srcpath, wind, solar, token)
         #adjust_timezone(path, time_zone_offset)
+        uncertainty_capacityfactor(path, CapacityFactor_adj)
 
         print("5. Build transmission technologies")
 
@@ -179,7 +181,7 @@ for j in dict_modelruns.keys():
 
         demandcells = os.path.join(os.getcwd(), 'run/scenarios/Demand/%i_demand_cells.csv' %(spatial))
         input_data =  os.path.join(os.getcwd(), 'run/scenarios/input_data.csv')
-        #distribution_length_cell_ref = network_length(demandcells, input_data, scenarios_folder, spatial)
+        distribution_length_cell_ref = network_length(demandcells, input_data, scenarios_folder, spatial)
         distribution = 'run/scenarios/%i_distributionlines.csv' %(spatial)
         distribution_row = "_%isum" %(spatial)
 
@@ -201,13 +203,13 @@ for j in dict_modelruns.keys():
         elec_ = 'run/%i_elec.csv' %(spatial)
 
         #Solar and wind csv files
-        renewableninja(renewable_path, scenarios_folder, spatial)
+        renewableninja(renewable_path, scenarios_folder, spatial, CapacityFactor_adj)
         #Location file
         gisfile_ref = GIS_file(scenarios_folder, '../Projected_files/' + point, spatial)
         matrix = 'run/scenarios/Demand/%i_adjacencymatrix.csv' %(spatial)
 
         capital_cost_transmission_distrib(elec_, noHV, HV_file, elec_noHV_cells, unelec, CapitalCost_transm, substation, capacitytoactivity, scenarios_folder, matrix, gisfile_ref, spatial, CapitalCost_distribution_ext, diesel = True)
-        scenario_runs[j] = id
+        scenario_runs[j] = combined
         
     else:
         print('Scenario already run')
@@ -215,8 +217,9 @@ for j in dict_modelruns.keys():
 #Read scenarios from sample file
 
     id_demand = spatial + elecdemand_df.iloc[35][0]
+    temporal_unique = float(modelrun.iloc[4][1])+id_demand+DemandProfileTier
 
-    if id_demand  not in demand_runs.values():
+    if temporal_unique  not in demand_runs.values():
         #Scenarios that are sensitive to spatial and demand simultaneously
         print("Running scenario %s" %j)
 
@@ -250,7 +253,6 @@ for j in dict_modelruns.keys():
         demand = 'run/scenarios/%i_demand_%i_spatialresolution.csv' %(elecdemand_df.iloc[35][0], spatial)
         
         temporal_id = float(modelrun.iloc[4][1])
-        temporal_unique = float(modelrun.iloc[4][1])+id_demand+DemandProfileTier
         if temporal_unique not in temporal_runs.values():
             yearsplit = yearsplit_calculation(temporal_id,seasonAprSept , seasonOctMarch, 'run/scenarios/yearsplit_%f.csv' %(temporal_id), year_array)
             specifieddemand, timesteps = demandprofile_calculation(tier_profile, temporal_id, seasonAprSept, seasonOctMarch, 'run/scenarios/specifiedrural_demand_time%i_tier%i.csv' %(int(temporal_id), DemandProfileTier), year_array, 'Minute')
@@ -261,9 +263,9 @@ for j in dict_modelruns.keys():
 
             load_yearly = annualload(tier_profile, 'run/scenarios/annualload_tier%i.csv' %(DemandProfileTier))
             loadprofile_high = 'input_data/high_Jan.csv'
-            capacityfactor_pv = 'run/scenarios/%i_capacityfactor_solar.csv' %(spatial)
-            tofilePV = 'run/scenarios/capacityfactor_solar_batteries_Tier%i_loca%i.csv' %(DemandProfileTier, spatial)
-            tofilePVhigh = 'run/scenarios/capacityfactor_solar_batteries_urban_loca%i.csv' %(spatial)
+            capacityfactor_pv = 'run/scenarios/uncertain%f_spatial%i_capacityfactor_solar.csv' %(CapacityFactor_adj,spatial)
+            tofilePV = 'run/scenarios/capacityfactor_solar_batteries_Tier%i_loca%i_uncertain%f.csv' %(DemandProfileTier, spatial, CapacityFactor_adj)
+            tofilePVhigh = 'run/scenarios/capacityfactor_solar_batteries_urban_loca%i_uncertain%f.csv' %(spatial, CapacityFactor_adj)
             efficiency_discharge = 0.98 # Koko (2022)
             efficiency_charge = 0.95 # Koko (2022)
             pvcost = 2540 #ATB 2021 version for 2021 value
@@ -276,9 +278,9 @@ for j in dict_modelruns.keys():
             endDate_load = pd.to_datetime("1900-02")
             battery_to_pv(load_yearly,  capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePV, scenario,  startDate, endDate, startDate_load, endDate_load)
             battery_to_pv(loadprofile_high,  capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePVhigh, scenario,  startDate, endDate, startDate, endDate)
-            temporal_runs[j] = temporal_id
+            temporal_runs[j] = temporal_unique
 
-        demand_runs[j] = id_demand
+        demand_runs[j] = temporal_unique
             
     else:
         print('Scenario already run')
@@ -296,5 +298,5 @@ for j in dict_modelruns.keys():
         os.makedirs('run/output')
 
     #write to DD-file
-    comb = country+str(j)+'.txt'
+    comb = country+j+'.txt'
     write_to_file('run/output/', outPutFile, comb)      #args.output_path
