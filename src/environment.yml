@@ -16,6 +16,5 @@ dependencies:
   - seaborn>=0.11.2
   - snakemake-minimal>=5.19.2
   - pip:
-    - amply==0.1.4
-    - numpy==1.21.6
-    - sklearn==0.0
+    - numpy>=1.21.6
+    - sklearn>=0.0

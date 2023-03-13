@@ -82,3 +82,9 @@ src/modelgenerator/__pycache__/**
 src/convert.py
 src/input_data/T3_load profile_Narayan.xls
 .gitignore
+src/.snakemake/**
+src/modelgenerator/Build_csv_files.py
+.gitignore
+
+**results_PuLP**
+**halfhourly_data_**
