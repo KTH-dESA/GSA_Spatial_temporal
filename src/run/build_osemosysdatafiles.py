@@ -70,11 +70,8 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
     else:
         print('No distributionlines file')
 ########################################################################################################
-    if 'capitalcostkm' in dict_df:
-        outPutFile = capitalcostkmkW(outPutFile, dict_df['input_data_%i'%(temporal)], CapitalCost_distribution, dict_df['%i_%i_peakdemand'%(spatial, demand_scenario)])
+    outPutFile = capitalcostkmkW(outPutFile, dict_df['input_data_%i'%(temporal)], CapitalCost_distribution, dict_df['%i_%i_peakdemand'%(spatial, demand_scenario)])
 
-    else:
-        print('No capitalcostkm file')
 ########################################################################################################
     if '%i_capitalcost'%(spatial) in dict_df:
         outPutFile = capapacityofonetech(outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['%i_capitalcost' %(spatial)], capacityofonetech,dict_df['capacitycostHV'] )
