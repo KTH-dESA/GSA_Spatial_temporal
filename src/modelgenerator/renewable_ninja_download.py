@@ -46,7 +46,7 @@ def csv_make(coordinates, path):
     coordinates['lat'] = coordinates.geometry.apply(lambda p: p.y)
     df = pd.DataFrame(coordinates)
     wind = pd.DataFrame(index=df.index, columns=(['name', 'lat', 'lon', 'from', 'to', 'dataset', 'capacity', 'height', 'turbine']))
-    wind["name"] = df ["ORIG_FID"]
+    wind["name"] = df ["id"]
     wind["lat"] = df["lat"]
     wind["lon"] = df["lon"]
     wind["from"] = "01/01/2016"
@@ -56,7 +56,7 @@ def csv_make(coordinates, path):
     wind["height"] = 55
     wind["turbine"] = "Vestas+V42+600"
     solar = pd.DataFrame(index=df.index, columns=(['name', 'lat', 'lon', 'from', 'to', 'dataset', 'capacity', 'system_loss', 'tracking', 'tilt', 'azim']))
-    solar["name"] = df ["ORIG_FID"]
+    solar["name"] = df ["id"]
     solar["lat"] = df["lat"]
     solar["lon"] = df["lon"]
     solar["from"] = "01/01/2016"
@@ -176,9 +176,9 @@ def download(path,  Rpath, srcpath, wind, solar, token):
                     csvfilesout = path + "/out_"+wind[x]
                     subprocess.call([
                          Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
-                if i >7:
-                    print("Waiting to download next 50 data sets")
-                    time.sleep(3601)
+            if i >modulus:
+                print("Waiting to download next %i data sets" %(modulus))
+                time.sleep(3601)
             i += modulus
 
     j = 0
@@ -191,9 +191,9 @@ def download(path,  Rpath, srcpath, wind, solar, token):
                     csvfilesout = path + "/out_"+solar[x]
                     subprocess.call([
                          Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
-                if j >7:
-                    print("Waiting to download next 50 data sets")
-                    time.sleep(3601)
+            if j >7:
+                print("Waiting to download next 50 data sets")
+                time.sleep(3601)
             j += 8
     except:
         modulus = len(solar)%8
@@ -205,9 +205,9 @@ def download(path,  Rpath, srcpath, wind, solar, token):
                     csvfilesout = path + "/out_"+solar[x]
                     subprocess.call([
                          Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
-                if j >7:
-                    print("Waiting to download next 50 data sets")
-                    time.sleep(3601)
+            if j >modulus:
+                print("Waiting to download next %i data sets" %(modulus))
+                time.sleep(3601)
             j += modulus
 
 ##
@@ -245,6 +245,7 @@ def uncertainty_capacityfactor(path, CapacityFactor_adj):
                 'timezoneoffset' in i]
 
     for f in files:
+        #TODO: Add a check if the file exists. It seems to lead to many files.
         df = pd.read_csv(path+"/"+f)
         adjdf = df.filter(like='adj')
         selected_col = df.filter(like='X')
