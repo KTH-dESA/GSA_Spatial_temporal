@@ -12,14 +12,14 @@ Module author: Nandi Moksnes <nandi@kth.se>
 
 import os
 import geopandas as gpd
-import gdal
+#import gdal
 import matplotlib
 matplotlib.use('Agg')
 import numpy as np
 import fiona
 import rasterio
 import rasterio.mask
-import ogr
+#import ogr
 import pandas as pd
 import subprocess
 
