@@ -160,18 +160,20 @@ for j in dict_modelruns.keys():
         print("4. Download Renewable Ninja files for scenario %i" %(id))
         # add your token for API from your own log in on Renewable Ninjas
 
-        if not os.path.exists('temp/%i' %(spatial)):
-            os.makedirs('temp/%i' %(spatial))
+
 
         shapefile = '../Projected_files/' + point
         #Add the path to the RScript.exe under Program Files and add here
 
         srcpath = os.path.dirname(os.path.abspath(__file__))
         path = "temp/%i" %(spatial)
-        #coordinates = project_vector(shapefile)
-        #wind, solar = csv_make(coordinates, path)
-        #down = download(path, Rpath, srcpath, wind, solar, token)
-        #adjust_timezone(path, time_zone_offset)
+
+        if not os.path.exists('temp/%i' %(spatial)):
+            os.makedirs('temp/%i' %(spatial))
+        coordinates = project_vector(shapefile)
+        wind, solar = csv_make(coordinates, path)
+        down = download(path, Rpath, srcpath, wind, solar, token)
+        adjust_timezone(path, time_zone_offset)
         uncertainty_capacityfactor(path, CapacityFactor_adj)
 
         print("5. Build transmission technologies")
