@@ -1,0 +1,6 @@
+name: osemosys
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - glpk
