@@ -20,8 +20,8 @@ from modelgenerator.Pathfinder_GIS_steps import *
 import numpy as np
 import pandas as pd
 import os
-import gdal
-import ogr
+from osgeo import gdal, ogr
+#import ogr
 import csv
 
 
@@ -91,8 +91,10 @@ def zonalstat_pathfinder(raster, polygon, scenario):
     :param polygon: The polygon of choise
     :param scenario: the scenario represents the number of cells in the polygon
     """
+
+    #TODO check that nodata is omitted from the sum
     from rasterstats import zonal_stats
-    zonal_polygon = zonal_stats(polygon, raster,
+    zonal_polygon = zonal_stats(polygon, raster, nodata=0,
             stats="sum")
     
     df_zonal = pd.DataFrame(zonal_polygon)
