@@ -151,64 +151,68 @@ def download(path,  Rpath, srcpath, wind, solar, token):
     """
 
     i = 0
-    try:
-        while i < len(wind):
-
-            for x in range(i,i+8): #50/6 is 8.3 so we will upload 8 files per hour
-                if x < len(wind):
-                    type = "wind"
-                    csvfiles = path + "/"+ wind[x]
-                    csvfilesout = path + "/out_"+wind[x]
+    #try:
+    while i <= len(wind):
+        for x in range(i,i+8): #50/6 is 8.3 so we will upload 8 files per hour
+            if x <= len(wind):
+                type = "wind"
+                csvfiles = path + "/"+ wind[x]
+                csvfilesout = path + "/out_"+wind[x]
+                if os.path.isfile(csvfilesout):
+                    print('File already exists, skipping calculations.')
+                else:
                     subprocess.call([
-                         Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
-            if i >7:
-                print("Waiting to download next 50 data sets")
-                time.sleep(3601)
-            i += 8
+                        Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
+                    if x%8:
+                        print("Waiting to download next 50 data sets")
+                        time.sleep(3601)
+        i += 8
 
-    except:
-        modulus = len(wind)%8
-        while i < len(wind)+modulus:
-            for x in range(i,i+modulus): #50/6 is 8.3 so we will upload 8 files per hour
-                if x < len(wind):
-                    type = "wind"
-                    csvfiles = path + "/"+ wind[x]
-                    csvfilesout = path + "/out_"+wind[x]
-                    subprocess.call([
-                         Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
-            if i >modulus:
-                print("Waiting to download next %i data sets" %(modulus))
-                time.sleep(3601)
-            i += modulus
+    # except:
+    #     modulus = len(wind)%8
+    #     while i < len(wind)+modulus:
+    #         for x in range(i,i+modulus): #50/6 is 8.3 so we will upload 8 files per hour
+    #             if x < len(wind):
+    #                 type = "wind"
+    #                 csvfiles = path + "/"+ wind[x]
+    #                 csvfilesout = path + "/out_"+wind[x]
+    #                 subprocess.call([
+    #                      Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
+    #         if i >modulus:
+    #             print("Waiting to download next %i data sets" %(modulus))
+    #             time.sleep(3601)
+    #         i += modulus
 
     j = 0
-    try:
-        while j < len(solar):
-            for x in range(j,j+8): #50/6 is 8.3 so we will upload 8 files per hour
-                if x < len(solar):
-                    type = "solar"
-                    csvfiles = path + "/"+ solar[x]
-                    csvfilesout = path + "/out_"+solar[x]
+    #try:
+    while j <= len(solar):
+        for x in range(j,j+8): #50/6 is 8.3 so we will upload 8 files per hour
+            if x <= len(solar):
+                type = "solar"
+                csvfiles = path + "/"+ solar[x]
+                csvfilesout = path + "/out_"+solar[x]
+                if os.path.isfile(csvfilesout):
+                    print('File already exists, skipping calculations.')
+                else:
                     subprocess.call([
-                         Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
-            if j >7:
-                print("Waiting to download next 50 data sets")
-                time.sleep(3601)
-            j += 8
-    except:
-        modulus = len(solar)%8
-        while j < len(solar)+modulus:
-            for x in range(j,j+modulus): #50/6 is 8.3 so we will upload 8 files per hour
-                if x < len(solar):
-                    type = "solar"
-                    csvfiles = path + "/"+ solar[x]
-                    csvfilesout = path + "/out_"+solar[x]
-                    subprocess.call([
-                         Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
-            if j >modulus:
-                print("Waiting to download next %i data sets" %(modulus))
-                time.sleep(3601)
-            j += modulus
+                            Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
+        print("Waiting to download next 50 data sets")
+        time.sleep(3601)
+        j += 8
+    # except:
+    #     modulus = len(solar)%8
+    #     while j < len(solar)+modulus:
+    #         for x in range(j,j+modulus): #50/6 is 8.3 so we will upload 8 files per hour
+    #             if x < len(solar):
+    #                 type = "solar"
+    #                 csvfiles = path + "/"+ solar[x]
+    #                 csvfilesout = path + "/out_"+solar[x]
+    #                 subprocess.call([
+    #                      Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
+    #         if j >modulus:
+    #             print("Waiting to download next %i data sets" %(modulus))
+    #             time.sleep(3601)
+    #         j += modulus
 
 ##
 def adjust_timezone(path, time_zone_offset):
@@ -230,7 +234,10 @@ def adjust_timezone(path, time_zone_offset):
         df["adjtime"] = time
         df = df.drop(columns=['Unnamed: 0','time'])
         final_path= path+"/timezoneoffset"+f
-        df.to_csv(final_path)
+        if os.path.isfile(final_path):
+            print('File already exists, skipping calculations.')
+        else:
+            df.to_csv(final_path)
     return final_path
 
 def uncertainty_capacityfactor(path, CapacityFactor_adj):
@@ -245,11 +252,13 @@ def uncertainty_capacityfactor(path, CapacityFactor_adj):
                 'timezoneoffset' in i]
 
     for f in files:
-        #TODO: Add a check if the file exists. It seems to lead to many files.
         df = pd.read_csv(path+"/"+f)
         adjdf = df.filter(like='adj')
         selected_col = df.filter(like='X')
         selected_col_reduced = selected_col.applymap(reduce_num)
         adjusted_df = adjdf.join(selected_col_reduced)
         final_path= path+"/uncertainty"+str(CapacityFactor_adj)+f
-        adjusted_df.to_csv(final_path)
+        if os.path.isfile(final_path):
+            print('File already exists, skipping calculations.')
+        else:
+            adjusted_df.to_csv(final_path)
