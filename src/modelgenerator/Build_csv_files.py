@@ -152,8 +152,8 @@ def GIS_file(dest, point, spatial):
     :param dest:
     :return:
     """
-    point = gpd.read_file(point)
-    GIS_data = point.index
+    df_point = gpd.read_file(point)
+    GIS_data = df_point.id
     grid = pd.DataFrame(GIS_data, copy=True)
     grid.columns = ['Location']
     grid.to_csv(os.path.join(dest, '%i_GIS_data.csv' %(spatial)), index=False)
@@ -177,7 +177,7 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
 
     #gdf = gpd.read_file(transmission_near)
     #transm = pd.DataFrame(gdf)
-    #transm.index = transm['index_right']
+    #transm.index = transm['id']
 
     capitalcost = pd.DataFrame(columns=['Technology', 'Capitalcost'], index=range(0,5000)) # dtype = {'Technology':'object', 'Capitalcost':'float64'}
 
@@ -199,13 +199,13 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
     except:
         print("No adjacencymatrix for this scenario")
         pass
-    elec.index_right = elec.index_right.astype(int)
+    elec.id = elec.id.astype(int)
     un_elec = pd.read_csv(unelec)
-    un_elec.index_right = un_elec.index_right.astype(int)
+    un_elec.id = un_elec.id.astype(int)
     noHV = pd.read_csv(noHV_file)
     HV = pd.read_csv(HV_file)
     elec_noHV_cells = pd.read_csv(elec_noHV_cells_file)
-    noHV.index_right = noHV.index_right.astype(int)
+    noHV.id = noHV.id.astype(int)
 
     m = 0
     input_temp = []
@@ -213,7 +213,7 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
     capital_temp = []
 
     ## Electrified by HV in baseyear
-    for k in HV['index_right']:
+    for k in HV['id']:
 
         input_temp = [0, "KEEL2", "TRLV_%i_0" %(k), 1, 1]
         inputactivity.loc[-1] = input_temp  # adding a row
@@ -305,7 +305,7 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         operationallife = operationallife.sort_index()
 
     # Electrified by minigrid in base year
-    for m in elec_noHV_cells['index_right']:
+    for m in elec_noHV_cells['id']:
         input_temp = [0, "EL2_%i" %(m), "TRLV_%i_1" %(m), 1, 1]
         inputactivity.loc[-1] = input_temp  # adding a row
         inputactivity.index = inputactivity.index + 1  # shifting index
@@ -377,7 +377,7 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         operationallife = operationallife.sort_index()
 
     # No electrified cells in the base year
-    for j in noHV['index_right']:
+    for j in noHV['id']:
 
         input_temp = [0, "EL2_%i" %(j),"TRLV_%i_0" %(j), 1, 1]
         inputactivity.loc[-1] = input_temp  # adding a row
@@ -563,11 +563,11 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
 
 def near_dist(pop_shp, un_elec_cells, path, CR):
 
-    unelec = pd.read_csv(un_elec_cells, usecols= ["index_right"])
+    unelec = pd.read_csv(un_elec_cells, usecols= ["id"])
     point = gpd.read_file(os.path.join(path, pop_shp))
-    point.index = point['index_right']
+    point.index = point['id']
     unelec_shp = gpd.GeoDataFrame(crs=32737)
-    for i in unelec['index_right']:
+    for i in unelec['id']:
         unelec_point = point.loc[i]
         unelec_shp = unelec_shp.append(unelec_point)
 
@@ -581,11 +581,22 @@ def near_dist(pop_shp, un_elec_cells, path, CR):
     return(outpath)
 
 def noHV_polygons(polygons, noHV, outpath, CR):
-    unelec = pd.read_csv(noHV, usecols= ["index_right"])
+
+    unelec = pd.read_csv(noHV, usecols=["id"])
     point = gpd.read_file(polygons)
-    #point.index = point['FID']
     unelec_shp = gpd.GeoDataFrame(geometry=[], crs=CR)
-    for i in unelec['index_right']:
-        unelec_point = point.loc[i]
-        unelec_shp = unelec_shp.append(unelec_point)
+
+    for i in unelec['id']:
+        unelec_point = point[point['id'] == int(i)]
+        unelec_shp = gpd.GeoDataFrame(pd.concat([unelec_shp, unelec_point]))
+
     unelec_shp.to_file(outpath)
+
+    # unelec = pd.read_csv(noHV, usecols= ["id"])
+    # point = gpd.read_file(polygons)
+    # #point.index = point['FID']
+    # unelec_shp = gpd.GeoDataFrame(geometry=[], crs=CR)
+    # for i in unelec['id']:
+    #     unelec_point = point.loc[i]
+    #     unelec_shp = pd.concat([unelec_shp, unelec_point])
+    # unelec_shp.to_file(outpath)
