@@ -41,7 +41,7 @@ def join_elec(elec, tif, cells, scenario):
 
     cell =  gpd.read_file(cells)
     demand_cells = sjoin(settlements, cell, how="left")
-    demand_cells.to_file(os.path.join(os.getcwd(), 'run\scenarios\Demand\demand.shp'))
+    #demand_cells.to_file(os.path.join(os.getcwd(), 'run\scenarios\Demand\demand.shp'))
     demand_cell = pd.DataFrame(demand_cells, copy=True)
     demand_cell.to_csv('run/scenarios/Demand/%i_demand_cells.csv'%(scenario))
     path = 'run/scenarios/Demand/%i_demand_cells.csv'%(scenario)
@@ -78,9 +78,9 @@ def network_length(demandcells, input, tofolder, scenario):
         ind = row.index
 
     networkkm = pd.DataFrame(network_list, columns=ind)
-    distribution =  networkkm[['elec', 'index_right', 'LV_km']]
+    distribution =  networkkm[['elec', 'id', 'LV_km']]
     average_distrbution = distribution[distribution['elec'] == 0]
-    distribution_aggr = average_distrbution.groupby(["index_right"])
+    distribution_aggr = average_distrbution.groupby(["id"])
     distribution_aggr.mean().reset_index().to_csv(os.path.join(os.getcwd(), tofolder,'%i_distribution.csv' %(scenario)))
 
     return(os.path.join(os.getcwd(),tofolder,'%i_distribution.csv' %(scenario)))
@@ -88,47 +88,47 @@ def network_length(demandcells, input, tofolder, scenario):
 def elec(demandcells, scenario):
     demand_cell = pd.read_csv(demandcells)
 
-    allcells = demand_cell.groupby(["index_right"])
-    HV_all = allcells.filter(lambda x: (x['elec'].mean() > 0) and ((x['MV'].min() < 1)) or ((x['LV'].min() < 1)) or ((x['Grid'].min() < 1)))
-    HV = HV_all.groupby(["index_right"])
-    HV_df = HV.sum().reset_index()[['index_right']]
+    allcells = demand_cell.groupby(["id"])
+    HV_all = allcells.filter(lambda x: (x['elec'].mean() > 0) ) #and ((x['MV'].min() < 1)) or ((x['LV'].min() < 1)) or ((x['Grid'].min() < 1)))
+    HV = HV_all.groupby(["id"])
+    HV_df = HV.sum(numeric_only=True).reset_index()[['id']]
     HV_df.to_csv(os.path.join(os.getcwd(),'run/%i_HV_cells.csv') %(scenario))
 
     elec_all = allcells.filter(lambda x: (x['elec'].mean() > 0))
-    elec = elec_all.groupby(["index_right"])
-    elec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/%i_elec.csv')%(scenario))
-    elec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/scenarios/%i_elec.csv')%(scenario))
+    elec = elec_all.groupby(["id"])
+    elec.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'run/%i_elec.csv')%(scenario))
+    elec.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'run/scenarios/%i_elec.csv')%(scenario))
 
-    elec_df = elec.sum().reset_index()[['index_right']]
+    elec_df = elec.sum(numeric_only=True).reset_index()[['id']]
     noHV_elec = (
         pd.merge(elec_df, HV_df, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
     noHV_elec.to_csv(os.path.join(os.getcwd(), 'run/%i_elec_noHV_cells.csv')%(scenario))
 
     #noHV_all = allcells.filter()
     #noHV_all = allcells.filter(lambda x: (x['p'].mean() == 0 ) or (x['Minigrid'].min() < 5000) and (x['MV'].min() > 1) or (x['LV'].min() > 1))
-    all_pointid = demand_cell['index_right'].drop_duplicates().dropna()
+    all_pointid = demand_cell['id'].drop_duplicates().dropna()
     noHV = (pd.merge(all_pointid,HV_df, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
     noHV_nominigrid= (pd.merge(noHV,noHV_elec, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
     noHV_nominigrid.to_csv(os.path.join(os.getcwd(),'run/%i_noHV_cells.csv')%(scenario))
 
     minigrid = allcells.filter(lambda x: (x['elec'].mean() > 0 ))
-    minigrid_all = minigrid.groupby(["index_right"])
-    minigrid_all.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/%i_minigridcells.csv')%(scenario))
+    minigrid_all = minigrid.groupby(["id"])
+    minigrid_all.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'run/%i_minigridcells.csv')%(scenario))
 
     unelec_all = allcells.filter(lambda x: (x['elec'].mean() == 0 ))
-    unelec = unelec_all.groupby(["index_right"])
-    unelec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/%i_un_elec.csv')%(scenario))
-    unelec.sum().reset_index()[['index_right']].to_csv(os.path.join(os.getcwd(),'run/scenarios/%i_un_elec.csv')%(scenario))
+    unelec = unelec_all.groupby(["id"])
+    unelec.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'run/%i_un_elec.csv')%(scenario))
+    unelec.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'run/scenarios/%i_un_elec.csv')%(scenario))
 
 def calculate_demand(settlements, elecdemand, unelecdemand, scenario, spatial, input_data_csv):
     input_data = pd.read_csv(input_data_csv)
     demand_cell = pd.read_csv(settlements)
     demand_GJ =  elecdemand
 
-    demand_cols =  demand_cell[['elec', 'index_right', 'pop', 'GDP_PPP']]
+    demand_cols =  demand_cell[['elec', 'id', 'pop', 'GDP_PPP']]
     #The case of unelectrified
     un_elec = demand_cols[demand_cols['elec'] == 0]
-    unelec_pointid = un_elec.groupby(["index_right"]).sum()
+    unelec_pointid = un_elec.groupby(["id"]).sum()
     unelec_pointid.sum().reset_index()
 
     sum_pop_unelec = sum(unelec_pointid['pop'])
@@ -150,7 +150,7 @@ def calculate_demand(settlements, elecdemand, unelecdemand, scenario, spatial, i
 
     #The case of electrified
     elec = demand_cols[demand_cols['elec'] == 1]
-    elec_pointid = elec.groupby(["index_right"]).sum()
+    elec_pointid = elec.groupby(["id"]).sum()
     elec_pointid.reset_index()
 
     sum_pop_elec = sum(elec_pointid['pop'])
