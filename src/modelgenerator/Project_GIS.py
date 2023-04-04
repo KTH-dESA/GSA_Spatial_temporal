@@ -63,7 +63,7 @@ def project_raster(rasterdata, output_raster, CR):
     :return:
     """
     #try:
-    print(rasterdata)
+    #print(rasterdata)
     input_raster = gdal.Open(rasterdata)
     gdal.Warp(output_raster, input_raster, dstSRS=CR)
     #except:
@@ -197,11 +197,11 @@ def project_main(GIS_files_path, topath, files, CR):
     :param GIS_files_path:
     :return:
     """
-    print(os.getcwd())
+    #print(os.getcwd())
     basedir = os.getcwd()
     os.chdir(GIS_files_path)
     current = os.getcwd()
-    print(os.getcwd())
+    #print(os.getcwd())
     #All shp-files in all folders in dir current
     adm = project_vector(os.path.join(current,files.loc['adm_WGS84','filename']), CR)
     adm.to_file(os.path.join(current,files.loc['adm','filename']))

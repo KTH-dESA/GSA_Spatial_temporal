@@ -176,7 +176,7 @@ def make_raster(pathfinder, s, origin):
     x_min = geo_trans[0]
     y_max = geo_trans[3]
     wkt_projection = zoom_20.GetProjection()
-    print(os.getcwd())
+    #print(os.getcwd())
     driver = gdal.GetDriverByName('GTiff')
     dataset3 = driver.Create(
         dst_filename,

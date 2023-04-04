@@ -92,7 +92,6 @@ def zonalstat_pathfinder(raster, polygon, scenario):
     :param scenario: the scenario represents the number of cells in the polygon
     """
 
-    #TODO check that nodata is omitted from the sum
     from rasterstats import zonal_stats
     zonal_polygon = zonal_stats(polygon, raster, nodata=0,
             stats="sum")

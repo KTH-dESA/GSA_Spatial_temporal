@@ -52,18 +52,18 @@ def raster_to_point(raster_list, pop_shp, proj_path):
         dest.write(mosaic)
 
     settlements = gpd.read_file(pop_shp)
-    print(settlements.crs)
+    #print(settlements.crs)
     settlements = settlements[['ID', 'hrslmultipl', 'geometry']]
     settlements.index = range(len(settlements))
     coords = [(x, y) for x, y in zip(settlements.geometry.x, settlements.geometry.y)]
 
     # Open the raster and store metadata
     nighttimelight = rasterio.open('%s/viirs.tif' % proj_path)
-    print(nighttimelight.crs)
+    #print(nighttimelight.crs)
 
     # Sample the raster at every point location and store values in DataFrame
     settlements['Nighttime'] = [x[0] for x in nighttimelight.sample(coords)]
-    print("Nighttime light")
+    #print("Nighttime light")
 
     print('The viirs.tif file is converted to a dataframe')
 
@@ -71,16 +71,16 @@ def raster_to_point(raster_list, pop_shp, proj_path):
     name, ending = os.path.splitext(filename)
     trans = rasterio.open(raster_list[0])
     settlements['Grid'] = [x[0] for x in trans.sample(coords)]
-    print(name)
+    #print(name)
 
     print('The %s.tif file is added to the dataframe' %(name))
 
     _, filename = os.path.split(raster_list[1])
     name, ending = os.path.splitext(filename)
     subs = rasterio.open(raster_list[1])
-    print(subs.crs)
+    #print(subs.crs)
     settlements['Substation'] = [x[0] for x in subs.sample(coords)]
-    print(name)
+    #print(name)
 
     print('The %s.tif file is added to the dataframe' %(name))
 
