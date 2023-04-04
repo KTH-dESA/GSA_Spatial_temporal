@@ -113,14 +113,14 @@ def renewableninja(path, dest, spatial, CapacityFactor_adj):
     outsolar = []
     for file in files:
 
-        if fnmatch.fnmatch(file, "uncertainty"+str(CapacityFactor_adj)+'timezoneoffsetout_w*'):
+        if fnmatch.fnmatch(file, "uncertainty"+str(CapacityFactor_adj)+'w*'):
 
             file = os.path.join(path,file)
             wind = pd.read_csv(file, index_col='adjtime')
             outwind.append(wind)
     for file in files:
 
-        if fnmatch.fnmatch(file, "uncertainty"+str(CapacityFactor_adj)+'timezoneoffsetout_s*'):
+        if fnmatch.fnmatch(file, "uncertainty"+str(CapacityFactor_adj)+'s*'):
 
             file = os.path.join(path,file)
             solar = pd.read_csv(file, index_col='adjtime')
@@ -215,7 +215,7 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
     ## Electrified by HV in baseyear
     for k in HV['id']:
 
-        input_temp = [0, "KEEL2", "TRLV_%i_0" %(k), 1, 1]
+        input_temp = [0, "TREL2", "TRLV_%i_0" %(k), 1, 1]
         inputactivity.loc[-1] = input_temp  # adding a row
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
@@ -227,15 +227,15 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
 
-        input_temp = [0, "KEEL2","KEEL00d_%i" %(k), 1, 1]
+        input_temp = [0, "TREL2","EL00d_%i" %(k), 1, 1]
         inputactivity.loc[-1] = input_temp  # adding a row
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
 
         capitalcost.loc[k]['Capitalcost'] = distribu_cost
-        capitalcost.loc[k]['Technology'] =  "KEEL00d_%i" %(k)
+        capitalcost.loc[k]['Technology'] =  "EL00d_%i" %(k)
 
-        output_temp = [0, "EL3_%i_1" % (k), "KEEL00d_%i" % (k), 0.83, 1]
+        output_temp = [0, "EL3_%i_1" % (k), "EL00d_%i" % (k), 0.83, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
@@ -425,7 +425,7 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         operationallife = operationallife.sort_index()
 
     #For all cells
-    for k in range(0,len(gis)):
+    for k in range(1,len(gis)+1):
 
         output_temp = [0,  "EL2_%i" % (k),"SOMG8c_%i" %(k), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
