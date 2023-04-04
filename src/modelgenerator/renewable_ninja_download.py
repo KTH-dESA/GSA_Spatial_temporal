@@ -154,7 +154,7 @@ def download(path,  Rpath, srcpath, wind, solar, token):
     #try:
     while i <= len(wind):
         for x in range(i,i+8): #50/6 is 8.3 so we will upload 8 files per hour
-            if x <= len(wind):
+            if x < len(wind):
                 type = "wind"
                 csvfiles = path + "/"+ wind[x]
                 csvfilesout = path + "/out_"+wind[x]
@@ -163,7 +163,7 @@ def download(path,  Rpath, srcpath, wind, solar, token):
                 else:
                     subprocess.call([
                         Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
-                    if x%8:
+                    if x%8==0:
                         print("Waiting to download next 50 data sets")
                         time.sleep(3601)
         i += 8
@@ -187,7 +187,7 @@ def download(path,  Rpath, srcpath, wind, solar, token):
     #try:
     while j <= len(solar):
         for x in range(j,j+8): #50/6 is 8.3 so we will upload 8 files per hour
-            if x <= len(solar):
+            if x < len(solar):
                 type = "solar"
                 csvfiles = path + "/"+ solar[x]
                 csvfilesout = path + "/out_"+solar[x]
@@ -196,8 +196,9 @@ def download(path,  Rpath, srcpath, wind, solar, token):
                 else:
                     subprocess.call([
                             Rpath, 'GEOSeMOSYS_download.r',srcpath, token, type, csvfiles, csvfilesout], shell=True)
-        print("Waiting to download next 50 data sets")
-        time.sleep(3601)
+                    if x%8==0:
+                        print("Waiting to download next 50 data sets")
+                        time.sleep(3601)
         j += 8
     # except:
     #     modulus = len(solar)%8
@@ -233,7 +234,8 @@ def adjust_timezone(path, time_zone_offset):
         time.index = new_index
         df["adjtime"] = time
         df = df.drop(columns=['Unnamed: 0','time'])
-        final_path= path+"/timezoneoffset"+f
+        start, mid, end = f.split("_")
+        final_path= path+"/timezoneoffset_"+mid + "_" + end
         if os.path.isfile(final_path):
             print('File already exists, skipping calculations.')
         else:
@@ -257,7 +259,8 @@ def uncertainty_capacityfactor(path, CapacityFactor_adj):
         selected_col = df.filter(like='X')
         selected_col_reduced = selected_col.applymap(reduce_num)
         adjusted_df = adjdf.join(selected_col_reduced)
-        final_path= path+"/uncertainty"+str(CapacityFactor_adj)+f
+        start, mid, end = f.split("_")
+        final_path= path+"/uncertainty"+str(CapacityFactor_adj)+mid + "_" + end
         if os.path.isfile(final_path):
             print('File already exists, skipping calculations.')
         else:
