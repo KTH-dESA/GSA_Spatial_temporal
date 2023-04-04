@@ -28,16 +28,16 @@ def join_elec(elec, tif, cells, scenario):
     :return:
     """
     settlements = gpd.read_file(elec)
-    print(settlements.crs)
+    #print(settlements.crs)
     settlements.index = range(len(settlements))
     coords = [(x, y) for x, y in zip(settlements.geometry.x, settlements.geometry.y)]
 
     _, filename = os.path.split(tif)
     name, ending = os.path.splitext(filename)
     gdp = rasterio.open(tif)
-    print(gdp.crs)
+    #print(gdp.crs)
     settlements['GDP_PPP'] = [x[0] for x in gdp.sample(coords)]
-    print(name)
+    #print(name)
 
     cell =  gpd.read_file(cells)
     demand_cells = sjoin(settlements, cell, how="left")
@@ -111,7 +111,7 @@ def elec(demandcells, scenario):
     noHV_nominigrid= (pd.merge(noHV,noHV_elec, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
     noHV_nominigrid.to_csv(os.path.join(os.getcwd(),'run/%i_noHV_cells.csv')%(scenario))
 
-    minigrid = allcells.filter(lambda x: (x['elec'].mean() > 0 ))
+    minigrid = pd.DataFrame({'id' : [np.nan]})
     minigrid_all = minigrid.groupby(["id"])
     minigrid_all.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'run/%i_minigridcells.csv')%(scenario))
 
@@ -139,8 +139,8 @@ def calculate_demand(settlements, elecdemand, unelecdemand, scenario, spatial, i
         row['Fuel'] = 'EL3_'+ str(pointid) + '_0'
         startyear = int(input_data['startyear'][0])
         while startyear <=int(input_data['endyear'][0]):
-            col = str(startyear)
-            row[col] = unelecdemand.loc[col,0]*row['un_elec_share']
+            col = startyear
+            row[col] = unelecdemand.loc[col,8]*row['un_elec_share']
             startyear +=1
 
         un_elec_list.append(row)
