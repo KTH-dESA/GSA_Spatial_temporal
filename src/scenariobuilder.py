@@ -92,34 +92,41 @@ for j in dict_modelruns.keys():
     # The parameters are defined and split
     modelrun = dict_modelruns[j]
     spatial = int(float(modelrun.iloc[0][1]))
-    DemandElectrified_raw = modelrun.iloc[1][1]
-    elecdemand_df = split_data_onecell(DemandElectrified_raw)
-    DemandUnelectrified_raw = modelrun.iloc[2][1]
-    unelecdemand_df = split_data_onecell(DemandUnelectrified_raw)
-    CapacityOfOneTechnologyUnit = int(float(modelrun.iloc[5][1]))
-    Dailytemporalresolution= int(float(modelrun.iloc[4][1]))
-    DiscountRate = float(modelrun.iloc[3][1])
-    CapitalCost_PV_raw = modelrun.iloc[6][1]
+    CapacityOfOneTechnologyUnit = int(float(modelrun.iloc[3][1]))
+    Dailytemporalresolution= int(float(modelrun.iloc[2][1]))
+    DiscountRate = float(modelrun.iloc[1][1])
+    CapitalCost_PV_raw = modelrun.iloc[4][1]
     CapitalCost_PV = split_data_onecell(CapitalCost_PV_raw)
-    CapitalCost_batt_raw = modelrun.iloc[7][1]
+    CapitalCost_batt_raw = modelrun.iloc[5][1]
     CapitalCost_batt = split_data_onecell(CapitalCost_batt_raw)
-    CapitalCost_WI_raw = modelrun.iloc[8][1]
+    CapitalCost_WI_raw = modelrun.iloc[6][1]
     CapitalCost_WI = split_data_onecell(CapitalCost_WI_raw)
-    CapitalCost_powerplant_raw = modelrun.iloc[9][1]
-    CapitalCost_powerplant = split_data_onecell(CapitalCost_powerplant_raw)
-    CapitalCost_transm = float(modelrun.iloc[10][1])
-    CapitalCost_distribution = float(modelrun.iloc[11][1])
-    CapacityFactor_adj = round(float(modelrun.iloc[12][1]), 4)
-    DemandProfileTier = int(float(modelrun.iloc[13][1]))
-    FuelpriceNG_raw = modelrun.iloc[14][1]
+    CapitalCost_transm = float(modelrun.iloc[7][1])
+    CapitalCost_distribution = float(modelrun.iloc[8][1])
+    CapacityFactor_adj = round(float(modelrun.iloc[9][1]), 4)
+    DemandProfileTier = int(float(modelrun.iloc[10][1]))
+    FuelpriceNG_raw = modelrun.iloc[11][1]
     FuelpriceNG = split_data_onecell(FuelpriceNG_raw)
-    FuelpriceDIESEL_raw = modelrun.iloc[15][1]
+    FuelpriceDIESEL_raw = modelrun.iloc[12][1]
     FuelpriceDIESEL = split_data_onecell(FuelpriceDIESEL_raw)
-    FuelpriceCOAL_raw = modelrun.iloc[16][1]
+    FuelpriceCOAL_raw = modelrun.iloc[13][1]
     FuelpriceCOAL = split_data_onecell(FuelpriceCOAL_raw)
-    CapitalCost_distribution_ext = float(modelrun.iloc[17][1])
+    CapitalCost_distribution_ext = float(modelrun.iloc[14][1])
 
     tier_profile = 'input_data/T%i_load profile_Narayan.csv' %(DemandProfileTier)
+
+    #read all demand levels as they are linked to the Tier
+    df = pd.read_csv('input_data/Benin_demand.csv')
+
+    # Electrified demand for selected tier
+    elecdemand_df_all = df[(df['Tier'] == DemandProfileTier) & (df['Electrified'] == 1)]
+    elecdemand_df = elecdemand_df_all.loc[:, '2020':'2055']
+    elecdemand_df.columns = elecdemand_df.columns.astype('int')
+
+    # Un-electrified demand for selected tier
+    unelecdemand_df_all = df[(df['Tier'] == DemandProfileTier) & (df['Electrified'] == 0)]
+    unelecdemand_df = unelecdemand_df_all.loc[:, '2020':'2055']
+    unelecdemand_df.columns = unelecdemand_df.columns.astype('int')
 
     id = spatial
     combined = spatial + CapacityFactor_adj
@@ -160,8 +167,6 @@ for j in dict_modelruns.keys():
         print("4. Download Renewable Ninja files for scenario %i" %(id))
         # add your token for API from your own log in on Renewable Ninjas
 
-
-
         shapefile = '../Projected_files/' + point
         #Add the path to the RScript.exe under Program Files and add here
 
@@ -183,7 +188,10 @@ for j in dict_modelruns.keys():
 
         demandcells = os.path.join(os.getcwd(), 'run/scenarios/Demand/%i_demand_cells.csv' %(spatial))
         input_data =  os.path.join(os.getcwd(), 'run/scenarios/input_data.csv')
-        distribution_length_cell_ref = network_length(demandcells, input_data, scenarios_folder, spatial)
+        if os.path.isfile('run/scenarios/%i_distribution.csv' %(spatial)):
+            print('File already exists, skipping calculations.')
+        else:
+            distribution_length_cell_ref = network_length(demandcells, input_data, scenarios_folder, spatial)
         distribution = 'run/scenarios/%i_distributionlines.csv' %(spatial)
         distribution_row = "_%isum" %(spatial)
 
@@ -192,8 +200,10 @@ for j in dict_modelruns.keys():
         HV_file = 'run/%i_HV_cells.csv' %(spatial)
         minigrid = 'run/%i_elec_noHV_cells.csv' %(spatial)
         neartable = 'run/scenarios/Demand/%i_Near_table.csv' %(spatial)
-
-        transmission_matrix(neartable, noHV, HV_file, minigrid, topath)
+        if os.path.isfile('run/scenarios/Demand/%i_adjacencymatrix.csv' %(spatial)):
+            print('File already exists, skipping calculations.')
+        else:
+            transmission_matrix(neartable, noHV, HV_file, minigrid, topath, spatial)
 
         date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
         print(date)
@@ -218,8 +228,8 @@ for j in dict_modelruns.keys():
 
 #Read scenarios from sample file
 
-    id_demand = spatial + elecdemand_df.iloc[35][0]
-    temporal_unique = float(modelrun.iloc[4][1])+id_demand+DemandProfileTier
+    id_demand = spatial + elecdemand_df.iloc[0][2055]
+    temporal_unique = float(modelrun.iloc[2][1])+id_demand+DemandProfileTier
 
     if temporal_unique  not in demand_runs.values():
         #Scenarios that are sensitive to spatial and demand simultaneously
@@ -235,7 +245,7 @@ for j in dict_modelruns.keys():
 
         settlements = 'run/scenarios/Demand/%i_demand_cells.csv' %(spatial)
         inputdata =  os.path.join(os.getcwd(), 'run/scenarios/input_data.csv')
-        calculate_demand(settlements, elecdemand_df, unelecdemand_df,elecdemand_df.iloc[35][0], spatial, inputdata)
+        calculate_demand(settlements, elecdemand_df, unelecdemand_df,elecdemand_df.iloc[0][2055], spatial, inputdata)
 
         print("7. Build peakdemand")
 
@@ -252,15 +262,15 @@ for j in dict_modelruns.keys():
         HV_file = 'run/%i_HV_cells.csv' %(spatial)
         minigrid = 'run/%i_elec_noHV_cells.csv' %(spatial)
         neartable = 'run/scenarios/Demand/%i_Near_table.csv' %(spatial)
-        demand = 'run/scenarios/%i_demand_%i_spatialresolution.csv' %(elecdemand_df.iloc[35][0], spatial)
+        demand = 'run/scenarios/%i_demand_%i_spatialresolution.csv' %(elecdemand_df.iloc[0][2055], spatial)
         
-        temporal_id = float(modelrun.iloc[4][1])
+        temporal_id = float(modelrun.iloc[2][1])
         if temporal_unique not in temporal_runs.values():
             yearsplit = yearsplit_calculation(temporal_id,seasonAprSept , seasonOctMarch, 'run/scenarios/yearsplit_%f.csv' %(temporal_id), year_array)
             specifieddemand, timesteps = demandprofile_calculation(tier_profile, temporal_id, seasonAprSept, seasonOctMarch, 'run/scenarios/specifiedrural_demand_time%i_tier%i.csv' %(int(temporal_id), DemandProfileTier), year_array, 'Minute')
             specifieddemandurban, timesteps = demandprofile_calculation(urban_profile, temporal_id, seasonAprSept, seasonOctMarch, 'run/scenarios/specifieddemand_%i.csv' %(int(temporal_id)), year_array, 'hour')
             
-            peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV_file, distribution, distribution_row, distribution_length_cell_ref, scenarios_folder, spatial, elecdemand_df.iloc[35][0])
+            peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV_file, distribution, distribution_row, distribution_length_cell_ref, scenarios_folder, spatial, elecdemand_df.iloc[0][2055])
             addtimestep(timesteps,input_data, 'run/scenarios/input_data_%i.csv' %(int(temporal_id)))
 
             load_yearly = annualload(tier_profile, 'run/scenarios/annualload_tier%i.csv' %(DemandProfileTier))
@@ -291,7 +301,7 @@ for j in dict_modelruns.keys():
     dict_df = load_csvs(scenarios_folder) #args.data_path) #
     outPutFile = make_outputfile(text_file)#args.template) #
 
-    outPutFile = functions_to_run(dict_df, outPutFile, spatial, elecdemand_df.iloc[35][0], DiscountRate, temporal_id,CapacityOfOneTechnologyUnit, CapitalCost_PV, 
+    outPutFile = functions_to_run(dict_df, outPutFile, spatial, elecdemand_df.iloc[0][2055], DiscountRate, temporal_id,CapacityOfOneTechnologyUnit, CapitalCost_PV, 
                                   CapitalCost_batt, CapitalCost_WI, CapitalCost_powerplant, CapitalCost_distribution, CapacityFactor_adj, 
                                   FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, DemandProfileTier)
 
