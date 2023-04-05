@@ -46,7 +46,7 @@ def make_outputfile(param_file):
     return outPutFile
 
 def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_scenario, temporal, capacityofonetech, CapitalCost_PV, 
-                                  CapitalCost_batt, CapitalCost_WI, CapitalCost_powerplant, CapitalCost_distribution, CapacityFactor_adj, FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, DemandProfileTier):
+                                  CapitalCost_batt, CapitalCost_WI, CapitalCost_distribution, CapacityFactor_adj, FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, DemandProfileTier):
     """Runs all the functions for the different parameters
 
     Arguments
@@ -151,7 +151,7 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
     ###########################################################
 
     if '%i_technologies' %(spatial) in dict_df:
-        outPutFile = SETS(outPutFile, dict_df['%i_technologies' %(spatial)], dict_df['%i_fuels' %(spatial)], CapitalCost_powerplant, dict_df['yearsplit_%f' %(temporal)])
+        outPutFile = SETS(outPutFile, dict_df['%i_technologies' %(spatial)], dict_df['%i_fuels' %(spatial)],CapitalCost_WI, dict_df['yearsplit_%f' %(temporal)])
     else:
         print('No technologies file')
      ###########################################################   
@@ -451,8 +451,8 @@ def maxkm(outPutFile,input_data, distributionlines, distributioncelllength, elec
     distributionlines = distributionlines.set_index(distributionlines.iloc[:, 0])
     distribution = distributionlines.drop(columns ='Unnamed: 0')
 
-    distributioncelllength.index = distributioncelllength['index_right']
-    distribtionlength = distributioncelllength.drop(['Unnamed: 0', 'index_right', 'elec'], axis = 1)
+    distributioncelllength.index = distributioncelllength['id']
+    distribtionlength = distributioncelllength.drop(['Unnamed: 0', 'id', 'elec'], axis = 1)
 
     distribution_total = distribution.multiply(distribtionlength.LV_km, axis = "rows")
 
@@ -461,7 +461,7 @@ def maxkm(outPutFile,input_data, distributionlines, distributioncelllength, elec
         year = int(input_data['startyear'][0])
         while year <= int(input_data['endyear'][0]):
             dataToInsert += "%s\tTRLV_%i_0\t%i\t%f\n" % (input_data['region'][0],j, year, km)
-            if elec['index_right'].eq(j).any():
+            if elec['id'].eq(j).any():
                 dataToInsert += "%s\tTRLVM_%i_0\t%i\t%f\n" % (input_data['region'][0], j, year, km)
             year += 1
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
@@ -777,10 +777,10 @@ def capacityfactor(outPutFile, df, input_data, capacityfactor_wind, capacityfact
                     tsday = timeslice[g] + "_" + str(daysplit[m])
                     for t in solar_tech:
                         if t == 'SOPV':
-                            if elec['index_right'].eq(row['Location']).any():
+                            if elec['id'].eq(row['Location']).any():
                                 dataToInsert += "%s\t%s_%s_1\t%s\t%i\t%f\n" % (region, t, location, tsday, year, average_solar)
                                 dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsday, year, average_solar)
-                            if un_elec['index_right'].eq(row['Location']).any():
+                            if un_elec['id'].eq(row['Location']).any():
                                 dataToInsert += "%s\t%s_%s_0\t%s\t%i\t%f\n" % (region, t, location, tsday, year, average_solar)
                         else:
                             dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location, tsday, year, average_solar)
@@ -841,10 +841,10 @@ def capacityfactor(outPutFile, df, input_data, capacityfactor_wind, capacityfact
     #                         average_solar = calculate_average(capacityfactor_solar_battery,  startDate, endDate, daysplitstart[m], daysplitend[m], location)
     #                         tsday = timeslice[m] + "_" + daysplit[m]
     #                         if line['Technology'] == 'SOPV':
-    #                             if elec['index_right'].eq(row['Location']).any():
+    #                             if elec['id'].eq(row['Location']).any():
     #                                 dataToInsert += "%s\t%s%ir_%s_1\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsday, year, average_solar)
     #                                 dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsday, year, average_solar)
-    #                             if un_elec['index_right'].eq(row['Location']).any():
+    #                             if un_elec['id'].eq(row['Location']).any():
     #                                 dataToInsert += "%s\t%s%ir_%s_0\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsday, year, average_solar)
     #                         else:
     #                             dataToInsert += "%s\t%s%ic_%s\t%s\t%i\t%f\n" % (region, line['Technology'], line['BatteryTime'], location, tsday, year, average_solar)
@@ -976,12 +976,12 @@ def capitalcost_dynamic(df, outPutFile, CapitalCost_PV, CapitalCost_batt, Capita
             batterycost = CapitalCost_batt.loc[k][0]
             sopvcapitalcostbatt_rural = pvcapitalcost*PV_sizing_rural.loc[row['Location']]['PV_size']+ batterycost*PV_sizing_rural.loc[row['Location']]['Battery_hours']
             sopvcapitalcostbatt_urban = pvcapitalcost*PVsizing_urban.loc[row['Location']]['PV_size']+ batterycost*PVsizing_urban.loc[row['Location']]['Battery_hours']
-            if elec['index_right'].eq(row['Location']).any():
+            if elec['id'].eq(row['Location']).any():
                 dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], "SOPV", location, k, pvcapitalcost))
                 dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPV", location, k, pvcapitalcost))
                 dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], "SOPVBattery", location, k, sopvcapitalcostbatt_urban))
                 dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPVBattery", location, k, sopvcapitalcostbatt_rural))
-            if un_elec['index_right'].eq(row['Location']).any():
+            if un_elec['id'].eq(row['Location']).any():
                 dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPV", location, k, pvcapitalcost))
                 dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPVBattery", location, k, sopvcapitalcostbatt_rural))
 

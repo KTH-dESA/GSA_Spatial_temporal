@@ -302,7 +302,7 @@ for j in dict_modelruns.keys():
     outPutFile = make_outputfile(text_file)#args.template) #
 
     outPutFile = functions_to_run(dict_df, outPutFile, spatial, elecdemand_df.iloc[0][2055], DiscountRate, temporal_id,CapacityOfOneTechnologyUnit, CapitalCost_PV, 
-                                  CapitalCost_batt, CapitalCost_WI, CapitalCost_powerplant, CapitalCost_distribution, CapacityFactor_adj, 
+                                  CapitalCost_batt, CapitalCost_WI, CapitalCost_distribution, CapacityFactor_adj, 
                                   FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, DemandProfileTier)
 
     #write data file
