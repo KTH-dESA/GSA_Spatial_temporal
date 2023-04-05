@@ -140,7 +140,7 @@ def calculate_demand(settlements, elecdemand, unelecdemand, scenario, spatial, i
         startyear = int(input_data['startyear'][0])
         while startyear <=int(input_data['endyear'][0]):
             col = startyear
-            row[col] = unelecdemand.loc[col,8]*row['un_elec_share']
+            row[str(col)] = unelecdemand.iloc[0][col]*row['un_elec_share']
             startyear +=1
 
         un_elec_list.append(row)
@@ -163,8 +163,8 @@ def calculate_demand(settlements, elecdemand, unelecdemand, scenario, spatial, i
         row['Fuel'] = 'EL3_'+ str(pointid) + '_1'
         startyear = int(input_data['startyear'][0])
         while startyear <=int(input_data['endyear'][0]):
-            col = str(startyear)
-            row[col] = elecdemand.loc[col,0]*row['elec_share']
+            col = startyear
+            row[str(col)] = elecdemand.iloc[0][col]*row['elec_share']
             startyear +=1
         elec_list.append(row)
         ind = row.index
