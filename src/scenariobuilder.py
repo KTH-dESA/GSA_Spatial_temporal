@@ -128,8 +128,7 @@ for j in dict_modelruns.keys():
     unelecdemand_df = unelecdemand_df_all.loc[:, '2020':'2055']
     unelecdemand_df.columns = unelecdemand_df.columns.astype('int')
 
-    id = spatial
-    combined = spatial + CapacityFactor_adj
+    combined = str(spatial) + str(CapacityFactor_adj)
 
     if combined not in scenario_runs.values():
 
@@ -164,7 +163,7 @@ for j in dict_modelruns.keys():
         #To be able to download you need to install the package curl from R and also have R installed on your computer
         # Easiest is to write  install.packages("curl") in the R prompt
 
-        print("4. Download Renewable Ninja files for scenario %i" %(id))
+        print("4. Download Renewable Ninja files for scenario %i" %(spatial))
         # add your token for API from your own log in on Renewable Ninjas
 
         shapefile = '../Projected_files/' + point
@@ -228,8 +227,7 @@ for j in dict_modelruns.keys():
 
 #Read scenarios from sample file
 
-    id_demand = spatial + elecdemand_df.iloc[0][2055]
-    temporal_unique = float(modelrun.iloc[2][1])+id_demand+DemandProfileTier
+    temporal_unique = str(Dailytemporalresolution) + str(spatial) + str(elecdemand_df.iloc[0][2055]) + str(DemandProfileTier)
 
     if temporal_unique  not in demand_runs.values():
         #Scenarios that are sensitive to spatial and demand simultaneously
@@ -239,7 +237,7 @@ for j in dict_modelruns.keys():
 
         polygon = str(spatial) + "_polygon.shp"
         point = str(spatial) + "_point.shp"
-        print("6. Build Demand for location %s" %(id))
+        print("6. Build Demand for location %i" %(spatial))
         date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
         print(date)
 
@@ -247,7 +245,7 @@ for j in dict_modelruns.keys():
         inputdata =  os.path.join(os.getcwd(), 'run/scenarios/input_data.csv')
         calculate_demand(settlements, elecdemand_df, unelecdemand_df,elecdemand_df.iloc[0][2055], spatial, inputdata)
 
-        print("7. Build peakdemand")
+        print("7. Build peakdemand, yearsplit, specified demand")
 
         date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
         print(date)
@@ -264,33 +262,43 @@ for j in dict_modelruns.keys():
         neartable = 'run/scenarios/Demand/%i_Near_table.csv' %(spatial)
         demand = 'run/scenarios/%i_demand_%i_spatialresolution.csv' %(elecdemand_df.iloc[0][2055], spatial)
         
-        temporal_id = float(modelrun.iloc[2][1])
-        if temporal_unique not in temporal_runs.values():
-            yearsplit = yearsplit_calculation(temporal_id,seasonAprSept , seasonOctMarch, 'run/scenarios/yearsplit_%f.csv' %(temporal_id), year_array)
-            specifieddemand, timesteps = demandprofile_calculation(tier_profile, temporal_id, seasonAprSept, seasonOctMarch, 'run/scenarios/specifiedrural_demand_time%i_tier%i.csv' %(int(temporal_id), DemandProfileTier), year_array, 'Minute')
-            specifieddemandurban, timesteps = demandprofile_calculation(urban_profile, temporal_id, seasonAprSept, seasonOctMarch, 'run/scenarios/specifieddemand_%i.csv' %(int(temporal_id)), year_array, 'hour')
-            
-            peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV_file, distribution, distribution_row, distribution_length_cell_ref, scenarios_folder, spatial, elecdemand_df.iloc[0][2055])
-            addtimestep(timesteps,input_data, 'run/scenarios/input_data_%i.csv' %(int(temporal_id)))
+        temporal_id = float(Dailytemporalresolution)
 
-            load_yearly = annualload(tier_profile, 'run/scenarios/annualload_tier%i.csv' %(DemandProfileTier))
-            loadprofile_high = 'input_data/high_Jan.csv'
-            capacityfactor_pv = 'run/scenarios/uncertain%f_spatial%i_capacityfactor_solar.csv' %(CapacityFactor_adj,spatial)
-            tofilePV = 'run/scenarios/capacityfactor_solar_batteries_Tier%i_loca%i_uncertain%f.csv' %(DemandProfileTier, spatial, CapacityFactor_adj)
-            tofilePVhigh = 'run/scenarios/capacityfactor_solar_batteries_urban_loca%i_uncertain%f.csv' %(spatial, CapacityFactor_adj)
-            efficiency_discharge = 0.98 # Koko (2022)
-            efficiency_charge = 0.95 # Koko (2022)
-            pvcost = 2540 #ATB 2021 version for 2021 value
-            batterycost_kWh = 522  #ATB 2021 version for 2021 value with adjusted Kenyan value
-            locations = 'run/scenarios/%i_GIS_data.csv' %(spatial)
-            scenario = temporal_id
-            startDate = pd.to_datetime("2016-01")
-            endDate = pd.to_datetime("2016-02")
-            startDate_load = pd.to_datetime("1900-01")
-            endDate_load = pd.to_datetime("1900-02")
+        yearsplit = yearsplit_calculation(temporal_id,seasonAprSept , seasonOctMarch, 'run/scenarios/yearsplit_%f.csv' %(temporal_id), year_array)
+        specifieddemand, timesteps = demandprofile_calculation(tier_profile, temporal_id, seasonAprSept, seasonOctMarch, 'run/scenarios/specifiedrural_demand_time%i_tier%i.csv' %(int(temporal_id), DemandProfileTier), year_array, 'Minute')
+        specifieddemandurban, timesteps = demandprofile_calculation(urban_profile, temporal_id, seasonAprSept, seasonOctMarch, 'run/scenarios/specifieddemand_%i.csv' %(int(temporal_id)), year_array, 'hour')
+        
+        peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV_file, distribution, distribution_row, distribution_length_cell_ref, scenarios_folder, spatial, elecdemand_df.iloc[0][2055])
+        addtimestep(timesteps,input_data, 'run/scenarios/input_data_%i.csv' %(int(temporal_id)))
+
+        print("8. Optimise PV and battery")
+
+        date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
+        print(date)
+
+        load_yearly = annualload(tier_profile, 'run/scenarios/annualload_tier%i.csv' %(DemandProfileTier))
+        loadprofile_high = 'input_data/high_Jan.csv'
+        capacityfactor_pv = 'run/scenarios/uncertain%f_spatial%i_capacityfactor_solar.csv' %(CapacityFactor_adj,spatial)
+        tofilePV = 'run/scenarios/capacityfactor_solar_batteries_Tier%i_loca%i_uncertain%f.csv' %(DemandProfileTier, spatial, CapacityFactor_adj)
+        tofilePVhigh = 'run/scenarios/capacityfactor_solar_batteries_urban_loca%i_uncertain%f.csv' %(spatial, CapacityFactor_adj)
+        efficiency_discharge = 0.98 # Koko (2022)
+        efficiency_charge = 0.95 # Koko (2022)
+        pvcost = 2540 #ATB 2021 version for 2021 value
+        batterycost_kWh = 522  #ATB 2021 version for 2021 value with adjusted Kenyan value
+        locations = 'run/scenarios/%i_GIS_data.csv' %(spatial)
+        scenario = temporal_id
+        startDate = pd.to_datetime("2016-01")
+        endDate = pd.to_datetime("2016-02")
+        startDate_load = pd.to_datetime("1900-01")
+        endDate_load = pd.to_datetime("1900-02")
+        if os.path.isfile(tofilePV):
+            print('File already exists, skipping calculations.')
+        else:
             battery_to_pv(load_yearly,  capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePV, scenario,  startDate, endDate, startDate_load, endDate_load)
+        if os.path.isfile(tofilePVhigh):
+            print('File already exists, skipping calculations.')
+        else:
             battery_to_pv(loadprofile_high,  capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePVhigh, scenario,  startDate, endDate, startDate, endDate)
-            temporal_runs[j] = temporal_unique
 
         demand_runs[j] = temporal_unique
             
