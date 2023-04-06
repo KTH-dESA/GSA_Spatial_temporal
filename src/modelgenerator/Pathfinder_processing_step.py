@@ -97,7 +97,11 @@ def zonalstat_pathfinder(raster, polygon, scenario):
             stats="sum")
     
     df_zonal = pd.DataFrame(zonal_polygon)
-    df_zonal.to_csv("run/scenarios/%i_distributionlines.csv" %(scenario))
+    polygon_gpd = gpd.read_file(polygon)
+    merged_polygon_zonal = pd.merge(df_zonal, polygon_gpd, left_index=True, right_index=True)
+    zonal_final = merged_polygon_zonal.drop(columns=['CLUSTER_ID', 'CLUSTER_SI', 'geometry'])
+    zonal_final.index = zonal_final.id
+    zonal_final.to_csv("run/scenarios/%i_distributionlines.csv" %(scenario))
 
 
 def pathfinder_main(path,proj_path, elec_shp, tofolder, tiffile, crs):
