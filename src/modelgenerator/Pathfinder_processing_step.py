@@ -99,7 +99,7 @@ def zonalstat_pathfinder(raster, polygon, scenario):
     df_zonal = pd.DataFrame(zonal_polygon)
     polygon_gpd = gpd.read_file(polygon)
     merged_polygon_zonal = pd.merge(df_zonal, polygon_gpd, left_index=True, right_index=True)
-    zonal_final = merged_polygon_zonal.drop(columns=['CLUSTER_ID', 'CLUSTER_SI', 'geometry'])
+    zonal_final = merged_polygon_zonal.drop(columns=['geometry'])
     zonal_final.index = zonal_final.id
     zonal_final.to_csv("run/scenarios/%i_distributionlines.csv" %(scenario))
 
