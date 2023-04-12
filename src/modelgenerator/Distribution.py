@@ -141,12 +141,14 @@ def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv
     peakdemand.index = peakdemand[('cell')]
     a = distribution_total.index
     peakdemand_divided_km = peakdemand.apply(lambda x: (x/distribution_total.loc[x['cell']]['sum'] if x['cell'] in a else print('not same')), axis=1)
+    peakdemand_divided_km.fillna(0,inplace=True)
     peakdemand_divided_km['Fuel'] = peakdemand.index.to_series().apply(lambda row: 'TRLV_'+str(row)+'_0')
     peakdemand_divided_km.index = peakdemand_divided_km['Fuel']
     peakdemand_divided_km_cleaned = peakdemand_divided_km.drop(['cell', 'Fuel'], axis=1)
 
     peakdemandLVM_ = peakdemand.loc[peakdemand['cell'].isin(HV.id)]
     peakdemandLVM_divided_km = peakdemandLVM_.apply(lambda x: (x/distribution_total.loc[x['cell']][0] if x['cell'] in a else print('not same')), axis=1)
+    peakdemandLVM_divided_km.fillna(0,inplace=True)
     peakdemandLVM_divided_km['Fuel'] = peakdemandLVM_divided_km.index.to_series().apply(lambda row: 'TRLVM_'+str(row)+'_0')
     peakdemandLVM_divided_km.index = peakdemandLVM_divided_km['Fuel']
     peakdemandLVM_divided_km_cleaned = peakdemandLVM_divided_km.drop(['cell', 'Fuel'], axis=1)
