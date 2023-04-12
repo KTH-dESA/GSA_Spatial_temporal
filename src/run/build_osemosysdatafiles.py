@@ -45,7 +45,7 @@ def make_outputfile(param_file):
     outPutFile = allLinesFromXy
     return outPutFile
 
-def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_scenario, temporal, capacityofonetech, CapitalCost_PV, 
+def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_scenario, temporal, capacityofonetech_param, CapitalCost_PV, 
                                   CapitalCost_batt, CapitalCost_WI, CapitalCost_distribution, CapacityFactor_adj, FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, DemandProfileTier):
     """Runs all the functions for the different parameters
 
@@ -74,7 +74,7 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
 
 ########################################################################################################
     if '%i_capitalcost'%(spatial) in dict_df:
-        outPutFile = capapacityofonetech(outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['%i_capitalcost' %(spatial)], capacityofonetech,dict_df['capacitycostHV'] )
+        outPutFile = capapacityofonetech(outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['%i_capitalcost' %(spatial)], capacityofonetech_param,dict_df['capacitycostHV'])
 
     else:
         print('No i_capitalcost file')
@@ -449,7 +449,7 @@ def maxkm(outPutFile,input_data, distributionlines, distributioncelllength, elec
     startIndex = outPutFile.index(param) + len(param)
 
     distributionlines = distributionlines.set_index(distributionlines.iloc[:, 0])
-    distribution = distributionlines.drop(columns ='Unnamed: 0')
+    distribution = distributionlines.drop(columns ='id')
 
     distributioncelllength.index = distributioncelllength['id']
     distribtionlength = distributioncelllength.drop(['Unnamed: 0', 'id', 'elec'], axis = 1)
