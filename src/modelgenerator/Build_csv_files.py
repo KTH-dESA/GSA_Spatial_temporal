@@ -262,24 +262,24 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_1" % (k),  "SOPV8r_%i_1" % (k), 1, 1]
+        output_temp = [0, "EL3_%i_1" % (k),  "SOPVBattery_%i_1" % (k), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        fixedcost_temp = ["SOPV8r_%i_0" % (k), 96]
+        fixedcost_temp = ["SOPVBattery_%i_0" % (k), 96]
         fixedcost.loc[-1] = fixedcost_temp  # adding a row
         fixedcost.index = fixedcost.index + 1  # shifting index
         fixedcost = fixedcost.sort_index()
 
         
-        operationallife_temp = ["SOPV8r_%i_0" % (k), 30]
+        operationallife_temp = ["SOPVBattery_%i_0" % (k), 30]
         operationallife.loc[-1] = operationallife_temp  # adding a row
         operationallife.index = operationallife.index + 1  # shifting index
         operationallife = operationallife.sort_index()
 
 
-        output_temp = [0, "EL3_%i_0" % (k),  "SOPV8r_%i_0" % (k), 1,1]
+        output_temp = [0, "EL3_%i_0" % (k),  "SOPVBattery_%i_0" % (k), 1,1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
@@ -336,22 +336,22 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_1" % (m),  "SOPV8r_%i_1" % (m), 1, 1]
+        output_temp = [0, "EL3_%i_1" % (m),  "SOPVBattery_%i_1" % (m), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_0" % (m),  "SOPV8r_%i_0" % (m), 1,1]
+        output_temp = [0, "EL3_%i_0" % (m),  "SOPVBattery_%i_0" % (m), 1,1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        fixedcost_temp = ["SOPV8r_%i_0" % (m), 96]
+        fixedcost_temp = ["SOPVBattery_%i_0" % (m), 96]
         fixedcost.loc[-1] = fixedcost_temp  # adding a row
         fixedcost.index = fixedcost.index + 1  # shifting index
         fixedcost = fixedcost.sort_index()
 
-        operationallife_temp = ["SOPV8r_%i_0" % (m), 30]
+        operationallife_temp = ["SOPVBattery_%i_0" % (m), 30]
         operationallife.loc[-1] = operationallife_temp  # adding a row
         operationallife.index = operationallife.index + 1  # shifting index
         operationallife = operationallife.sort_index()
@@ -394,17 +394,17 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
-        output_temp = [0,"EL3_%i_0" % (j),"SOPV8r_%i_0" % (j), 1, 1]
+        output_temp = [0,"EL3_%i_0" % (j),"SOPVBattery_%i_0" % (j), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
         
-        fixedcost_temp = ["SOPV8r_%i_0" % (j), 96]
+        fixedcost_temp = ["SOPVBattery_%i_0" % (j), 96]
         fixedcost.loc[-1] = fixedcost_temp  # adding a row
         fixedcost.index = fixedcost.index + 1  # shifting index
         fixedcost = fixedcost.sort_index()
 
-        operationallife_temp = ["SOPV8r_%i_0" % (j), 30]
+        operationallife_temp = ["SOPVBattery_%i_0" % (j), 30]
         operationallife.loc[-1] = operationallife_temp  # adding a row
         operationallife.index = operationallife.index + 1  # shifting index
         operationallife = operationallife.sort_index()
@@ -508,10 +508,10 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
             #capitalcost.loc[m]['Capitalcost'] = tech_matr.loc[h]['DISTANCE'] /1000*capital_cost_HV + substation  #kUSD/MW divided by 1000 as it is in meters
             #capitalcost.loc[m]['Technology'] =  matrix.loc[h]['INTECH']
 
-            fixedcost_temp = [matrix.loc[h]['INTECH'],tech_matr.loc[h]['DISTANCE'] /1000*capital_cost_HV + substation]
-            fixedcost.loc[-1] = fixedcost_temp  # adding a row
-            fixedcost.index = fixedcost.index + 1  # shifting index
-            fixedcost = fixedcost.sort_index()
+            capitalcost_temp = [matrix.loc[h]['INTECH'],tech_matr.loc[h]['DISTANCE'] /1000*capital_cost_HV + substation]
+            capitalcost.loc[-1] = capitalcost_temp  # adding a row
+            capitalcost.index = capitalcost.index + 1  # shifting index
+            capitalcost = capitalcost.sort_index()
 
             #fixedcost.loc[m]['Fixed Cost'] = tech_matr.loc[h]['DISTANCE']/1000*capital_cost_HV*0.025 + substation*0.025  #kUSD/MW divided by 1000 as it is in meters
             #fixedcost.loc[m]['Technology'] =  matrix.loc[h]['INTECH']
