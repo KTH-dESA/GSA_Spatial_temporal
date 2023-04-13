@@ -21,7 +21,7 @@ def yearsplit_calculation(dayslices, seasonAprSep, seasonOctMarch, savepath, yea
     df = pd.DataFrame.from_dict([slicearray])
     df = df.T
     df.index.names = ['Timeslice']
-    multiple = pd.concat([df.T]*36).T
+    multiple = pd.concat([df.T]*(len(years))).T
     multiple.columns = years
     multiple.index = df.index
     multiple.to_csv(savepath)
@@ -75,7 +75,7 @@ def demandprofile_calculation(profile, dayslices, seasonAprSep, seasonOctMarch, 
     df= df.T
     df.index.names = ['Timeslice']
     profile = df[0]
-    multiple = pd.concat([df.T]*36).T
+    multiple = pd.concat([df.T]*(len(years))).T
     multiple.columns = years
     multiple.index = df.index
     multiple.to_csv(savepath)

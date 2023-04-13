@@ -380,7 +380,7 @@ def capacityfactor_modification(outPutFile,input_data, capacityfactor_other):
                     startDate = pd.to_datetime("2016-%s" % (timeslicemonthstart[g]))
                     endDate = pd.to_datetime("2016-%s" % (timeslicemonthend[g]))
                     average_solar = calculate_average(capacityfactor_solar_pv, startDate, endDate, daysplitstart[m], daysplitend[m], location)
-                    tsday = timeslice[g] + "_" + str(daysplit[m])
+                    tsday = timeslice[g] + str(daysplit[m])
                     dataToInsert += "%s\t%s\t%s\t%i\t%f\n" % (region, k, tsday, year, average_solar)
                     g+=1
                 m +=1
@@ -429,7 +429,7 @@ def discountrate_(outPutFile, discountr):
 def peakdemand(outPutFile,input_data, peakdemand):
     dataToInsert = ""
     print("Peak demand", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-    param = "param Peakdemand default -1:=\n"
+    param = "param Peakdemand default 9999999999999:=\n"
     startIndex = outPutFile.index(param) + len(param)
 
     peakdemand.index = peakdemand['Fuel']
@@ -445,7 +445,7 @@ def peakdemand(outPutFile,input_data, peakdemand):
 def maxkm(outPutFile,input_data, distributionlines, distributioncelllength, elec):
     dataToInsert = ""
     print("Max km Distribution", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-    param = "param MaxKmPerTech default -1 :=\n"
+    param = "param MaxKmPerTech default 9999999999999 :=\n"
     startIndex = outPutFile.index(param) + len(param)
 
     distributionlines = distributionlines.set_index(distributionlines.iloc[:, 0])
@@ -774,7 +774,7 @@ def capacityfactor(outPutFile, df, input_data, capacityfactor_wind, capacityfact
                     startDate = pd.to_datetime("2016-%s" % (timeslicemonthstart[g]))
                     endDate = pd.to_datetime("2016-%s" % (timeslicemonthend[g]))
                     average_solar = calculate_average(capacityfactor_solar_pv, startDate, endDate, daysplitstart[m], daysplitend[m], location)
-                    tsday = timeslice[g] + "_" + str(daysplit[m])
+                    tsday = timeslice[g] + str(daysplit[m])
                     for t in solar_tech:
                         if t == 'SOPV':
                             if elec['id'].eq(row['Location']).any():
@@ -869,7 +869,7 @@ def capacityfactor(outPutFile, df, input_data, capacityfactor_wind, capacityfact
                     endDate = pd.to_datetime("2016-%s" % (timeslicemonthend[g]))
                     average_wind_day = calculate_average(capacityfactor_windcopy, startDate, endDate,
                                                         daysplitstart[m], daysplitend[m], location)
-                    tsday = timeslice[g] + "_" + str(daysplit[m])
+                    tsday = timeslice[g] + str(daysplit[m])
                     for t in wind_tech:
                         dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location , tsday, year, average_wind_day)
                     g +=1

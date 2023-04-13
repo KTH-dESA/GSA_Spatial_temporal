@@ -47,7 +47,7 @@ urban_profile = config['inputfiles']['urban_profile']
 text_file = config['inputfiles']['text_file']
 country = config['inputfiles']['country']
 output_folder = config['inputfiles']['output_folder']
-year_array = ['2020', '2021', '2022','2023','2024','2025','2026','2027','2028','2029',	'2030',	'2031',	'2032',	'2033',	'2034',	'2035',	'2036',	'2037',	'2038',	'2039',	'2040',	'2041',	'2042',	'2043',	'2044',	'2045',	'2046',	'2047',	'2048',	'2049',	'2050',	'2051',	'2052',	'2053',	'2054',	'2055']
+year_array = ['2020', '2021', '2022','2023','2024','2025','2026','2027','2028','2029',	'2030',	'2031',	'2032',	'2033',	'2034',	'2035',	'2036',	'2037',	'2038',	'2039',	'2040']
 
 def split_data_onecell(data):
     data_ = data.replace(']', '')
@@ -120,12 +120,12 @@ for j in dict_modelruns.keys():
 
     # Electrified demand for selected tier
     elecdemand_df_all = df[(df['Tier'] == DemandProfileTier) & (df['Electrified'] == 1)]
-    elecdemand_df = elecdemand_df_all.loc[:, '2020':'2055']
+    elecdemand_df = elecdemand_df_all.loc[:, '2020':'2040']
     elecdemand_df.columns = elecdemand_df.columns.astype('int')
 
     # Un-electrified demand for selected tier
     unelecdemand_df_all = df[(df['Tier'] == DemandProfileTier) & (df['Electrified'] == 0)]
-    unelecdemand_df = unelecdemand_df_all.loc[:, '2020':'2055']
+    unelecdemand_df = unelecdemand_df_all.loc[:, '2020':'2040']
     unelecdemand_df.columns = unelecdemand_df.columns.astype('int')
 
     combined = str(spatial) + str(CapacityFactor_adj)
@@ -227,7 +227,7 @@ for j in dict_modelruns.keys():
 
 #Read scenarios from sample file
 
-    temporal_unique = str(Dailytemporalresolution) + str(spatial) + str(elecdemand_df.iloc[0][2055]) + str(DemandProfileTier)
+    temporal_unique = str(Dailytemporalresolution) + str(spatial) + str(elecdemand_df.iloc[0][2040]) + str(DemandProfileTier)+ str(CapacityFactor_adj)
 
     if temporal_unique  not in demand_runs.values():
         #Scenarios that are sensitive to spatial and demand simultaneously
@@ -243,7 +243,7 @@ for j in dict_modelruns.keys():
 
         settlements = 'run/scenarios/Demand/%i_demand_cells.csv' %(spatial)
         inputdata =  os.path.join(os.getcwd(), 'run/scenarios/input_data.csv')
-        calculate_demand(settlements, elecdemand_df, unelecdemand_df,elecdemand_df.iloc[0][2055], spatial, inputdata)
+        calculate_demand(settlements, elecdemand_df, unelecdemand_df,elecdemand_df.iloc[0][2040], spatial, inputdata)
 
         print("7. Build peakdemand, yearsplit, specified demand")
 
@@ -260,7 +260,7 @@ for j in dict_modelruns.keys():
         HV_file = 'run/%i_HV_cells.csv' %(spatial)
         minigrid = 'run/%i_elec_noHV_cells.csv' %(spatial)
         neartable = 'run/scenarios/Demand/%i_Near_table.csv' %(spatial)
-        demand = 'run/scenarios/%i_demand_%i_spatialresolution.csv' %(elecdemand_df.iloc[0][2055], spatial)
+        demand = 'run/scenarios/%i_demand_%i_spatialresolution.csv' %(elecdemand_df.iloc[0][2040], spatial)
         
         temporal_id = float(Dailytemporalresolution)
 
@@ -268,7 +268,7 @@ for j in dict_modelruns.keys():
         specifieddemand, timesteps = demandprofile_calculation(tier_profile, temporal_id, seasonAprSept, seasonOctMarch, 'run/scenarios/specifiedrural_demand_time%i_tier%i.csv' %(int(temporal_id), DemandProfileTier), year_array, 'Minute')
         specifieddemandurban, timesteps = demandprofile_calculation(urban_profile, temporal_id, seasonAprSept, seasonOctMarch, 'run/scenarios/specifieddemand_%i.csv' %(int(temporal_id)), year_array, 'hour')
         
-        peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV_file, distribution, distribution_row, distribution_length_cell_ref, scenarios_folder, spatial, elecdemand_df.iloc[0][2055])
+        peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV_file, distribution, distribution_row, distribution_length_cell_ref, scenarios_folder, spatial, elecdemand_df.iloc[0][2040])
         addtimestep(timesteps,input_data, 'run/scenarios/input_data_%i.csv' %(int(temporal_id)))
 
         print("8. Optimise PV and battery")
@@ -308,15 +308,17 @@ for j in dict_modelruns.keys():
     ####################### Make txt file #############################
     dict_df = load_csvs(scenarios_folder) #args.data_path) #
     outPutFile = make_outputfile(text_file)#args.template) #
-
-    outPutFile = functions_to_run(dict_df, outPutFile, spatial, elecdemand_df.iloc[0][2055], DiscountRate, temporal_id,CapacityOfOneTechnologyUnit, CapitalCost_PV, 
-                                  CapitalCost_batt, CapitalCost_WI, CapitalCost_distribution, CapacityFactor_adj, 
-                                  FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, DemandProfileTier)
-
-    #write data file
-    if not os.path.exists(output_folder):
-        os.makedirs('run/output')
-
-    #write to DD-file
     comb = country+j+'.txt'
-    write_to_file('run/output/', outPutFile, comb)      #args.output_path
+
+    if os.path.isfile('run/output/'+comb):
+        print('File already exists, skipping calculations.')
+    else:
+        outPutFile = functions_to_run(dict_df, outPutFile, spatial, elecdemand_df.iloc[0][2040], DiscountRate, temporal_id,CapacityOfOneTechnologyUnit, CapitalCost_PV, 
+                                    CapitalCost_batt, CapitalCost_WI, CapitalCost_distribution, CapacityFactor_adj, 
+                                    FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, DemandProfileTier)
+
+        #write data file
+        if not os.path.exists(output_folder):
+            os.makedirs('run/output')
+
+        write_to_file('run/output/', outPutFile, comb)      #args.output_path

@@ -29,8 +29,6 @@ import os
 import csv
 import pandas as pd
 import numpy as np
-from otoole.read_strategies import ReadDatapackage
-from otoole.write_strategies import WriteDatapackage
 
 from logging import getLogger
 
@@ -132,28 +130,4 @@ def modify_parameters(
     df.to_csv(os.path.join(tofolder+sample+'.csv'))
     return expanded_data
 
-def main(input_filepath, output_filepath, parameters: List[Dict[str, Union[str, int, float]]]):
 
-    reader = ReadDatapackage()
-
-    writer = WriteDatapackage()
-
-    logger.info("Reading datapackage {}".format(input_filepath))
-    model_params, default_values = reader.read(input_filepath)
-    for name, parameter in model_params.items():
-        parameter = parameter.sort_index()
-        model_params[name] = parameter
-
-    config = reader.input_config
-    model_params = modify_parameters(model_params, parameters, config)
-    writer.write(model_params, output_filepath, default_values)
-
-
-if __name__ == "__main__":
-
-    if len(sys.argv) != 4:
-        print("Usage: python create_modelrun.py <input_filepath> <output_filepath> <sample_filepath>")
-    else:
-        with open(sys.argv[3], 'r') as csv_file:
-            sample = list(csv.DictReader(csv_file))
-        main(sys.argv[1], sys.argv[2], sample)

@@ -88,3 +88,9 @@ src/modelgenerator/Build_csv_files.py
 
 **results_PuLP**
 **halfhourly_data_**
+checkcorrectenessofmodel/**
+src/config/parameters.xlsx
+src/config/results.csv
+src/modelgenerator/__ init __.py
+src/run/__ init __.py
+**7z
