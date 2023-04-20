@@ -44,3 +44,53 @@ src/run/5_elec_noHV_cells.csv
 src/run/scenarios/Demand/**
 src/run/scenarios/**
 
+src/modelruns/scenarios/unique_comb_morris.csv
+src/run/1_elec_noHV_cells.csv
+src/run/1_elec.csv
+src/run/1_HV_cells.csv
+src/run/1_minigridcells.csv
+src/run/1_noHV_cells.csv
+src/run/1_un_elec.csv
+src/run/5_elec.csv
+src/run/5_HV_cells.csv
+src/run/5_minigridcells.csv
+src/run/5_noHV_cells.csv
+src/run/5_un_elec.csv
+src/run/9_elec_noHV_cells.csv
+src/run/9_elec.csv
+src/run/9_HV_cells.csv
+src/run/9_minigridcells.csv
+src/run/9_noHV_cells.csv
+src/run/9_un_elec.csv
+src/run/13_elec_noHV_cells.csv
+src/run/13_elec.csv
+src/run/13_HV_cells.csv
+src/run/13_minigridcells.csv
+src/run/13_noHV_cells.csv
+src/run/13_un_elec.csv
+src/run/QGIS_5_distributionlines.csv
+src/run/QGIS_13_distributionlines.csv
+src/run/output/**
+src/run/__pycache__/**
+src/run/capacity_factor_other.xlsx
+src/run/Benin_modified.txt
+tech naming temba.xlsx
+src/sensitivity/**
+
+src/run/sensitivity_range/**
+src/modelgenerator/__pycache__/**
+src/convert.py
+src/input_data/T3_load profile_Narayan.xls
+.gitignore
+src/.snakemake/**
+src/modelgenerator/Build_csv_files.py
+.gitignore
+
+**results_PuLP**
+**halfhourly_data_**
+checkcorrectenessofmodel/**
+src/config/parameters.xlsx
+src/config/results.csv
+src/modelgenerator/__ init __.py
+src/run/__ init __.py
+**7z

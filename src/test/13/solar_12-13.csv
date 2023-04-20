@@ -1,0 +1,2 @@
+name,lat,lon,from,to,dataset,capacity,system_loss,tracking,tilt,azim
+12,8.35968943889137,2.3886366935734373,01/01/2016,31/12/2016,merra2,1,0.1,0,35,180

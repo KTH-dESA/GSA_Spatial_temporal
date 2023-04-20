@@ -3,6 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import geopandas as gpd
 import pandas as pd
+from configparser import ConfigParser
 import numpy as np
 import seaborn as sns
 from Download_files import *
@@ -17,7 +18,10 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 files = pd.read_csv('input_data/Benin_GIS_files.csv', index_col=0)
 import os
 
-crs = "EPSG:32631"
+config = ConfigParser()
+config.read('config/config_input.ini')
+
+crs = config['geospatialdata']['crs']
 
 # 1. The files in "input_data/GIS_data" are downloaded and placed in a "temp" folder.
 date = datetime. now(). strftime("%Y_%m_%d-%I:%M:%S_%p")
@@ -34,14 +38,14 @@ date = datetime. now(). strftime("%Y_%m_%d-%I:%M:%S_%p")
 print(date)
 print("2. The files are then projected and clipped to the administrative boundaries.")
 
-project_main('../GIS_Data', '../Projected_files', files, crs)
+#project_main('../GIS_Data', '../Projected_files', files, crs)
 # 3. Through QGIS make raster to point layer and save (MANUAL STEP)
 date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
 print(date)
 print("3. Through QGIS make raster to point layer and save (download from zenodo)")
 #Make sure you are in the /src directory when you start this script
 print(os.getcwd())
-download_url_data("input_data/zenodo.txt", "Projected_files")
+#download_url_data("input_data/zenodo.txt", "Projected_files")
 
 # 4. The GIS layers are prepared to for a heuristic approximation for electrified settlements
 date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
