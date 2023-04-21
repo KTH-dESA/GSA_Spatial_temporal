@@ -3,9 +3,9 @@ Spatial,spatial,GLOBAL,1,100,1,100,unif,None,fixed,Y
 DiscountRate,discountrate,GLOBAL,0.05,0.2,0.05,0.2,unif,None,fixed,N
 Dailytemporalresolution,time,GLOBAL,1,24,1,24,unif,None,fixed,Y
 CapacityOfOneTechnologyUnit,MIP,TRHV,0,1,0,1,unif,None,fixed,Y
-CapitalCost_PV,cost,SOPV,2200,2200,1100,1800,unif,YEAR,interpolate,N
-CapitalCost_Battery,costbattery,battery,2200,2200,1100,1800,unif,YEAR,interpolate,N
-CapitalCost_Wind,costwi,WI,2200,2200,1100,1800,unif,YEAR,interpolate,N
+CapitalCost_PV,cost,SOPV,2710,2710,1000,1000,unif,YEAR,interpolate,N
+CapitalCost_Battery,costbattery,battery,4589,4589,1643,2490,unif,YEAR,interpolate,N
+CapitalCost_Wind,costwi,WI,1375,1375,910,910,unif,YEAR,interpolate,N
 CapitalCost_transm,costnetwork,Transmission,2,4,2,4,unif,None,fixed,N
 CapitalCost_distribution,costdistribution,Distribution,10000,28000,10000,28000,unif,None,fixed,N
 CapacityFactor_error,capacityfactor,SOPV,-0.05,0.05,-0.05,0.05,unif,None,fixed,N
