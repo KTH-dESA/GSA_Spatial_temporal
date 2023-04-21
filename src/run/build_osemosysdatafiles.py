@@ -4,6 +4,7 @@ import os
 from os import listdir
 from os.path import isfile, join
 from datetime import datetime
+import math
 
 import logging
 
@@ -167,7 +168,12 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
     else:
         print('No capacityfactors for power plants file')
 
+    ##############################################################
 
+    if 'residual_capacity%i_demand_%i_spatialresolution' %(demand_scenario,spatial) in dict_df:
+        outPutFile = residualcapacity(outPutFile, dict_df['residual_capacity%i_demand_%i_spatialresolution' %(demand_scenario,spatial)])
+    else:
+        print('No residual capacity file')
     ################################################################
 
     if ('uncertain%f_spatial%i_capacityfactor_solar' %(CapacityFactor_adj ,spatial) or 'uncertain%f_spatial%i_capacityfactor_wind'%(CapacityFactor_adj ,spatial)) in dict_df.keys():
@@ -178,6 +184,19 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
     ###############################################################################
 
     return(outPutFile)
+
+def residualcapacity(outPutFile, residual_df):
+    dataToInsert = ""
+    print("FUEL SET", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    param = "param ResidualCapacity default 0 :=\n[Benin,*,*]:\n2020	2021	2022	2023	2024	2025	2026	2027	2028	2029	2030	2031	2032	2033	2034	2035	2036	2037	2038	2039	2040:=\n"
+    startIndex = outPutFile.index(param) + len(param)
+
+    dataToInsert = residual_df.to_string(index=False, header=None)+'\n'
+
+    outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
+
+    return(outPutFile)
+
 
 def SETS(outPutFile, technology, fuel, years, yearsplit):
 
@@ -458,6 +477,9 @@ def maxkm(outPutFile,input_data, distributionlines, distributioncelllength, elec
 
     for j, row in distribution_total.iterrows():
         km = distribution_total.loc[j]['sum']
+        if math.isnan(km):
+            km=0
+        
         year = int(input_data['startyear'][0])
         while year <= int(input_data['endyear'][0]):
             dataToInsert += "%s\tTRLV_%i_0\t%i\t%f\n" % (input_data['region'][0],j, year, km)
