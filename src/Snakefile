@@ -2,11 +2,11 @@ import pandas as pd
 import sys
 
 localrules: all, clean
-#wildcard_constraints:
+wildcard_constraints:
     #result_file="[^(objective)][a-zA-Z_\-]+",  ##Maybe not
-    #model_run="\d+"
+    model_run="\d+"
 
-files, = glob_wildcards("run/output/{file}.txt")
+files, = glob_wildcards("run/output/testsnake/{file}.txt")
 
 #DDfiles = [pd.read_csv("run/output/{file}.txt") for file in files]
 MODELRUNS = range(len(files))
@@ -24,16 +24,13 @@ rule all:
 
 rule build_lp:
     input:
-        df_path = "run/output/Beninsample_{model_runs}.txt"
+        df_path = "run/output/testsnake/Beninsample_{model_runs}.txt"
     params:
         model_path = "run/model.txt",
     output:
         temp("run/temp/Benin_{model_runs}.lp")
     log:
         "run/temp/{model_runs}.log"
-    threads: 1
-    resources:
-        mem_mb=4096
     shell:
         "glpsol -m {params.model_path} -d {input.df_path} --wlp {output} --check > {log}"
 
@@ -42,32 +39,15 @@ rule solve_lp:
     input:
         "run/temp/Benin_{model_runs}.lp"
     output:
-        json="run/results/{model_runs}.json",
+        #json="run/results/{model_runs}.json",
         solution=temp("run/temp/Benin_{model_runs}.sol")
     log:
         "run/results/log/{model_runs}.log"
     params:
         ilp="run/results/{model_runs}.ilp",
         cplex="run/results/{model_runs}.cplex",
-    benchmark:
-        "run/benchmarks/{model_runs}.tsv"
-    resources:
-        mem_mb=30000,
-        disk_mb=20000,
-        time=720
-    group: "solve"
-    threads:
-        3
     shell:
-        """
-          echo "set threads {threads}"   > {params.cplex}
-          echo "set timelimit 43200"     >> {params.cplex}
-          echo "read {input}" 	         >> {params.cplex}
-          echo "baropt"                  >> {params.cplex}
-          echo "write {output.solution}" >> {params.cplex}
-          echo "quit"                    >> {params.cplex}
-        cplex < {params.cplex} > {log} && touch {output.json}
-        """
+        'cplex -c "read {input}" "optimize" "write {output.solution}"'
 
 rule transform_file:
     message: "Transforming CPLEX sol file '{input}'"
@@ -85,7 +65,7 @@ rule sort_transformed_solution:
     input:
         "run/temp/results/Benin_{model_runs}_trans.txt"
     output:
-        temp("run/temp/results/Benin_{model_runs}_sorted.txt")
+        "run/temp/results/Benin_{model_runs}_sorted.txt"
     shell:
         "sort {input} > {output}"
 
