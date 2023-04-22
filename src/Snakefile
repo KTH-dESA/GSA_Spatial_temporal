@@ -6,7 +6,7 @@ wildcard_constraints:
     #result_file="[^(objective)][a-zA-Z_\-]+",  ##Maybe not
     model_run="\d+"
 
-files, = glob_wildcards("run/output/testsnake/{file}.txt")
+files, = glob_wildcards("run/output/{file}.txt")
 
 #DDfiles = [pd.read_csv("run/output/{file}.txt") for file in files]
 MODELRUNS = range(len(files))
