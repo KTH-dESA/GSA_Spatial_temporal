@@ -35,7 +35,7 @@ param CapitalCostkmkW default 0 :=
 
 
 
-param TotalTechnologyAnnualActivityUpperLimit default -1 :=
+param TotalTechnologyAnnualActivityUpperLimit default 99999999999 :=
 ;
 
 param RETagTechnology default 0 :=
@@ -222,7 +222,7 @@ param DepreciationMethod default 1 :=
 ;
 
 #MW
-param TotalAnnualMaxCapacityInvestment default -1 :=
+param TotalAnnualMaxCapacityInvestment default 99999999999 :=
 [Benin,*,*]:																									
 2020	2021	2022	2023	2024	2025	2026	2027	2028	2029	2030	2031	2032	2033	2034	2035	2036	2037	2038	2039	2040:=	
 BENBIOCHC01N	0	999999000	999999000	999999000	999999000	999999000	999999000	999999000	999999000	999999000	999999000	999999000	999999000	999999000	999999000	999999000	999999000	999999000	999999000	999999000	999999000
@@ -553,7 +553,7 @@ Benin	TGOELBENBP00	100
 Benin	BENWINONP00X	25
 ;
 
-param TotalAnnualMaxCapacity default -1 :=
+param TotalAnnualMaxCapacity default 99999999999 :=
 [Benin,*,*]:																									
 2020	2021	2022	2023	2024	2025	2026	2027	2028	2029	2030	2031	2032	2033	2034	2035	2036	2037	2038	2039	2040:=
 BENELGHABP00	654.6	654.6	654.6	654.6	654.6	654.6	654.6	654.6	654.6	654.6	654.6	654.6	654.6	654.6	654.6	654.6	654.6	654.6	654.6	654.6	654.6
@@ -749,7 +749,7 @@ param InputActivityRatio default 0 :=
 1	3.03030303	3.03030303	3.03030303	3.03030303	3.03030303	3.03030303	3.03030303	3.03030303	3.03030303	3.03030303	3.03030303	3.03030303	3.03030303	3.03030303	3.03030303	3.03030303	3.03030303	3.03030303	3.03030303	3.03030303	3.03030303
 ;
 
-param ModelPeriodEmissionLimit default -1 :=
+param ModelPeriodEmissionLimit default 99999999999 :=
 ;
 
 param AccumulatedAnnualDemand default 0 :=
@@ -789,7 +789,7 @@ param EmissionActivityRatio default 0 :=
 param ReserveMargin default 1 :=
 ;
 
-param AnnualEmissionLimit default -1 :=
+param AnnualEmissionLimit default 99999999999 :=
 ;
 
 param TradeRoute default 0 :=
@@ -805,7 +805,7 @@ param CapacityOfOneTechnologyUnit default 0 :=
 ;
 
 #TJ
-param TotalTechnologyModelPeriodActivityUpperLimit default -1 :=
+param TotalTechnologyModelPeriodActivityUpperLimit default 99999999999 :=
 Benin BENCOAPRP00X	0
 Benin BENCO1PRP00X	48952
 Benin BENNGAPRP00X	43341.69432
