@@ -399,7 +399,7 @@ def capacityfactor_modification(outPutFile,input_data, capacityfactor_other):
                     startDate = pd.to_datetime("2016-%s" % (timeslicemonthstart[g]))
                     endDate = pd.to_datetime("2016-%s" % (timeslicemonthend[g]))
                     average_solar = calculate_average(capacityfactor_solar_pv, startDate, endDate, daysplitstart[m], daysplitend[m], location)
-                    tsday = timeslice[g] + str(daysplit[m])
+                    tsday = timeslice[g] + str(int(daysplit[m]))
                     dataToInsert += "%s\t%s\t%s\t%i\t%f\n" % (region, k, tsday, year, average_solar)
                     g+=1
                 m +=1
@@ -796,7 +796,7 @@ def capacityfactor(outPutFile, df, input_data, capacityfactor_wind, capacityfact
                     startDate = pd.to_datetime("2016-%s" % (timeslicemonthstart[g]))
                     endDate = pd.to_datetime("2016-%s" % (timeslicemonthend[g]))
                     average_solar = calculate_average(capacityfactor_solar_pv, startDate, endDate, daysplitstart[m], daysplitend[m], location)
-                    tsday = timeslice[g] + str(daysplit[m])
+                    tsday = timeslice[g] + str(int(daysplit[m]))
                     for t in solar_tech:
                         if t == 'SOPV':
                             if elec['id'].eq(row['Location']).any():
@@ -891,7 +891,7 @@ def capacityfactor(outPutFile, df, input_data, capacityfactor_wind, capacityfact
                     endDate = pd.to_datetime("2016-%s" % (timeslicemonthend[g]))
                     average_wind_day = calculate_average(capacityfactor_windcopy, startDate, endDate,
                                                         daysplitstart[m], daysplitend[m], location)
-                    tsday = timeslice[g] + str(daysplit[m])
+                    tsday = timeslice[g] + str(int(daysplit[m]))
                     for t in wind_tech:
                         dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location , tsday, year, average_wind_day)
                     g +=1
