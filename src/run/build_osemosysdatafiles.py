@@ -996,8 +996,8 @@ def capitalcost_dynamic(df, outPutFile, CapitalCost_PV, CapitalCost_batt, Capita
         for k in CapitalCost_PV.index:  # year is an object so I cannot match it with a number (e.g. startyear)
             pvcapitalcost = CapitalCost_PV.loc[k][0]
             batterycost = CapitalCost_batt.loc[k][0]
-            sopvcapitalcostbatt_rural = pvcapitalcost*PV_sizing_rural.loc[row['Location']]['PV_size']+ batterycost*PV_sizing_rural.loc[row['Location']]['Battery_hours']
-            sopvcapitalcostbatt_urban = pvcapitalcost*PVsizing_urban.loc[row['Location']]['PV_size']+ batterycost*PVsizing_urban.loc[row['Location']]['Battery_hours']
+            sopvcapitalcostbatt_rural = pvcapitalcost*PV_sizing_rural.loc[row['Location']]['PV_size']+ batterycost*PV_sizing_rural.loc[row['Location']]['Battery_hours'] + 2476 #average constant from paper 3
+            sopvcapitalcostbatt_urban = pvcapitalcost*PVsizing_urban.loc[row['Location']]['PV_size']+ batterycost*PVsizing_urban.loc[row['Location']]['Battery_hours'] + 2476 #average constant from paper 3
             if elec['id'].eq(row['Location']).any():
                 dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], "SOPV", location, k, pvcapitalcost))
                 dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPV", location, k, pvcapitalcost))
