@@ -69,15 +69,13 @@ def read_data(dict_df, years):
         df = dict_df[i]
         df['sumall'] = df[years].sum(axis=1)
         df_final = df.loc[df.sumall!=0]
-        #df_final['scenario'] = sample
         param = df_final.param.unique()
         dict_re = {}
 
         for c in param:
             subdf = df_final.loc[df['param']==c]
-            #subdf_final = subdf.loc[subdf.sumall!=0]#.index, inplace=True)
             dict_re[c] = subdf
-            #subdf_final.to_csv(i +c+'.csv')
+            subdf.to_csv(i +c+'.csv')
         dict_results[sample] = dict_re
     return dict_results
 
@@ -86,19 +84,29 @@ def creating_Y_to_morris(dict, path, years):
     #TODO add totaldiscountedcost, capacity by technology, transmission lines, Pre-optimisation results (battery size?), Share of total cost distribution and transmission,
     #TODO add Solution time (computation)
 
-    Y_dict = {}
+    Y_totalcost = {}
     #TotalDiscountedCostByTechnology[r,t,y]+sum{s in STORAGE} TotalDiscountedStorageCost[r,s,y] = TotalDiscountedCost[r,y] There is no storage in this model
     for i in dict.keys():
         totaldiscounted_cost = {}
         totaldiscounted_cost['TotalDiscountedCost'] = dict[i]['TotalDiscountedCostByTechnology']['sumall'].sum(axis=0)
-        Y_dict[i] = totaldiscounted_cost
+        Y_totalcost[i] = totaldiscounted_cost
 
-    df = pd.DataFrame.from_dict(Y_dict, orient="index")
-    
-    df.to_csv('src/sensitivity/Y_dict.csv')
-    return Y_dict
+    df = pd.DataFrame.from_dict(Y_totalcost, orient="index")
+    df.to_csv('src/sensitivity/totaldiscounted_results.csv')
 
-def run_morris(dict_y, paramvalues_path, problem_path):
+    Y_capacity = {}
+    #NewCapacity
+    for i in dict.keys():
+        newcap = {}
+        newcap['NewCapacity'] = dict[i]['NewCapacity']['sumall'].sum(axis=0)
+        Y_capacity[i] = newcap
+
+    df = pd.DataFrame.from_dict(Y_capacity, orient="index")
+    df.to_csv('src/sensitivity/New_capacity.csv')
+
+    return Y_totalcost, Y_capacity
+
+def run_morris(dict_y, paramvalues_path, problem_path, save_file):
 
     # Perform the sensitivity analysis using the model output
     # Specify which column of the output file to analyze (zero-indexed)
@@ -138,23 +146,6 @@ def run_morris(dict_y, paramvalues_path, problem_path):
     The `inputs.txt` should be the output from SALib.sample.morris.sample
 
     """
-
-    def plot_histogram(problem: dict, X: np.array, fig: plt.figure):
-
-        # chnage histogram labels to legend for clarity
-        problem_hist = problem.copy()
-        problem_hist['names'] = [f'X{x}' for x, _ in enumerate(problem_hist['names'])]
-        legend_labels = [f"{problem_hist['names'][num]} = {problem['names'][num]}" for num, _ in enumerate(problem['names'])]
-        legend_handles = [mlines.Line2D([],[], color='w', marker='.', linewidth=0, markersize=0, label=label) for label in legend_labels]
-
-        # plot histogram 
-        ax = fig.subplots(1)
-        plot_morris.sample_histograms(fig, X, problem_hist)
-        fig.patch.set_visible(False)
-        ax.axis('off')
-        ncols = 2 if len(legend_labels) < 3 else ceil(len(legend_labels)/2) 
-        fig.legend(handles=legend_handles, ncol=ncols, frameon=False, fontsize='small')
-        fig.suptitle(' ', fontsize=(ncols * 20))
 
     def create_salib_problem(parameters: List) -> dict:
         """Creates SALib problem from scenario configuration.
@@ -234,8 +225,6 @@ def run_morris(dict_y, paramvalues_path, problem_path):
 
         fig.savefig(f'{save_file}.png', bbox_inches='tight')
     
-    save_file = 'src/sensitivity/totaldiscountedcost'
-
     with open(problem_path, 'r') as csv_file:
         parameters = list(csv.DictReader(csv_file))
 
@@ -251,8 +240,10 @@ def main(folder, outputdataframe):
     years = ['2020', '2021', '2022','2023','2024','2025','2026','2027','2028','2029','2030','2031',	'2032',	'2033',	'2034',	'2035',	'2036',	'2037',	'2038',	'2039',	'2040', '2041']
     dict_df = load_csvs(folder, years)
     dict_results = read_data(dict_df, years)
-    dict_Y = creating_Y_to_morris(dict_results, 'src/sensitivity', years)
-    run_morris(dict_Y, 'src/sensitivity/sample_morris.csv', 'src/config/parameters.csv')
+    totaldiscountedcost, capacity = creating_Y_to_morris(dict_results, 'src/sensitivity', years)
+    run_morris(totaldiscountedcost, 'src/sensitivity/sample_morris.csv', 'src/config/parameters.csv', 'src/sensitivity/totaldiscountedcost')
+    run_morris(capacity, 'src/sensitivity/sample_morris.csv', 'src/config/parameters.csv', 'src/sensitivity/newcapacity')
+
 
 main('src/run/temp/results', 'src/run/temp/results')
 
