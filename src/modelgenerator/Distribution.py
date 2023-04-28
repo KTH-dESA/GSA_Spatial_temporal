@@ -35,13 +35,13 @@ def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath, spatial):
         # The table includes the raw data from ArcMap function
         near_adj_points: Union[Union[Series, ExtensionArray, ndarray, DataFrame, None], Any] = neartable[neartable["DISTANCE"] > 0]
 
-        near_adj_points.loc[(near_adj_points.SENDID.isin(HV.id)), 'SendTech'] = 'KEEL00t00'
+        near_adj_points.loc[(near_adj_points.SENDID.isin(HV.id)), 'SendTech'] = 'BENEL1TRP00X'
 
         #add input fuel and inputtech to central exisiting grid
         central = near_adj_points.loc[(near_adj_points.SENDID.isin(HV.id))]
         central_nogrid = central.loc[central.NEARID.isin(noHV.id)]
         for m in central_nogrid.index:
-            near_adj_points.loc[near_adj_points.index == m, 'INFUEL'] = 'KEEL2'
+            near_adj_points.loc[near_adj_points.index == m, 'INFUEL'] = 'TREL2'
             near_adj_points.loc[(near_adj_points.index == m , 'INTECH')] =  "TRHV_"+ str(int(near_adj_points.SENDID[m])) + "_" + str(int(near_adj_points.NEARID[m]))
             near_adj_points.loc[near_adj_points.index == m, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[m]))
 
@@ -49,7 +49,7 @@ def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath, spatial):
 
         central_minigrid = central.loc[central.NEARID.isin(minigrid.id)]
         for m in central_minigrid.index:
-            near_adj_points.loc[near_adj_points.index == m, 'INFUEL'] = 'KEEL2'
+            near_adj_points.loc[near_adj_points.index == m, 'INFUEL'] = 'TREL2'
             near_adj_points.loc[(near_adj_points.index == m , 'INTECH')] = "TRHV_"+ str(int(near_adj_points.SENDID[m])) + "_" + str(int(near_adj_points.NEARID[m]))
             near_adj_points.loc[near_adj_points.index == m, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[m]))
 
@@ -156,3 +156,21 @@ def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv
     TRLV_TRLVM = pd.concat([peakdemand_divided_km_cleaned, peakdemandLVM_divided_km_cleaned])
 
     TRLV_TRLVM.to_csv(os.path.join(tofolder,'%i_%i_peakdemand.csv') %(spatail, demand_scneario))
+
+def distribution_elec_startyear(demand, capacitytoactivity, distrlosses, years, savepath):
+    demand_df =pd.read_csv(demand)
+    elecdemand = demand_df.loc[demand_df.Fuel.str.endswith('_1', na=False)]
+    elecdemand['Technology'] = elecdemand['Fuel'].str.replace('EL3_', 'EL00d_')
+    elecdemand['Technology'] = elecdemand['Technology'] .str.slice(stop=-2)
+    elecdemand.drop('Fuel', axis=1)
+    elecdemand.index = elecdemand['Technology']
+
+    demand_column = elecdemand[years[0]]
+    capacity_distrib  = demand_column.apply(lambda row: row/(capacitytoactivity*distrlosses)) 
+
+    #capacity_distrib = elecdemand['new_column']
+    #df= capacity_distrib
+    multiple = pd.DataFrame({f'col{i+1}': capacity_distrib for i in range((len(years)))})
+    multiple.columns = years
+    multiple.index = capacity_distrib.index
+    multiple.to_csv(savepath)

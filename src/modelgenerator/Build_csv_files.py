@@ -463,7 +463,7 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
             outputactivity.index = outputactivity.index + 1  # shifting index
             outputactivity = outputactivity.sort_index()
 
-            input_temp = [0,  "KEDS", "DSGEN_%i" %(k), 4, 1]
+            input_temp = [0,  "DIESEL_IMP", "DSGEN_%i" %(k), 4, 1]
             inputactivity.loc[-1] = input_temp  # adding a row
             inputactivity.index = inputactivity.index + 1  # shifting index
             inputactivity = inputactivity.sort_index()

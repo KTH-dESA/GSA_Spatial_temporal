@@ -4,6 +4,7 @@ import os
 from os import listdir
 from os.path import isfile, join
 from datetime import datetime
+import math
 
 import logging
 
@@ -167,7 +168,12 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
     else:
         print('No capacityfactors for power plants file')
 
+    ##############################################################
 
+    if 'residual_capacity%i_demand_%i_spatialresolution' %(demand_scenario,spatial) in dict_df:
+        outPutFile = residualcapacity(outPutFile, dict_df['residual_capacity%i_demand_%i_spatialresolution' %(demand_scenario,spatial)])
+    else:
+        print('No residual capacity file')
     ################################################################
 
     if ('uncertain%f_spatial%i_capacityfactor_solar' %(CapacityFactor_adj ,spatial) or 'uncertain%f_spatial%i_capacityfactor_wind'%(CapacityFactor_adj ,spatial)) in dict_df.keys():
@@ -178,6 +184,19 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
     ###############################################################################
 
     return(outPutFile)
+
+def residualcapacity(outPutFile, residual_df):
+    dataToInsert = ""
+    print("FUEL SET", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    param = "param ResidualCapacity default 0 :=\n[Benin,*,*]:\n2020	2021	2022	2023	2024	2025	2026	2027	2028	2029	2030	2031	2032	2033	2034	2035	2036	2037	2038	2039	2040:=\n"
+    startIndex = outPutFile.index(param) + len(param)
+
+    dataToInsert = residual_df.to_string(index=False, header=None)+'\n'
+
+    outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
+
+    return(outPutFile)
+
 
 def SETS(outPutFile, technology, fuel, years, yearsplit):
 
@@ -380,7 +399,7 @@ def capacityfactor_modification(outPutFile,input_data, capacityfactor_other):
                     startDate = pd.to_datetime("2016-%s" % (timeslicemonthstart[g]))
                     endDate = pd.to_datetime("2016-%s" % (timeslicemonthend[g]))
                     average_solar = calculate_average(capacityfactor_solar_pv, startDate, endDate, daysplitstart[m], daysplitend[m], location)
-                    tsday = timeslice[g] + str(daysplit[m])
+                    tsday = timeslice[g] + str(int(daysplit[m]))
                     dataToInsert += "%s\t%s\t%s\t%i\t%f\n" % (region, k, tsday, year, average_solar)
                     g+=1
                 m +=1
@@ -458,6 +477,9 @@ def maxkm(outPutFile,input_data, distributionlines, distributioncelllength, elec
 
     for j, row in distribution_total.iterrows():
         km = distribution_total.loc[j]['sum']
+        if math.isnan(km):
+            km=0
+        
         year = int(input_data['startyear'][0])
         while year <= int(input_data['endyear'][0]):
             dataToInsert += "%s\tTRLV_%i_0\t%i\t%f\n" % (input_data['region'][0],j, year, km)
@@ -774,7 +796,7 @@ def capacityfactor(outPutFile, df, input_data, capacityfactor_wind, capacityfact
                     startDate = pd.to_datetime("2016-%s" % (timeslicemonthstart[g]))
                     endDate = pd.to_datetime("2016-%s" % (timeslicemonthend[g]))
                     average_solar = calculate_average(capacityfactor_solar_pv, startDate, endDate, daysplitstart[m], daysplitend[m], location)
-                    tsday = timeslice[g] + str(daysplit[m])
+                    tsday = timeslice[g] + str(int(daysplit[m]))
                     for t in solar_tech:
                         if t == 'SOPV':
                             if elec['id'].eq(row['Location']).any():
@@ -869,7 +891,7 @@ def capacityfactor(outPutFile, df, input_data, capacityfactor_wind, capacityfact
                     endDate = pd.to_datetime("2016-%s" % (timeslicemonthend[g]))
                     average_wind_day = calculate_average(capacityfactor_windcopy, startDate, endDate,
                                                         daysplitstart[m], daysplitend[m], location)
-                    tsday = timeslice[g] + str(daysplit[m])
+                    tsday = timeslice[g] + str(int(daysplit[m]))
                     for t in wind_tech:
                         dataToInsert += "%s\t%s_%s\t%s\t%i\t%f\n" % (region, t, location , tsday, year, average_wind_day)
                     g +=1
@@ -970,12 +992,12 @@ def capitalcost_dynamic(df, outPutFile, CapitalCost_PV, CapitalCost_batt, Capita
         for k in CapitalCost_WI.index:  # year is an object so I cannot match it with a number (e.g. startyear)
             windcapitalcost = CapitalCost_WI.loc[k][0]
             dataToInsert += "%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], "WI", location, k, windcapitalcost)
-
+            
         for k in CapitalCost_PV.index:  # year is an object so I cannot match it with a number (e.g. startyear)
             pvcapitalcost = CapitalCost_PV.loc[k][0]
             batterycost = CapitalCost_batt.loc[k][0]
-            sopvcapitalcostbatt_rural = pvcapitalcost*PV_sizing_rural.loc[row['Location']]['PV_size']+ batterycost*PV_sizing_rural.loc[row['Location']]['Battery_hours']
-            sopvcapitalcostbatt_urban = pvcapitalcost*PVsizing_urban.loc[row['Location']]['PV_size']+ batterycost*PVsizing_urban.loc[row['Location']]['Battery_hours']
+            sopvcapitalcostbatt_rural = pvcapitalcost*PV_sizing_rural.loc[row['Location']]['PV_size']+ batterycost*PV_sizing_rural.loc[row['Location']]['Battery_hours'] + 2476 #average constant from paper 3
+            sopvcapitalcostbatt_urban = pvcapitalcost*PVsizing_urban.loc[row['Location']]['PV_size']+ batterycost*PVsizing_urban.loc[row['Location']]['Battery_hours'] + 2476 #average constant from paper 3
             if elec['id'].eq(row['Location']).any():
                 dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], "SOPV", location, k, pvcapitalcost))
                 dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPV", location, k, pvcapitalcost))
@@ -984,6 +1006,7 @@ def capitalcost_dynamic(df, outPutFile, CapitalCost_PV, CapitalCost_batt, Capita
             if un_elec['id'].eq(row['Location']).any():
                 dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPV", location, k, pvcapitalcost))
                 dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPVBattery", location, k, sopvcapitalcostbatt_rural))
+            dataToInsert += "%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], "SOMG8c", location, k, sopvcapitalcostbatt_rural)
 
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)

@@ -12,7 +12,7 @@ import pulp as pl
 from pulp import *
 import pandas as pd
 from datetime import timedelta
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 
 def optimize_battery_pv(pv_power, location, load_profile, efficiency_discharge,  efficiency_charge, pv_cost, battery_cost, scenario):
     """
