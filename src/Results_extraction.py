@@ -92,6 +92,7 @@ def creating_Y_to_morris(dict, path, years):
         Y_totalcost[i] = totaldiscounted_cost
 
     df = pd.DataFrame.from_dict(Y_totalcost, orient="index")
+    #TODO add sort function on index
     df.to_csv('src/sensitivity/totaldiscounted_results.csv')
 
     Y_capacity = {}
@@ -230,8 +231,20 @@ def run_morris(dict_y, paramvalues_path, problem_path, save_file):
 
     #for i in dict_y.keys():
     X = np.loadtxt(paramvalues_path, delimiter=",")
-    df = pd.DataFrame.from_dict(dict_y, orient="index")
-    Y = df.to_numpy()
+    #df = pd.DataFrame({'sample':dict_y.keys(), 'value':dict_y.values()})
+    df = pd.DataFrame.from_dict(dict_y)
+    #df = pd.DataFrame.from_dict(dict_y, orient="index")
+    #df['sample'] = df.index
+    #df.index_obj.to_numpy(dtype=int)
+    #df.sample.astype(int)
+    #df.index= df['sample']
+    df_2 = df.T
+    df_2.index = df_2.index.astype(int)
+    df_2 = df_2.sort_index()
+    #index_list = df_2.index.tolist()
+    #df_2.index = index_list
+    #df_2.sort_index(axis=0)
+    Y = df_2.to_numpy()
 
     sa_results(parameters, X, Y, save_file)
     
@@ -245,6 +258,6 @@ def main(folder, outputdataframe):
     run_morris(capacity, 'src/sensitivity/sample_morris.csv', 'src/config/parameters.csv', 'src/sensitivity/newcapacity')
 
 
-main('src/run/temp/results', 'src/run/temp/results')
+main('src/run/temp/results', 'src/run/sensitivity')
 
 
