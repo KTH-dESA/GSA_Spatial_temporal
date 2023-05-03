@@ -111,7 +111,7 @@ def run_morris(dict_y, paramvalues_path, problem_path, save_file):
 
     # Perform the sensitivity analysis using the model output
     # Specify which column of the output file to analyze (zero-indexed)
-    #Si = morris.analyze(problem, param_values_, Y, conf_level=0.95, print_to_console=True, num_levels=4, num_resamples=100)
+    # Si = morris.analyze(problem, param_values_, Y, conf_level=0.95, print_to_console=True, num_levels=4, num_resamples=100)
     # Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and 'mu_star_conf'
     # e.g. Si['mu_star'] contains the mu* value for each parameter, in the
     # same order as the parameter file
@@ -229,21 +229,11 @@ def run_morris(dict_y, paramvalues_path, problem_path, save_file):
     with open(problem_path, 'r') as csv_file:
         parameters = list(csv.DictReader(csv_file))
 
-    #for i in dict_y.keys():
     X = np.loadtxt(paramvalues_path, delimiter=",")
-    #df = pd.DataFrame({'sample':dict_y.keys(), 'value':dict_y.values()})
     df = pd.DataFrame.from_dict(dict_y)
-    #df = pd.DataFrame.from_dict(dict_y, orient="index")
-    #df['sample'] = df.index
-    #df.index_obj.to_numpy(dtype=int)
-    #df.sample.astype(int)
-    #df.index= df['sample']
     df_2 = df.T
     df_2.index = df_2.index.astype(int)
     df_2 = df_2.sort_index()
-    #index_list = df_2.index.tolist()
-    #df_2.index = index_list
-    #df_2.sort_index(axis=0)
     Y = df_2.to_numpy()
 
     sa_results(parameters, X, Y, save_file)
