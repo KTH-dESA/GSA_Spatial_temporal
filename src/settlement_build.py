@@ -290,29 +290,29 @@ def raster_proximity(proj_path, files, country):
         #    print("Skipping a raster")
 
         # Proximity raster of 50 000 m
-        for j in range(len(raster_out)):
-            #try:
-            print('Making proximity analysis %s' %(raster_out[j]))
-            src_ds = gdal.Open(raster_out[j])
-            _, filename = os.path.split(raster_list[j])
-            name, ending = os.path.splitext(filename)
+    for j in range(len(raster_out)):
+        #try:
+        print('Making proximity analysis %s' %(raster_out[j]))
+        src_ds = gdal.Open(raster_out[j])
+        _, filename = os.path.split(raster_list[j])
+        name, ending = os.path.splitext(filename)
 
-            srcband = src_ds.GetRasterBand(1)
-            dst_filename = os.path.join(proj_path, name+'proximity.tif')
-            raster_prox.append(dst_filename)
+        srcband = src_ds.GetRasterBand(1)
+        dst_filename = os.path.join(proj_path, name+'proximity.tif')
+        raster_prox.append(dst_filename)
 
-            drv = gdal.GetDriverByName('GTiff')
-            dst_ds = drv.Create(dst_filename,src_ds.RasterXSize, src_ds.RasterYSize, 1, gdal.GetDataTypeByName('Float32'))
+        drv = gdal.GetDriverByName('GTiff')
+        dst_ds = drv.Create(dst_filename,src_ds.RasterXSize, src_ds.RasterYSize, 1, gdal.GetDataTypeByName('Float32'))
 
-            dst_ds.SetGeoTransform(src_ds.GetGeoTransform())
-            dst_ds.SetProjection(src_ds.GetProjectionRef())
-            dstband = dst_ds.GetRasterBand(1)
-            gdal.ComputeProximity(srcband, dstband, ["DISTUNITS=GEO", "maxdist=50000", "nodata=99999"])
-            srcband = None
-            dstband = None
-            src_ds = None
-            dst_ds = None
-            #except:
-                #print("Skipping raster")
+        dst_ds.SetGeoTransform(src_ds.GetGeoTransform())
+        dst_ds.SetProjection(src_ds.GetProjectionRef())
+        dstband = dst_ds.GetRasterBand(1)
+        gdal.ComputeProximity(srcband, dstband, ["DISTUNITS=GEO", "maxdist=50000", "nodata=99999"])
+        srcband = None
+        dstband = None
+        src_ds = None
+        dst_ds = None
+        #except:
+            #print("Skipping raster")
 
     return(raster_prox)
