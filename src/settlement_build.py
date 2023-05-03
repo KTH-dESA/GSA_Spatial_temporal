@@ -70,25 +70,69 @@ def raster_to_point(raster_list, pop_shp, proj_path, crs, country):
 
     print('The viirs.tif file is converted to a dataframe')
 
-    _, filename = os.path.split(raster_list[0])
-    name, ending = os.path.splitext(filename)
-    try:
-        trans = rasterio.open(raster_list[0])
-        settlements['Grid'] = [x[0] for x in trans.sample(coords)]
-        print(name)
+    if country == 'Benin':
+        _, filename = os.path.split(raster_list[0])
+        name, ending = os.path.splitext(filename)
+        try:
+            trans = rasterio.open(raster_list[0])
+            settlements['Grid'] = [x[0] for x in trans.sample(coords)]
+            print(name)
 
-        print('The %s.tif file is added to the dataframe' %(name))
-    except:
-        print('No %s.tif file' %(name))
+            print('The %s.tif file is added to the dataframe' %(name))
+        except:
+            print('No %s.tif file' %(name))
 
-    if country == 'Kenya':
+        if country == 'Kenya':
+            _, filename = os.path.split(raster_list[1])
+            name, ending = os.path.splitext(filename)
+            try:
+                subs = rasterio.open(raster_list[1])
+                print(subs.crs)
+                settlements['Substation'] = [x[0] for x in subs.sample(coords)]
+                print(name)
+
+                print('The %s.tif file is added to the dataframe' %(name))
+            except:
+                print('No %s.tif file' %(name))
+
+            _, filename = os.path.split(raster_list[2])
+            name, ending = os.path.splitext(filename)
+            try:
+                transf = rasterio.open(raster_list[2])
+                settlements['Transform'] = [x[0] for x in transf.sample(coords)]
+
+                print('The %s.tif file is added to the dataframe' %(name))
+            except:
+                print('No %s.tif file' %(name))
+
+            _, filename = os.path.split(raster_list[3])
+            name, ending = os.path.splitext(filename)
+            try:
+                minig = rasterio.open(raster_list[3])
+                settlements['Minigrid'] = [x[0] for x in minig.sample(coords)]
+
+                print('The %s.tif file is added to the dataframe' %(name))
+            except:
+                print('No %s.tif file' %(name))
+
+        else:
+            print('Benin')
+
         _, filename = os.path.split(raster_list[1])
         name, ending = os.path.splitext(filename)
         try:
-            subs = rasterio.open(raster_list[1])
-            print(subs.crs)
-            settlements['Substation'] = [x[0] for x in subs.sample(coords)]
-            print(name)
+            road = rasterio.open(raster_list[1])
+            settlements['Road'] = [x[0] for x in road.sample(coords)]
+
+            print('The %s.tif file is added to the dataframe' %(name))
+        except:
+            print('No %s.tif file' %(name))
+
+        _, filename = os.path.split(raster_list[0])
+        name, ending = os.path.splitext(filename)
+        try:
+            mv = rasterio.open(raster_list[0])
+            settlements['MV'] = [x[0] for x in mv.sample(coords)]
 
             print('The %s.tif file is added to the dataframe' %(name))
         except:
@@ -97,58 +141,93 @@ def raster_to_point(raster_list, pop_shp, proj_path, crs, country):
         _, filename = os.path.split(raster_list[2])
         name, ending = os.path.splitext(filename)
         try:
-            transf = rasterio.open(raster_list[2])
-            settlements['Transform'] = [x[0] for x in transf.sample(coords)]
+            lv = rasterio.open(raster_list[2])
+            settlements['LV'] = [x[0] for x in lv.sample(coords)]
 
             print('The %s.tif file is added to the dataframe' %(name))
         except:
             print('No %s.tif file' %(name))
-
-        _, filename = os.path.split(raster_list[3])
+    else:
+        _, filename = os.path.split(raster_list[0])
         name, ending = os.path.splitext(filename)
         try:
-            minig = rasterio.open(raster_list[3])
-            settlements['Minigrid'] = [x[0] for x in minig.sample(coords)]
+            trans = rasterio.open(raster_list[0])
+            settlements['Grid'] = [x[0] for x in trans.sample(coords)]
+            print(name)
 
             print('The %s.tif file is added to the dataframe' %(name))
         except:
             print('No %s.tif file' %(name))
 
-    else:
-        print('Benin')
+        if country == 'Kenya':
+            _, filename = os.path.split(raster_list[1])
+            name, ending = os.path.splitext(filename)
+            try:
+                subs = rasterio.open(raster_list[1])
+                print(subs.crs)
+                settlements['Substation'] = [x[0] for x in subs.sample(coords)]
+                print(name)
 
-    _, filename = os.path.split(raster_list[1])
-    name, ending = os.path.splitext(filename)
-    try:
-        road = rasterio.open(raster_list[1])
-        settlements['Road'] = [x[0] for x in road.sample(coords)]
+                print('The %s.tif file is added to the dataframe' %(name))
+            except:
+                print('No %s.tif file' %(name))
 
-        print('The %s.tif file is added to the dataframe' %(name))
-    except:
-        print('No %s.tif file' %(name))
+            _, filename = os.path.split(raster_list[2])
+            name, ending = os.path.splitext(filename)
+            try:
+                transf = rasterio.open(raster_list[2])
+                settlements['Transform'] = [x[0] for x in transf.sample(coords)]
 
-    _, filename = os.path.split(raster_list[0])
-    name, ending = os.path.splitext(filename)
-    try:
-        mv = rasterio.open(raster_list[0])
-        settlements['MV'] = [x[0] for x in mv.sample(coords)]
+                print('The %s.tif file is added to the dataframe' %(name))
+            except:
+                print('No %s.tif file' %(name))
 
-        print('The %s.tif file is added to the dataframe' %(name))
-    except:
-        print('No %s.tif file' %(name))
+            _, filename = os.path.split(raster_list[3])
+            name, ending = os.path.splitext(filename)
+            try:
+                minig = rasterio.open(raster_list[3])
+                settlements['Minigrid'] = [x[0] for x in minig.sample(coords)]
 
-    _, filename = os.path.split(raster_list[2])
-    name, ending = os.path.splitext(filename)
-    try:
-        lv = rasterio.open(raster_list[2])
-        settlements['LV'] = [x[0] for x in lv.sample(coords)]
+                print('The %s.tif file is added to the dataframe' %(name))
+            except:
+                print('No %s.tif file' %(name))
 
-        print('The %s.tif file is added to the dataframe' %(name))
+        else:
+            print('Benin')
 
-        settlements.to_file(os.path.join(proj_path, 'settlements.shp'))
-        print('The dataframe is saved to settlements.shp')
-    except:
-        print('No %s.tif file' %(name))
+        _, filename = os.path.split(raster_list[4])
+        name, ending = os.path.splitext(filename)
+        try:
+            road = rasterio.open(raster_list[4])
+            settlements['Road'] = [x[0] for x in road.sample(coords)]
+
+            print('The %s.tif file is added to the dataframe' %(name))
+        except:
+            print('No %s.tif file' %(name))
+
+        _, filename = os.path.split(raster_list[5])
+        name, ending = os.path.splitext(filename)
+        try:
+            mv = rasterio.open(raster_list[5])
+            settlements['MV'] = [x[0] for x in mv.sample(coords)]
+
+            print('The %s.tif file is added to the dataframe' %(name))
+        except:
+            print('No %s.tif file' %(name))
+
+        _, filename = os.path.split(raster_list[6])
+        name, ending = os.path.splitext(filename)
+        try:
+            lv = rasterio.open(raster_list[6])
+            settlements['LV'] = [x[0] for x in lv.sample(coords)]
+
+            print('The %s.tif file is added to the dataframe' %(name))
+        except:
+            print('No %s.tif file' %(name))
+
+    settlements.to_file(os.path.join(proj_path, 'settlements.shp'))
+    print('The dataframe is saved to settlements.shp')
+
     return()
 
 def raster_proximity(proj_path, files, country):
@@ -187,7 +266,6 @@ def raster_proximity(proj_path, files, country):
 
         # Open Shapefile
         Shapefile = ogr.Open(InputVector)
-        Shapefile.GetLayerCount()
         Shapefile_layer = Shapefile.GetLayer()
 
         # Rasterise

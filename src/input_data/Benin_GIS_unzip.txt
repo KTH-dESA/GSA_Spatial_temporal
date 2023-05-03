@@ -1,6 +1,0 @@
-VNL_v2_npp_2020_global_vcmslcfg_c202102150000.average_masked.tif.gz,VNL_v2_npp_2020_global_vcmslcfg_c202102150000.average_masked.tif.gz
-https://zenodo.org/record/4736323/files/GDP_PPP_Layer2015.tif?download=1,GDP_PPP_2015_WGS_84.tif
-https://energydata.info/dataset/0924f8e6-efbb-4f38-b2df-67b380fbbd0b/resource/146ac1a0-deb2-4b27-a3e8-b55aa9e84975/download/ecowas_distribution.zip,ecowas_distribution.zip
-https://development-data-hub-s3-public.s3.amazonaws.com/ddhfiles/99865/geospatial/AICD/Power%20Transmission/benin-electricity-transmission-network.zip,benin-electricity-transmission-network.zip
-https://biogeo.ucdavis.edu/data/gadm3.6/shp/gadm36_BEN_shp.zip,gadm36_BEN_shp.zip
-https://energydata.info/dataset/f285a8ca-891a-41f0-8486-06987603aebe/resource/ff2c95d6-1a3b-4240-b548-89b9586281ce/download/benin-roads.zip,benin-roads.zip
