@@ -6,22 +6,74 @@ import pandas as pd
 from configparser import ConfigParser
 import numpy as np
 import seaborn as sns
-from Download_files import *
-from Project_GIS import *
+from modelgenerator.Download_files import *
+from modelgenerator.Project_GIS import *
 from settlement_build import *
-from elec_start import *
-from Build_csv_files import *
-from Pathfinder_processing_step import *
-
-print(os.getcwd())
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
-files = pd.read_csv('input_data/Benin_GIS_files.csv', index_col=0)
+from modelgenerator.elec_start import *
+from modelgenerator.Build_csv_files import *
+from modelgenerator.Pathfinder_processing_step import *
 import os
 
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 config = ConfigParser()
 config.read('config/config_input.ini')
 
-crs = config['geospatialdata']['crs']
+country = 'Kenya'
+if country == 'Kenya':
+    crs = config['geospatialdata']['Kenyacrs']
+
+    files = pd.read_csv(config['inputfiles']['Kenyagisfiles'], index_col=0)
+    GIS_URL_Kenya = config['geospatialdata']['KenyaURL']
+    KenyaUnzip = config['geospatialdata']['KenyaUnzip']
+    Kenyaprojectedfolder = config['geospatialdata']['Kenyaprojectedfolder']
+    Kenyapop_shp =config['geospatialdata']['Kenyapopshp']
+    Kenyaelec_shp = config['inputfiles']['Kenyaelec_shp']
+    Kenyascenarios_folder = config['inputfiles']['Kenyascenarios_folder']
+    projpath = config['dijkstra_Kenya']['proj_path']
+    elec_actual = float(config['electrification_Kenya']['elec_actual'])
+    pop_cutoff = int(config['electrification_Kenya']['pop_cutoff'])
+    dist_mv = int(config['electrification_Kenya']['dist_mv'])
+    dist_lv = int(config['electrification_Kenya']['dist_lv'])
+    dist_to_trans = int(config['electrification_Kenya']['dist_to_trans'])
+    dist_to_sub = int(config['electrification_Kenya']['dist_to_sub'])
+    dist_minig = int(config['electrification_Kenya']['dist_minig'])
+    min_night_lights = float(config['electrification_Kenya']['min_night_lights'])
+    max_grid_dist = int(config['electrification_Kenya']['max_grid_dist'])
+    max_road_dist = int(config['electrification_Kenya']['max_road_dist'])
+    pop_cutoff2 = int(config['electrification_Kenya']['pop_cutoff2'])
+    urban_elec_ratio =  float(config['electrification_Kenya']['urban_elec_ratio'])
+    rural_elec_ratio = float(config['electrification_Kenya']['rural_elec_ratio'])
+    pop_actual = int(config['electrification_Kenya']['pop_actual'])
+    urban =float(config['electrification_Kenya']['urban'])
+    urban_cutoff =  int(config['electrification_Kenya']['urban_cutoff'])
+    start_year =  int(config['electrification_Kenya']['start_year'])
+    settlement = gpd.read_file(config['electrification_Kenya']['settlement'])                           
+else:
+    crs = config['geospatialdata']['Benincrs']
+
+    files = pd.read_csv(config['inputfiles']['Beningisfiles'], index_col=0)
+    GIS_URL_Kenya = config['geospatialdata']['BeninURL']
+    KenyaUnzip = config['geospatialdata']['BeninUnzip']
+    Kenyaprojectedfolder = config['geospatialdata']['Beninprojectedfolder']
+    Kenyapop_shp =config['geospatialdata']['Beninpopshp']
+    Kenyaelec_shp = config['inputfiles']['Beninelec_shp']
+    Kenyascenarios_folder = config['inputfiles']['Beninscenarios_folder']
+    projpath = config['dijkstra_Benin']['proj_path']
+    elec_actual = float(config['electrification_Benin']['elec_actual'])
+    pop_cutoff = int(config['electrification_Benin']['pop_cutoff'])
+    dist_mv = int(config['electrification_Benin']['dist_mv'])
+    dist_lv = int(config['electrification_Benin']['dist_lv'])
+    min_night_lights = float(config['electrification_Benin']['min_night_lights'])
+    max_grid_dist = int(config['electrification_Benin']['max_grid_dist'])
+    max_road_dist = int(config['electrification_Benin']['max_road_dist'])
+    pop_cutoff2 = int(config['electrification_Benin']['pop_cutoff2'])
+    urban_elec_ratio =  float(config['electrification_Benin']['urban_elec_ratio'])
+    rural_elec_ratio = float(config['electrification_Benin']['rural_elec_ratio'])
+    pop_actual = int(config['electrification_Benin']['pop_actual'])
+    urban =float(config['electrification_Benin']['urban'])
+    urban_cutoff =  int(config['electrification_Benin']['urban_cutoff'])
+    start_year =  int(config['electrification_Benin']['start_year'])
+    settlement = gpd.read_file(config['electrification_Benin']['settlement'])
 
 # 1. The files in "input_data/GIS_data" are downloaded and placed in a "temp" folder.
 date = datetime. now(). strftime("%Y_%m_%d-%I:%M:%S_%p")
@@ -29,16 +81,16 @@ print(date)
 print("1. The files in input_data/GIS_data are downloaded and placed in a temp folder.")
 URL_viirs = 'https://eogdata.mines.edu/nighttime_light/annual/v20/2020/VNL_v2_npp_2020_global_vcmslcfg_c202102150000.average_masked.tif.gz'
 
-download_url_data('input_data/GIS_URL.txt', 'temp')
-download_viirs(URL_viirs, 'temp')
-unzip_all('input_data/GIS_unzip.txt', '../temp', '../GIS_data')
+#download_url_data(GIS_URL_Kenya, 'temp')
+#download_viirs(URL_viirs, 'temp')
+#unzip_all(KenyaUnzip, '../temp', '../GIS_data')
 
 # 2. The files are then projected and clipped to the administrative boundaries.
 date = datetime. now(). strftime("%Y_%m_%d-%I:%M:%S_%p")
 print(date)
 print("2. The files are then projected and clipped to the administrative boundaries.")
 
-#project_main('../GIS_Data', '../Projected_files', files, crs)
+#project_main('../GIS_Data', Kenyaprojectedfolder, files, crs)
 # 3. Through QGIS make raster to point layer and save (MANUAL STEP)
 date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
 print(date)
@@ -54,44 +106,24 @@ print("4. The GIS layers are prepared to for a heuristic approximation for elect
 #Make sure you are in the /src directory when you start this script
 print(os.getcwd())
 
-pop_shp = '../Projected_files/Benin/raster_to_point_Benin_UTM31N.shp'
-Projected_files_path = '../Projected_files'
-
-rasterize = raster_proximity(Projected_files_path, files)
-points = raster_to_point(rasterize, pop_shp, Projected_files_path, crs)
+rasterize = raster_proximity(Kenyaprojectedfolder, files, country)
+points = raster_to_point(rasterize, Kenyapop_shp, Kenyaprojectedfolder, crs, country)
 
 # 5. Approximate location of urban settlements and the electrified settlements 1kmx1km resolution
 date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
 print(date)
 print("5. Approximate location of urban settlements and the electrified settlements 1kmx1km resolution")
 
-elec_actual = 0.414  # percent #https://data.worldbank.org/indicator/EG.ELC.ACCS.ZS accessed 2022-08-09
-pop_cutoff = 400  # people
-dist_mv = 1000 #meters
-dist_lv = 1000 #meters
-min_night_lights = 0.5
-max_grid_dist = 5000  # meters
-max_road_dist = 500  # meters
-pop_cutoff2 = 3000 # people
-urban_elec_ratio = 0.663  # percent https://data.worldbank.org/indicator/EG.ELC.ACCS.UR.ZS 2022-08-09
-rural_elec_ratio = 0.182  # percent https://data.worldbank.org/indicator/EG.ELC.ACCS.RU.ZS accessed 2022-02-02
-pop_actual = 12046162  # people
-urban = 0.48  # percent https://data.worldbank.org/indicator/SP.URB.TOTL.IN.ZS 2021-02-02
-urban_cutoff = 20000
-start_year = 2019
-settlement = gpd.read_file("../Projected_files/settlements.shp")
-
 settlements = pd.DataFrame(settlement, copy=True)
-urbansettlements = calibrate_pop_and_urban(settlements, pop_actual, urban, urban_cutoff)
+urbansettlements = calibrate_pop_and_urban(settlements, pop_actual, urban, urban_cutoff, country)
 elec_current_and_future(urbansettlements, elec_actual, pop_cutoff, min_night_lights,
-                            max_grid_dist, urban_elec_ratio, rural_elec_ratio, max_road_dist, pop_actual, pop_cutoff2, start_year, dist_mv, dist_lv, crs)
-
+                            max_grid_dist, urban_elec_ratio, rural_elec_ratio, max_road_dist, pop_actual, pop_cutoff2, start_year, dist_mv, dist_lv, crs, country, dist_to_trans, dist_to_sub, dist_minig, Kenyaprojectedfolder)
 
 
 date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
 print(date)
-shp_path = ('../Projected_files/elec.shp')
-point = gpd.read_file(shp_path)
+
+point = gpd.read_file(Kenyaelec_shp)
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 #
@@ -99,15 +131,12 @@ fig, ax = plt.subplots(1, 1)
 point.plot(column='elec', ax=ax)
 fig.suptitle('Estimated electrified popluation (in yellow) Benin', fontsize=18)
 
-plt.savefig('run/elec.png')
+plt.savefig(country +'_run/elec.png')
 
 date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
 print(date)
 print("1. Calculating the Pathfinder distribution lines to unelectrified cells")
-path = '../Projected_files/'
-proj_path = 'temp/dijkstra'
-elec_shp = '../Projected_files/elec.shp'
-tofolder = 'run/scenarios'
+
 tiffile = '../Projected_files/' + files.loc['pop_raster','filename']
 
-pathfinder_main(path,proj_path, elec_shp, tofolder, tiffile, crs)
+pathfinder_main(Kenyaprojectedfolder,projpath, Kenyaelec_shp, Kenyascenarios_folder, tiffile, crs)
