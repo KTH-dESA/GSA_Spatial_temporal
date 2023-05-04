@@ -151,7 +151,7 @@ def merge_mv(proj_path, fil):
 
     try:
         gdf = pd.concat([shp for shp in tmiss_list]).pipe(gpd.GeoDataFrame)
-        gdf.to_file(os.path.join(proj_path,fil.loc['minigrid_concat','filename']))
+        gdf.to_file(os.path.join(proj_path,fil.loc['Concat_MV_lines_UMT37S','filename']))
     except:
         print("No MV lines")
     os.chdir(current)
@@ -182,7 +182,7 @@ def merge_minigrid(proj_path, fil):
 
     try:
         gdf = pd.concat([shp for shp in minigr_list]).pipe(gpd.GeoDataFrame)
-        gdf.to_file(os.path.join(proj_path,fil.loc['MV_concat','filename']))
+        gdf.to_file(os.path.join(proj_path,fil.loc['Concat_Mini-grid','filename']))
     except:
         print("No minigrid files")
     os.chdir(current)

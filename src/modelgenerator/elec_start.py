@@ -71,7 +71,7 @@ def calibrate_pop_and_urban(settlement, pop_actual, urban, urban_cutoff, country
     return settlement
 
 def elec_current_and_future(settlement, elec_actual, pop_cutoff, min_night_lights,
-                            max_grid_dist, urban_elec_ratio, rural_elec_ratio, max_road_dist, pop_actual, pop_cutoff2, start_year, dist_mv, dist_lv, crs, country, dist_to_trans, dist_to_sub, dist_minig):
+                            max_grid_dist, urban_elec_ratio, rural_elec_ratio, max_road_dist, pop_actual, pop_cutoff2, start_year, dist_mv, dist_lv, crs, country, dist_to_trans, dist_to_sub, dist_minig, topath):
     """This function calibrate the current electrification status, and future 'pre-electrification' status
     :param settlement:
     :param elec_actual:
@@ -310,7 +310,7 @@ def elec_current_and_future(settlement, elec_actual, pop_cutoff, min_night_light
 
     print("(All units are in meters): ", "Nightlight (avg rad):", min_night_lights, "Distance to HV:", max_grid_dist, "Road", max_road_dist, "Elec percent:", elec_modelled, "Population threshold:", pop_cutoff, "Distance to MV:", dist_mv, "Distance to LV:", dist_lv)
     gdf = gpd.GeoDataFrame(settlement, geometry=settlement.geometry, crs=crs)
-    gdf.to_file("../Projected_files/elec.shp")
-    settlement.to_csv("../Projected_files/elec.csv")
+    gdf.to_file(os.path.join(topath, 'elec.shp'))
+    settlement.to_csv(os.path.join(topath,'elec.csv'))
 
     return
