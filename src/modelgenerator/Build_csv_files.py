@@ -20,7 +20,7 @@ from modelgenerator.PV_battery_optimisation import optimize_battery_pv
 
 pd.options.mode.chained_assignment = None
 
-def battery_to_pv(loadprofile, capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pv_cost, battery_cost, tofilePV, scenario, startDate, endDate, startDate_load, endDate_load):
+def battery_to_pv(loadprofile, capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pv_cost, battery_cost, tofilePV, scenario, startDate, endDate, startDate_load, endDate_load, country):
     """This function re-distributes the load based on the load and capacity factor from renewable ninja
     """
 
@@ -68,7 +68,7 @@ def battery_to_pv(loadprofile, capacityfactor_pv, efficiency_discharge, efficien
         location = str(row[0])
         capacityf_solar_batteries_location = capacityf_solar_batteries[[location]]
         #charging = charging_binary(capacityf_solar_batteries_location,adjusted_load, location)
-        PVadj, batterytime = optimize_battery_pv(capacityf_solar_batteries_location, location, adjusted_load, efficiency_discharge,  efficiency_charge, pv_cost, battery_cost, scenario)
+        PVadj, batterytime = optimize_battery_pv(capacityf_solar_batteries_location, location, adjusted_load, efficiency_discharge,  efficiency_charge, pv_cost, battery_cost, scenario, country)
         PV_size[location]= PVadj
         battery_size[location] = batterytime
         print("location=", location, "PV-size =", PVadj, "Batterytime=", batterytime)
@@ -463,7 +463,7 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
             outputactivity.index = outputactivity.index + 1  # shifting index
             outputactivity = outputactivity.sort_index()
 
-            input_temp = [0,  "DIESEL_IMP", "DSGEN_%i" %(k), 4, 1]
+            input_temp = [0,  "DSFUEL", "DSGEN_%i" %(k), 4, 1]
             inputactivity.loc[-1] = input_temp  # adding a row
             inputactivity.index = inputactivity.index + 1  # shifting index
             inputactivity = inputactivity.sort_index()

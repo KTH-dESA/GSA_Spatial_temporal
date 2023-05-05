@@ -10,24 +10,24 @@ temp/**
 GEOSeMOSYS_Kenya-master/**
 .idea/**
 src/__pycache__/**
-src/run/o.lp
-src/run/scenarios/capacityfactor_solar.csv
-src/run/scenarios/capacityfactor_wind.csv
-src/run/scenarios/capacitytoactivity.csv
-src/run/scenarios/capitalcost.csv
-src/Results_extraction.py
-src/run/scenarios/adjacencymatrix.csv
-src/run/scenarios/elec.csv
-src/run/scenarios/fixed_cost_tnd.csv
-src/run/scenarios/fuels.csv
-src/run/scenarios/GIS_data.csv
-src/run/scenarios/inputactivity.csv
-src/run/scenarios/outputactivity.csv
-src/run/scenarios/un_elec.csv
-src/run/scenarios/technologies.csv
-src/run/results/**
+src/Benin_run/o.lp
+src/Benin_run/scenarios/capacityfactor_solar.csv
+src/Benin_run/scenarios/capacityfactor_wind.csv
+src/Benin_run/scenarios/capacitytoactivity.csv
+src/Benin_run/scenarios/capitalcost.csv
+
+src/Benin_run/scenarios/adjacencymatrix.csv
+src/Benin_run/scenarios/elec.csv
+src/Benin_run/scenarios/fixed_cost_tnd.csv
+src/Benin_run/scenarios/fuels.csv
+src/Benin_run/scenarios/GIS_data.csv
+src/Benin_run/scenarios/inputactivity.csv
+src/Benin_run/scenarios/outputactivity.csv
+src/Benin_run/scenarios/un_elec.csv
+src/Benin_run/scenarios/technologies.csv
+src/Benin_run/results/**
 src/SALib-main/**
-src/run/Demand/demand**
+src/Benin_run/Demand/demand**
 New Text Document.txt
 src/.ipynb_checkpoints/GEOSeMOSYS -Benin-checkpoint.ipynb
 src/test_GEOSeMOSYS_Kenya.py
@@ -36,12 +36,12 @@ src/sample_morris_masterdata.xlsx
 src/sample_morris.csv
 .vscode/settings.json
 src/GEOSeMOSYS -Benin.ipynb
-src/run/elec.png
+src/Benin_run/elec.png
 src/modelruns/scenarios/sample_morris.csv
 src/modelruns/scenarios/unique_morris.csv
 
 src/run/5_elec_noHV_cells.csv
-src/run/scenarios/Demand/**
+src/Benin_run/scenarios/Demand/**
 src/run/scenarios/**
 
 src/modelruns/scenarios/unique_comb_morris.csv
@@ -94,3 +94,28 @@ src/config/results.csv
 src/modelgenerator/__ init __.py
 src/run/__ init __.py
 **7z
+src/run/glpk-4.65/**
+**.log
+src/run/temp/**
+KenyaProjected_files/**
+BeninProjected_files/**
+src/Benin_run/output/**
+src/Benin_run/temp/results/**
+src/Beninsensitivity/runs/**
+src/Kenyasensitivity/runs/**
+src/Benin_run/temp/**
+csv
+**.lp
+**.sol
+src/Benin_run/**
+src/Beninsensitivity/**
+src/Benintemp/**
+src/Kenyatemp/**
+src/Kenya_run/**
+src/Kenyasensitivity/**
+src/Benininput_data/Benin_demand.xlsx
+src/Benininput_data/halfhourly_data.csv
+src/Benininput_data/high_Jan.csv
+src/Benininput_data/Kenya_GIS_files.csv
+src/Benininput_data/T1-T5 loadprofile.xlsx
+src/Benininput_data/T3_load profile_Narayan.xls

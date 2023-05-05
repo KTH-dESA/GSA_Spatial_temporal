@@ -93,7 +93,7 @@ def creating_Y_to_morris(dict, path, years):
 
     df = pd.DataFrame.from_dict(Y_totalcost, orient="index")
     #TODO add sort function on index
-    df.to_csv('src/sensitivity/totaldiscounted_results.csv')
+    df.to_csv(os.path.join(path,'totaldiscounted_results.csv'))
 
     Y_capacity = {}
     #NewCapacity
@@ -103,7 +103,7 @@ def creating_Y_to_morris(dict, path, years):
         Y_capacity[i] = newcap
 
     df = pd.DataFrame.from_dict(Y_capacity, orient="index")
-    df.to_csv('src/sensitivity/New_capacity.csv')
+    df.to_csv(os.path.join(path,'New_capacity.csv'))
 
     return Y_totalcost, Y_capacity
 
@@ -111,7 +111,7 @@ def run_morris(dict_y, paramvalues_path, problem_path, save_file):
 
     # Perform the sensitivity analysis using the model output
     # Specify which column of the output file to analyze (zero-indexed)
-    #Si = morris.analyze(problem, param_values_, Y, conf_level=0.95, print_to_console=True, num_levels=4, num_resamples=100)
+    # Si = morris.analyze(problem, param_values_, Y, conf_level=0.95, print_to_console=True, num_levels=4, num_resamples=100)
     # Returns a dictionary with keys 'mu', 'mu_star', 'sigma', and 'mu_star_conf'
     # e.g. Si['mu_star'] contains the mu* value for each parameter, in the
     # same order as the parameter file
@@ -229,21 +229,11 @@ def run_morris(dict_y, paramvalues_path, problem_path, save_file):
     with open(problem_path, 'r') as csv_file:
         parameters = list(csv.DictReader(csv_file))
 
-    #for i in dict_y.keys():
     X = np.loadtxt(paramvalues_path, delimiter=",")
-    #df = pd.DataFrame({'sample':dict_y.keys(), 'value':dict_y.values()})
     df = pd.DataFrame.from_dict(dict_y)
-    #df = pd.DataFrame.from_dict(dict_y, orient="index")
-    #df['sample'] = df.index
-    #df.index_obj.to_numpy(dtype=int)
-    #df.sample.astype(int)
-    #df.index= df['sample']
     df_2 = df.T
     df_2.index = df_2.index.astype(int)
     df_2 = df_2.sort_index()
-    #index_list = df_2.index.tolist()
-    #df_2.index = index_list
-    #df_2.sort_index(axis=0)
     Y = df_2.to_numpy()
 
     sa_results(parameters, X, Y, save_file)
@@ -253,11 +243,11 @@ def main(folder, outputdataframe):
     years = ['2020', '2021', '2022','2023','2024','2025','2026','2027','2028','2029','2030','2031',	'2032',	'2033',	'2034',	'2035',	'2036',	'2037',	'2038',	'2039',	'2040', '2041']
     dict_df = load_csvs(folder, years)
     dict_results = read_data(dict_df, years)
-    totaldiscountedcost, capacity = creating_Y_to_morris(dict_results, 'src/sensitivity', years)
-    run_morris(totaldiscountedcost, 'src/sensitivity/sample_morris.csv', 'src/config/parameters.csv', 'src/sensitivity/totaldiscountedcost')
-    run_morris(capacity, 'src/sensitivity/sample_morris.csv', 'src/config/parameters.csv', 'src/sensitivity/newcapacity')
+    totaldiscountedcost, capacity = creating_Y_to_morris(dict_results, 'Beninsensitivity', years)
+    run_morris(totaldiscountedcost, 'Beninsensitivity/sample_morris.csv', 'config/Beninparameters.csv', 'Beninsensitivity/totaldiscountedcost')
+    run_morris(capacity, 'Beninsensitivity/sample_morris.csv', 'config/Beninparameters.csv', 'Beninsensitivity/newcapacity')
 
 
-main('src/run/temp/results', 'src/run/sensitivity')
+main('Benin_run/temp/results', 'Benin_run/sensitivity')
 
 

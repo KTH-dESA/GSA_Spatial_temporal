@@ -17,7 +17,7 @@ from numpy import ndarray
 from pandas import Series, DataFrame
 from pandas.core.arrays import ExtensionArray
 
-def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath, spatial):
+def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath, spatial, country):
     """
     This function creates transmission lines in both directions for each cell and connects the adjacent cells to grid to the central grid.
     :param path:
@@ -35,7 +35,10 @@ def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath, spatial):
         # The table includes the raw data from ArcMap function
         near_adj_points: Union[Union[Series, ExtensionArray, ndarray, DataFrame, None], Any] = neartable[neartable["DISTANCE"] > 0]
 
-        near_adj_points.loc[(near_adj_points.SENDID.isin(HV.id)), 'SendTech'] = 'BENEL1TRP00X'
+        if country == 'Benin':
+            near_adj_points.loc[(near_adj_points.SENDID.isin(HV.id)), 'SendTech'] = 'BENEL1TRP00X'
+        else:
+            near_adj_points.loc[(near_adj_points.SENDID.isin(HV.id)), 'SendTech'] = 'KEEL00t00'
 
         #add input fuel and inputtech to central exisiting grid
         central = near_adj_points.loc[(near_adj_points.SENDID.isin(HV.id))]

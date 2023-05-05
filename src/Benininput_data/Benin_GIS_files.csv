@@ -1,5 +1,5 @@
 type,filename
-pop_raster,Benin/HRSL_Benin_1km_km_UTM31N.tif
+pop,Benin/HRSL_Benin_1km_km_UTM31N.tif
 adm_WGS84,gadm36_BEN_shp/gadm36_BEN_0.shp
 adm,gadm36_BEN_0_UTM31N.shp
 crs,UTM31N

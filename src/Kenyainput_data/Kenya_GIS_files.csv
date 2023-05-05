@@ -1,0 +1,9 @@
+type,filename
+pop,Kenya/HRSL_Kenya_1km_km_UTM37S.tif
+adm_WGS84,gadm36_KEN_shp/gadm36_KEN_0.shp
+adm,gadm36_KEN_0_UTM37S.shp
+crs,UTM37S
+minigrid_concat,Concat_Mini-grid_UMT37S.shp
+MV_concat,Concat_MV_lines_UMT37S.shp
+rastertopoint,Kenya/raster_to_point_Kenya_UTM37S.shp
+gdp,UTM37S_GDP_PPP_2015_WGS_84.tif

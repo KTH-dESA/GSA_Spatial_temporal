@@ -36,17 +36,19 @@ def mosaic(dict_raster, proj_path, cr):
     for key, value in dict_raster.items():
         src = rasterio.open(value)
         pathfinder.append(src)
-
-    mosaic, out_trans = merge(pathfinder)
-    out_meta = src.meta.copy()
-    out_meta.update({"driver": "GTiff", "height": mosaic.shape[1], "width": mosaic.shape[2], "transform": out_trans,
+    try:
+        mosaic, out_trans = merge(pathfinder)
+        out_meta = src.meta.copy()
+        out_meta.update({"driver": "GTiff", "height": mosaic.shape[1], "width": mosaic.shape[2], "transform": out_trans,
                      "crs": ({'init': cr})})
-    with rasterio.open('%s/pathfinder.tif' % proj_path, "w", **out_meta) as dest:
-        dest.write(mosaic)
-    print('Pathfinder is now mosaicked to pathfinder.tif')
+        with rasterio.open('%s/pathfinder.tif' % proj_path, "w", **out_meta) as dest:
+            dest.write(mosaic)
+        print('Pathfinder is now mosaicked to pathfinder.tif')
+    except:
+        print('Pathfinder was not mosaiced')
     return ()
 
-def remove_grid_from_results_multiply_with_lenght(dict_pathfinder, dict_weight,tofolder):
+def remove_grid_from_results_multiply_with_lenght(dict_pathfinder, dict_weight,tofolder, path, country):
     """
     This function sets the results (shortest path network) from Pathfinder that are overlapping weights less than 0.5
     so that where the grid route is utilized this is not double counted in the final results. It then runs zonal statistics 
@@ -78,13 +80,13 @@ def remove_grid_from_results_multiply_with_lenght(dict_pathfinder, dict_weight,t
     
     elec_path_np = elec_path.to_numpy()
     #rasterize the cleaned numpyarray
-    make_raster(elec_path_np, "cleaned", "1")
+    make_raster(elec_path_np, "cleaned", "1", path, country)
 
     #df = pd.DataFrame.from_dict(sum_distribution, orient='index')
     #Modified to not sum at this point
     #elec_path.to_csv(os.path.join(tofolder,'distributionlines.csv'))
 
-def zonalstat_pathfinder(raster, polygon, scenario):
+def zonalstat_pathfinder(raster, polygon, scenario, country):
     """
     This function returns the zonalstatistic "count" from the raster to the polygon and is saved to run/scenario/{scenario}_distributionlines.csv
     :param raster: The Pathfinder raster
@@ -101,10 +103,10 @@ def zonalstat_pathfinder(raster, polygon, scenario):
     merged_polygon_zonal = pd.merge(df_zonal, polygon_gpd, left_index=True, right_index=True)
     zonal_final = merged_polygon_zonal.drop(columns=['geometry'])
     zonal_final.index = zonal_final.id
-    zonal_final.to_csv("run/scenarios/%i_distributionlines.csv" %(scenario))
+    zonal_final.to_csv("%s_run/scenarios/%i_distributionlines.csv" %(country, scenario))
 
 
-def pathfinder_main(path,proj_path, elec_shp, tofolder, tiffile, crs):
+def pathfinder_main(path,proj_path, elec_shp, tofolder, tiffile, crs, country):
     """
     This is the function which runs all GIS functions and Pathfinder
     :param path:
@@ -113,19 +115,19 @@ def pathfinder_main(path,proj_path, elec_shp, tofolder, tiffile, crs):
     :param tofolder:
     :return:
     """
-    elec_shape = convert_zero_to_one(elec_shp)
+    elec_shape = convert_zero_to_one(elec_shp, path)
     #The elec_raster will serve as the points to connect and the roads will create the weights
     #Returns the path to elec_raster
     elec_raster = rasterize_elec(elec_shape, path, tiffile)
 
     #Concatinate the highway with high- medium and low voltage lines
-    grid_weight = merge_grid(path)
+    grid_weight = merge_grid(path, country)
 
     #returns the path to highway_weights
-    highway_shp, grid_shp = highway_weights(grid_weight, path, crs)
-    highway_raster = rasterize_road(highway_shp, path)
-    transmission_raster = rasterize_transmission(grid_shp, path)
-    weights_raster = merge_raster(transmission_raster, highway_raster, crs)
+    highway_shp, grid_shp = highway_weights(grid_weight, path, crs, country)
+    highway_raster = rasterize_road(highway_shp, path, tiffile)
+    transmission_raster = rasterize_transmission(grid_shp, path, tiffile)
+    weights_raster = merge_raster(transmission_raster, highway_raster, crs, path)
 
 
     files = os.listdir(proj_path)
@@ -142,20 +144,20 @@ def pathfinder_main(path,proj_path, elec_shp, tofolder, tiffile, crs):
     dict_weight = {}
     for f in shapefiles:
         name, end = os.path.splitext(os.path.basename(f))
-        weight_raster_cell = masking(f, weights_raster, '%s_weight.tif' %(name))
-        elec_raster_cell = masking(f, elec_raster, '%s_elec.tif' % (name))
+        weight_raster_cell = masking(f, weights_raster, '%s_weight.tif' %(name), path)
+        elec_raster_cell = masking(f, elec_raster, '%s_elec.tif' % (name), path)
 
         # make csv files for Dijkstra
-        weight_csv = make_weight_numpyarray(weight_raster_cell, name)
-        target_csv = make_target_numpyarray(elec_raster_cell, name)
+        weight_csv = make_weight_numpyarray(weight_raster_cell, name, country)
+        target_csv = make_target_numpyarray(elec_raster_cell, name, country)
         if not os.path.exists(target_csv):
           e = "No targets in square"
         try:
             if os.path.exists(target_csv):
-                targets = np.genfromtxt(os.path.join('temp/dijkstra', "%s_target.csv" % (name)), delimiter=',')
-                weights = np.genfromtxt(os.path.join('temp/dijkstra', "%s_weight.csv" % (name)), delimiter=',')
-                origin_csv = make_origin_numpyarray(target_csv, name)
-                origin = np.genfromtxt(os.path.join('temp/dijkstra', "%s_origin.csv" % (name)), delimiter=',')
+                targets = np.genfromtxt(os.path.join('%stemp/dijkstra' %(country), "%s_target.csv" % (name)), delimiter=',')
+                weights = np.genfromtxt(os.path.join('%stemp/dijkstra' %(country), "%s_weight.csv" % (name)), delimiter=',')
+                origin_csv = make_origin_numpyarray(target_csv, name, country)
+                origin = np.genfromtxt(os.path.join('%stemp/dijkstra' %(country), "%s_origin.csv" % (name)), delimiter=',')
                 # Run the Pathfinder alogrithm seek(origins, target, weights, path_handling='link', debug=False, film=False)
                 pathfinder = seek(origin, targets, weights, path_handling='link', debug=False, film=False)
                 elec_path = pathfinder['paths']
@@ -163,10 +165,10 @@ def pathfinder_main(path,proj_path, elec_shp, tofolder, tiffile, crs):
                 weights_trimmed= weights[1:-1,1:-1]
                 electrifiedpath = pd.DataFrame(elec_path_trimmed)
                 weight_pandas = pd.DataFrame(weights_trimmed)
-                electrifiedpath.to_csv("temp/dijkstra/elec_path_%s.csv" % (name))
+                electrifiedpath.to_csv("%stemp/dijkstra/elec_path_%s.csv" % (country, name))
                 dict_pathfinder[name] = electrifiedpath
                 dict_weight[name] = weight_pandas
-                raster_pathfinder = make_raster(elec_path_trimmed, name, name)
+                raster_pathfinder = make_raster(elec_path_trimmed, name, name, path, country)
                 dict_raster[name] = raster_pathfinder
 
         except Exception as e:
@@ -176,5 +178,5 @@ def pathfinder_main(path,proj_path, elec_shp, tofolder, tiffile, crs):
     print("Make raster of pathfinder")
     mosaic(dict_raster, path, crs)
     print("Remove pathfinder where grid is passed to not double count")
-    remove_grid_from_results_multiply_with_lenght(dict_pathfinder, dict_weight, tofolder)
+    remove_grid_from_results_multiply_with_lenght(dict_pathfinder, dict_weight, tofolder, path, country)
 

@@ -14,7 +14,7 @@ import pandas as pd
 from datetime import timedelta
 #from matplotlib import pyplot as plt
 
-def optimize_battery_pv(pv_power, location, load_profile, efficiency_discharge,  efficiency_charge, pv_cost, battery_cost, scenario):
+def optimize_battery_pv(pv_power, location, load_profile, efficiency_discharge,  efficiency_charge, pv_cost, battery_cost, scenario, country):
     """
     This function optmize the PV+battery system based on the location specific capacity factor and load profile.
     The function returns the PV adjustment needed plus the required battery hours to meet the whole demand.
@@ -108,7 +108,7 @@ def optimize_battery_pv(pv_power, location, load_profile, efficiency_discharge, 
     prb.solve()
 
     # write to a csv file
-    output_filename = 'input_data/results_PuLP_%s_%s.csv'%(location, scenario)
+    output_filename = '%sinput_data/results_PuLP_%s.csv'%(country, scenario)
 
     # use a context manager to open/close the file...
     with open(output_filename, 'w') as fout:

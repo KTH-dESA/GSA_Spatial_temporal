@@ -30,7 +30,7 @@ gdal.UseExceptions()
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
 
-def convert_zero_to_one(file):
+def convert_zero_to_one(file, path):
     """
     This function converts the inputed "file" 0 to 1 in a column called "dijkstra" and saves it to a shapefile.
     :param file:
@@ -41,8 +41,8 @@ def convert_zero_to_one(file):
     gpdf.loc[(gpdf.elec == 1), 'dijkstra'] = 0
     gpdf.loc[(gpdf.elec == 0),'dijkstra'] = 1
 
-    gpdf.to_file('../Projected_files/zero_to_one_elec.shp')
-    return ('../Projected_files/zero_to_one_elec.shp')
+    gpdf.to_file(os.path.join(path,'zero_to_one_elec.shp'))
+    return (os.path.join(path,'zero_to_one_elec.shp'))
 
 def rasterize_elec(file, proj_path, tiffile):
     """
@@ -90,7 +90,7 @@ def rasterize_elec(file, proj_path, tiffile):
     Shapefile= None
     return (OutputImage)
 
-def merge_grid(proj_path):
+def merge_grid(proj_path, country):
     """This function concatinates the shapefiles which contains the keyword '33kV' and '66kV'
     :param proj_path:
     :return:
@@ -103,7 +103,10 @@ def merge_grid(proj_path):
         if file.endswith('.shp'):
             f = os.path.abspath(file)
             shapefiles += [f]
-    keyword = ['UTM31N_Benin Electricity Transmission Network', 'UTM31N_ECOWAS_Electricity_Distribution']
+    if country == 'Benin':
+        keyword = ['UTM31N_Benin Electricity Transmission Network', 'UTM31N_ECOWAS_Electricity_Distribution']
+    else:
+        keyword = ['Concat_MV_lines_UMT37S', 'Concat_Transmission_lines_UMT37S','11kV']
     dijkstraweight = []
     out = [f for f in shapefiles if any(xs in f for xs in keyword)]
     for f in out:
@@ -118,11 +121,11 @@ def merge_grid(proj_path):
         grid = gpd.GeoDataFrame([shp for shp in dijkstraweight])
     #road = gpd.read_file('../Projected_files/UMT37S_Roads.shp')
     #gdf = grid.append(road)
-    grid.to_file("../Projected_files/grid_weight.shp")
+    grid.to_file(os.path.join(proj_path,'grid_weight.shp'))
     os.chdir(current)
-    return("../Projected_files/grid_weight.shp")
+    return(os.path.join(proj_path,'grid_weight.shp'))
 
-def highway_weights(path_grid, path, crs):
+def highway_weights(path_grid, path, crs, country):
     """
     This function adds the weight to where the grid (0.01 weight) is located as well as road (0.5 weight) to column weight
     :param path_grid:
@@ -134,25 +137,46 @@ def highway_weights(path_grid, path, crs):
     grid = gpd.read_file(path_grid)
     #Km represents all lines that are grid and Length_km represents road
 
-    keep = ['Km', 'VOLTAGE_KV']
-    grid_col = grid[keep]
-    pd.options.mode.chained_assignment = None
-    grid_col['weight'] = 1
-    grid_col = grid_col.astype('float64')
-    grid_col.loc[grid_col['Km']>0, ['weight']] = 0.01
-    grid_col.loc[grid_col['VOLTAGE_KV']>0, ['weight']] = 0.01
+    if country == 'Benin':
+        keep = ['Km', 'VOLTAGE_KV']
+        grid_col = grid[keep]
+        pd.options.mode.chained_assignment = None
+        grid_col['weight'] = 1
+        grid_col = grid_col.astype('float64')
+        grid_col.loc[grid_col['Km']>0, ['weight']] = 0.00001
+        grid_col.loc[grid_col['VOLTAGE_KV']>0, ['weight']] = 0.00001
 
-    schema = grid.geometry  #the geometry same as highways
-    gdf = gpd.GeoDataFrame(grid_col, crs=crs, geometry=schema)
-    gdf.to_file(driver = 'ESRI Shapefile', filename= weight_grid)
+        schema = grid.geometry  #the geometry same as highways
+        gdf = gpd.GeoDataFrame(grid_col, crs=crs, geometry=schema)
+        gdf.to_file(driver = 'ESRI Shapefile', filename= weight_grid)
 
-    road = gpd.read_file('../Projected_files/UTM31N_benin roads.shp')
-    keep = ['Shape_Leng']
-    highways_col = road[keep]
-    pd.options.mode.chained_assignment = None
-    highways_col['weight'] = 1
-    highways_col = highways_col.astype('float64')
-    highways_col.loc[highways_col['Shape_Leng']>0, ['weight']] = 0.5
+        road = gpd.read_file(os.path.join(path, 'UTM31N_benin roads.shp'))
+        keep = ['Shape_Leng']
+        highways_col = road[keep]
+        pd.options.mode.chained_assignment = None
+        highways_col['weight'] = 1
+        highways_col = highways_col.astype('float64')
+        highways_col.loc[highways_col['Shape_Leng']>0, ['weight']] = 0.13
+    else:
+        keep = ['Length_km', 'Length_m_']
+        grid_col = grid[keep]
+        pd.options.mode.chained_assignment = None
+        grid_col['weight'] = 1
+        grid_col = grid_col.astype('float64')
+        grid_col.loc[grid_col['Length_km']>0, ['weight']] = 0.00001
+        grid_col.loc[grid_col['Length_m_']>0, ['weight']] = 0.00001
+
+        schema = grid.geometry  #the geometry same as highways
+        gdf = gpd.GeoDataFrame(grid_col, crs=crs, geometry=schema)
+        gdf.to_file(driver = 'ESRI Shapefile', filename= weight_grid)
+
+        road = gpd.read_file(os.path.join(path, 'UTM37S_Roads.shp'))
+        keep = ['Length_km']
+        highways_col = road[keep]
+        pd.options.mode.chained_assignment = None
+        highways_col['weight'] = 1
+        highways_col = highways_col.astype('float64')
+        highways_col.loc[highways_col['Length_km']>0, ['weight']] = 0.13
 
     schema = road.geometry  #the geometry same as highways
     gdf_road = gpd.GeoDataFrame(highways_col, crs=crs, geometry=schema)
@@ -161,10 +185,10 @@ def highway_weights(path_grid, path, crs):
     return (weight_highway, weight_grid)
 
 # Pathfinder results to raster
-def make_raster(pathfinder, s, origin):
+def make_raster(pathfinder, s, origin, topath, country):
 
-    dst_filename = os.path.join('temp/dijkstra','path_%s.tif' %(s))
-    path = os.path.join('../Projected_files','%s_elec.tif' %(origin))
+    dst_filename = os.path.join('%stemp/dijkstra' %(country),'path_%s.tif' %(s))
+    path = os.path.join(topath,'%s_elec.tif' %(origin))
     zoom_20 = gdal.Open(path)
     geo_trans = zoom_20.GetGeoTransform()
     pixel_width = geo_trans[1]
@@ -197,7 +221,7 @@ def make_raster(pathfinder, s, origin):
     dataset3.FlushCache()  # Write to disk.
     return dst_filename
 
-def make_weight_numpyarray(file, s):
+def make_weight_numpyarray(file, s, country):
     """
     The weight from road and grid is converted to a numpy array (from raster). It is padded in all directions with ones as Pathfinder
     cannot handel targets on the edge of the array.
@@ -216,12 +240,12 @@ def make_weight_numpyarray(file, s):
         b[:, 1:-1] = weight
         c = np.ones((b.shape[0] +2, b.shape[1]))
         c[1:-1,:] = b
-        np.savetxt(os.path.join('temp/dijkstra', "%s_weight.csv" %(s)), c, delimiter=',')
+        np.savetxt(os.path.join('%stemp/dijkstra' %(country), "%s_weight.csv" %(s)), c, delimiter=',')
     raster = None # close the raster
 
     return None
 
-def make_origin_numpyarray(file, s):
+def make_origin_numpyarray(file, s, country):
     """
     This function creates the origin file, which indicates where the network needs to start.
     The origin is optimally at the center of the cell as that is where the MV line is calculated. However, if the center
@@ -277,10 +301,10 @@ def make_origin_numpyarray(file, s):
               #  origin_found = True
               #  break
     if np.count_nonzero(origins) != 0:
-        np.savetxt(os.path.join('temp/dijkstra', "%s_origin.csv" %(s)), origins, delimiter=',')
+        np.savetxt(os.path.join('%stemp/dijkstra'%(country), "%s_origin.csv" %(s)), origins, delimiter=',')
     return None
 
-def make_target_numpyarray(file, s):
+def make_target_numpyarray(file, s, country):
     """
     This function converts the unelectrified raster (containing ones) to a numpy array. It is also padded with zeros around in
     all directions as Pathfinder cannot handle targets on the edge.
@@ -299,12 +323,12 @@ def make_target_numpyarray(file, s):
         b[:,1 :-1] = target
         c = np.zeros((b.shape[0] +2, b.shape[1]))
         c[1:-1,:] = b
-        np.savetxt(os.path.join('temp/dijkstra', "%s_target.csv" %(s)), c, delimiter=',')
+        np.savetxt(os.path.join('%stemp/dijkstra' %(country), "%s_target.csv" %(s)), c, delimiter=',')
     raster = None # close the raster
 
-    return os.path.join('temp/dijkstra', "%s_target.csv" %(s))
+    return os.path.join('%stemp/dijkstra' %(country), "%s_target.csv" %(s))
 
-def rasterize_road(file, proj_path):
+def rasterize_road(file, proj_path, refimage):
     """
     This function rasterize the shapefiel roads to a raster.
     :param file:
@@ -316,7 +340,7 @@ def rasterize_road(file, proj_path):
     #_, filename = os.path.split(file)
     #name, ending = os.path.splitext(filename)
     OutputImage2 = os.path.join(proj_path, 'road.tif')
-    RefImage = os.path.join('../Projected_files', 'HRSL_Benin_1km_km_UTM31N.tif')
+    RefImage = refimage
 
     gdalformat = 'GTiff'
     datatype2 = gdal.GDT_Float32
@@ -348,7 +372,7 @@ def rasterize_road(file, proj_path):
 
     return OutputImage2
 
-def rasterize_transmission(file, proj_path):
+def rasterize_transmission(file, proj_path, refimage):
     """
     This function rasterize the merged transmission shapefile.
     :param file:
@@ -358,7 +382,7 @@ def rasterize_transmission(file, proj_path):
     # Rasterizing the point file
     InputVector = file
     OutputImage3 = os.path.join(proj_path, 'transmission.tif')
-    RefImage = os.path.join('../Projected_files', 'HRSL_Benin_1km_km_UTM31N.tif')
+    RefImage = refimage
 
     gdalformat = 'GTiff'
     datatype2 = gdal.GDT_Float32
@@ -390,14 +414,14 @@ def rasterize_transmission(file, proj_path):
 
     return OutputImage3
 
-def merge_raster(transmission_raster, highway_raster, crs):
+def merge_raster(transmission_raster, highway_raster, crs, path):
     """
     This function merge the transmission and roads together into one raster with transmission overriding roads incase overlap.
     :param transmission_raster:
     :param highway_raster:
     :return:
     """
-    out_fp = '../Projected_files/weights.tif'
+    out_fp = os.path.join(path, 'weights.tif')
     transmission = rasterio.open(transmission_raster)
     road = rasterio.open(highway_raster)
 
@@ -413,7 +437,7 @@ def merge_raster(transmission_raster, highway_raster, crs):
 
     return out_fp
 
-def masking(shape,tif_file, s):
+def masking(shape,tif_file, s, path):
     """ This function masks the raster data (tif-file) with the GADM Admin 0 boundaries (admin)
     :param bounds:
     :param tif_file:
@@ -430,6 +454,6 @@ def masking(shape,tif_file, s):
                      "width": out_image.shape[2],
                      "transform": out_transform})
 
-    with rasterio.open('../Projected_files/%s' %(s), "w", **out_meta) as dest:
+    with rasterio.open(os.path.join(path,'%s' %(s)), "w", **out_meta) as dest:
         dest.write(out_image)
-    return('../Projected_files/%s' %(s))
+    return(os.path.join(path,'%s' %(s)))
