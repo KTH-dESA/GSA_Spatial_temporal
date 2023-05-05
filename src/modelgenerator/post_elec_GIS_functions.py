@@ -19,7 +19,7 @@ from osgeo import gdal, ogr, gdalconst
 import os
 import math
 
-def join_elec(elec, tif, cells, scenario):
+def join_elec(elec, tif, cells, scenario, country):
     """
 
     :param elec:
@@ -43,7 +43,7 @@ def join_elec(elec, tif, cells, scenario):
     demand_cells = sjoin(settlements, cell, how="left")
     #demand_cells.to_file(os.path.join(os.getcwd(), 'run\scenarios\Demand\demand.shp'))
     demand_cell = pd.DataFrame(demand_cells, copy=True)
-    demand_cell.to_csv('run/scenarios/Demand/%i_demand_cells.csv'%(scenario))
+    demand_cell.to_csv('%s_run/scenarios/Demand/%i_demand_cells.csv'%(country, scenario))
     path = 'run/scenarios/Demand/%i_demand_cells.csv'%(scenario)
     return(path)
 
@@ -85,42 +85,42 @@ def network_length(demandcells, input, tofolder, scenario):
 
     return(os.path.join(os.getcwd(),tofolder,'%i_distribution.csv' %(scenario)))
 
-def elec(demandcells, scenario):
+def elec(demandcells, scenario, country):
     demand_cell = pd.read_csv(demandcells)
 
     allcells = demand_cell.groupby(["id"])
     HV_all = allcells.filter(lambda x: (x['elec'].mean() > 0) ) #and ((x['MV'].min() < 1)) or ((x['LV'].min() < 1)) or ((x['Grid'].min() < 1)))
     HV = HV_all.groupby(["id"])
     HV_df = HV.sum(numeric_only=True).reset_index()[['id']]
-    HV_df.to_csv(os.path.join(os.getcwd(),'run/%i_HV_cells.csv') %(scenario))
+    HV_df.to_csv(os.path.join(os.getcwd(),'%s_run/%i_HV_cells.csv') %(country, scenario))
 
     elec_all = allcells.filter(lambda x: (x['elec'].mean() > 0))
     elec = elec_all.groupby(["id"])
-    elec.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'run/%i_elec.csv')%(scenario))
-    elec.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'run/scenarios/%i_elec.csv')%(scenario))
+    elec.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'%s_run/%i_elec.csv')%(country, scenario))
+    elec.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'%s_run/scenarios/%i_elec.csv')%(country, scenario))
 
     elec_df = elec.sum(numeric_only=True).reset_index()[['id']]
     noHV_elec = (
         pd.merge(elec_df, HV_df, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
-    noHV_elec.to_csv(os.path.join(os.getcwd(), 'run/%i_elec_noHV_cells.csv')%(scenario))
+    noHV_elec.to_csv(os.path.join(os.getcwd(), '%s_run/%i_elec_noHV_cells.csv')%(country, scenario))
 
     #noHV_all = allcells.filter()
     #noHV_all = allcells.filter(lambda x: (x['p'].mean() == 0 ) or (x['Minigrid'].min() < 5000) and (x['MV'].min() > 1) or (x['LV'].min() > 1))
     all_pointid = demand_cell['id'].drop_duplicates().dropna()
     noHV = (pd.merge(all_pointid,HV_df, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
     noHV_nominigrid= (pd.merge(noHV,noHV_elec, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
-    noHV_nominigrid.to_csv(os.path.join(os.getcwd(),'run/%i_noHV_cells.csv')%(scenario))
+    noHV_nominigrid.to_csv(os.path.join(os.getcwd(),'%s_run/%i_noHV_cells.csv')%(country, scenario))
 
     minigrid = pd.DataFrame({'id' : [np.nan]})
     minigrid_all = minigrid.groupby(["id"])
-    minigrid_all.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'run/%i_minigridcells.csv')%(scenario))
+    minigrid_all.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'%s_run/%i_minigridcells.csv')%(country, scenario))
 
     unelec_all = allcells.filter(lambda x: (x['elec'].mean() == 0 ))
     unelec = unelec_all.groupby(["id"])
-    unelec.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'run/%i_un_elec.csv')%(scenario))
-    unelec.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'run/scenarios/%i_un_elec.csv')%(scenario))
+    unelec.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'%s_run/%i_un_elec.csv')%(country, scenario))
+    unelec.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'%s_run/scenarios/%i_un_elec.csv')%(country, scenario))
 
-def calculate_demand(settlements, elecdemand, unelecdemand, scenario, spatial, input_data_csv):
+def calculate_demand(settlements, elecdemand, unelecdemand, scenario, spatial, input_data_csv, country):
     input_data = pd.read_csv(input_data_csv)
     demand_cell = pd.read_csv(settlements)
     demand_GJ =  elecdemand
@@ -173,12 +173,12 @@ def calculate_demand(settlements, elecdemand, unelecdemand, scenario, spatial, i
     ref = pd.concat(([ref_elec, ref_unelec]))
     ref.index = ref['Fuel']
     ref = ref.drop(columns =['elec', 'pop','GDP_PPP', 'elec_share', 'Fuel', 'un_elec_share'])
-    ref.to_csv('run/scenarios/%i_demand_%i_spatialresolution.csv' %(scenario, spatial))
+    ref.to_csv('%s_run/scenarios/%i_demand_%i_spatialresolution.csv' %(country, scenario, spatial))
 
     return ()
 
-def discountrate_csv(discountrate, scenario):
+def discountrate_csv(discountrate, scenario, country):
     dr =  pd.read_csv(discountrate)
     dr_scenario = dr[dr['Scenario']==scenario]
     dr_scenario = dr_scenario['Discountrate']
-    dr_scenario.to_csv('run/scenarios/%i_discountrate.csv' %(scenario))
+    dr_scenario.to_csv('%s_run/scenarios/%i_discountrate.csv' %(country, scenario))

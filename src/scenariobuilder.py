@@ -123,26 +123,25 @@ for j in dict_modelruns.keys():
     # The parameters are defined and split
     modelrun = dict_modelruns[j]
     spatial = int(float(modelrun.iloc[0][1]))
-    CapacityOfOneTechnologyUnit = int(float(modelrun.iloc[3][1]))
     Dailytemporalresolution= int(float(modelrun.iloc[2][1]))
     DiscountRate = float(modelrun.iloc[1][1])
-    CapitalCost_PV_raw = modelrun.iloc[4][1]
+    CapitalCost_PV_raw = modelrun.iloc[3][1]
     CapitalCost_PV = split_data_onecell(CapitalCost_PV_raw)
-    CapitalCost_batt_raw = modelrun.iloc[5][1]
+    CapitalCost_batt_raw = modelrun.iloc[4][1]
     CapitalCost_batt = split_data_onecell(CapitalCost_batt_raw)
-    CapitalCost_WI_raw = modelrun.iloc[6][1]
+    CapitalCost_WI_raw = modelrun.iloc[5][1]
     CapitalCost_WI = split_data_onecell(CapitalCost_WI_raw)
-    CapitalCost_transm = float(modelrun.iloc[7][1])
-    CapitalCost_distribution = float(modelrun.iloc[8][1])
-    CapacityFactor_adj = round(float(modelrun.iloc[9][1]), 4)
-    DemandProfileTier = int(float(modelrun.iloc[10][1]))
-    FuelpriceNG_raw = modelrun.iloc[11][1]
+    CapitalCost_transm = float(modelrun.iloc[6][1])
+    CapitalCost_distribution = float(modelrun.iloc[7][1])
+    CapacityFactor_adj = round(float(modelrun.iloc[8][1]), 4)
+    DemandProfileTier = int(float(modelrun.iloc[9][1]))
+    FuelpriceNG_raw = modelrun.iloc[10][1]
     FuelpriceNG = split_data_onecell(FuelpriceNG_raw)
-    FuelpriceDIESEL_raw = modelrun.iloc[12][1]
+    FuelpriceDIESEL_raw = modelrun.iloc[11][1]
     FuelpriceDIESEL = split_data_onecell(FuelpriceDIESEL_raw)
-    FuelpriceCOAL_raw = modelrun.iloc[13][1]
+    FuelpriceCOAL_raw = modelrun.iloc[12][1]
     FuelpriceCOAL = split_data_onecell(FuelpriceCOAL_raw)
-    CapitalCost_distribution_ext = float(modelrun.iloc[14][1])
+    CapitalCost_distribution_ext = float(modelrun.iloc[13][1])
 
     tier_profile = '%sinput_data/T%i_load profile_Narayan.csv' %(country, DemandProfileTier)
 
@@ -249,7 +248,6 @@ for j in dict_modelruns.keys():
         #Location file
         gisfile_ref = GIS_file(scenarios_folder, projectedfolder + '/'+ point, spatial)
         matrix = '%s_run/scenarios/Demand/%i_adjacencymatrix.csv' %(country, spatial)
-
         capital_cost_transmission_distrib(elec_, noHV, HV_file, elec_noHV_cells, unelec, CapitalCost_transm, substation, capacitytoactivity, scenarios_folder, matrix, gisfile_ref, spatial, CapitalCost_distribution_ext, diesel = True)
         scenario_runs[j] = combined
         
@@ -319,7 +317,7 @@ for j in dict_modelruns.keys():
     pvcost = 2540 #ATB 2021 version for 2021 value
     batterycost_kWh = 522  #ATB 2021 version for 2021 value with adjusted Kenyan value
     locations = '%s_run/scenarios/%i_GIS_data.csv' %(country, spatial)
-    scenario = temporal_id
+    scenario = 'Tier%i_loca%i_uncertain%f.csv' %(DemandProfileTier, spatial, CapacityFactor_adj)
     startDate = pd.to_datetime("2016-01-02")
     endDate = pd.to_datetime("2016-02-02")
     startDate_load = pd.to_datetime("1900-01-02")
@@ -346,7 +344,7 @@ for j in dict_modelruns.keys():
     if os.path.isfile('%s_run/output/' %(country) +comb):
         print('File already exists, skipping calculations.')
     else:
-        outPutFile = functions_to_run(dict_df, outPutFile, spatial, elecdemand_df.iloc[0][2040], DiscountRate, temporal_id,CapacityOfOneTechnologyUnit, CapitalCost_PV, 
+        outPutFile = functions_to_run(dict_df, outPutFile, spatial, elecdemand_df.iloc[0][2040], DiscountRate, temporal_id, CapitalCost_PV, 
                                     CapitalCost_batt, CapitalCost_WI, CapitalCost_distribution, CapacityFactor_adj, 
                                     FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, DemandProfileTier, country)
 
