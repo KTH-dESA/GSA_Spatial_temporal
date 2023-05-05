@@ -113,3 +113,9 @@ src/Benintemp/**
 src/Kenyatemp/**
 src/Kenya_run/**
 src/Kenyasensitivity/**
+src/Benininput_data/Benin_demand.xlsx
+src/Benininput_data/halfhourly_data.csv
+src/Benininput_data/high_Jan.csv
+src/Benininput_data/Kenya_GIS_files.csv
+src/Benininput_data/T1-T5 loadprofile.xlsx
+src/Benininput_data/T3_load profile_Narayan.xls
