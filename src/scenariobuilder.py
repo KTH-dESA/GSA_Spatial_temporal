@@ -23,7 +23,7 @@ config = ConfigParser()
 config.read('config/config_input.ini')
 
 #Choose which country tobuild
-country = 'Kenya'
+country = 'Benin'
 
 if country == 'Benin':
     # Benin
@@ -35,7 +35,8 @@ if country == 'Benin':
     elec_shp = config['inputfiles']['Beninelec_shp']
     scenario_ouput = config['sensitivityanalysis']['Beninscenario_ouput']
     output_files_sample = config['sensitivityanalysis']['Beninoutput_files_sample']
-    pathfinder_raster_country = config['inputfiles']['Beinpathfinder_raster_country']
+    pathfinder_raster_country = config['inputfiles']['Beninpathfinder_raster_country']
+    projectedfolder = config['geospatialdata']['Beninprojectedfolder']
     files = pd.read_csv(config['inputfiles']['Beningisfiles'], index_col=0)
     substation = float(config['model_settings']['substation'])
     capacitytoactivity = float(config['model_settings']['capacitytoactivity'])
@@ -318,6 +319,7 @@ for j in dict_modelruns.keys():
     batterycost_kWh = 522  #ATB 2021 version for 2021 value with adjusted Kenyan value
     locations = '%s_run/scenarios/%i_GIS_data.csv' %(country, spatial)
     scenario = 'Tier%i_loca%i_uncertain%f.csv' %(DemandProfileTier, spatial, CapacityFactor_adj)
+    highscenario = 'High_loca%i_uncertain%f.csv' %(spatial, CapacityFactor_adj)
     startDate = pd.to_datetime("2016-01-02")
     endDate = pd.to_datetime("2016-02-02")
     startDate_load = pd.to_datetime("1900-01-02")
@@ -329,7 +331,7 @@ for j in dict_modelruns.keys():
     if os.path.isfile(tofilePVhigh):
         print('File already exists, skipping calculations.')
     else:
-        battery_to_pv(loadprofile_high,  capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePVhigh, scenario,  startDate, endDate, startDate, endDate, country)
+        battery_to_pv(loadprofile_high,  capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePVhigh, highscenario,  startDate, endDate, startDate, endDate, country)
 
     #demand_runs[j] = temporal_unique
             
