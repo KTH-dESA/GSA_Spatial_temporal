@@ -160,7 +160,7 @@ param TechnologyToStorage default 0 :=
 param TotalTechnologyAnnualActivityLowerLimit default 0 :=
 [Kenya,*,*]:																									
 2020	2021	2022	2023	2024	2025	2026	2027	2028	2029	2030	2031	2032	2033	2034	2035	2036	2037	2038	2039	2040:=	
-KEWI31ph	4522400	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+KEWI31ph	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
 KEHFCCph	3175200	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
 KEGOBIph	6610000	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
 KEBMCHph	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
