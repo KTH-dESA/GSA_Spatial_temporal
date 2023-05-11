@@ -23,7 +23,7 @@ config = ConfigParser()
 config.read('config/config_input.ini')
 
 #Choose which country tobuild
-country = 'Benin'
+country = 'Kenya'#sys.argv[1]
 
 if country == 'Benin':
     # Benin
@@ -51,6 +51,7 @@ if country == 'Benin':
     text_file = config['inputfiles']['Benintext_file']
     country = config['inputfiles']['Benincountry']
     output_folder = config['inputfiles']['Beninoutput_folder']
+    basetopeak = float(config['model_settings']['basetopeak'])
 
 else:
     #Kenya
@@ -73,6 +74,7 @@ else:
     Rpath = config['renewableninja']['Rpath']
     seasonAprSept = int(config['model_settings']['seasonAprSept'])
     seasonOctMarch = int(config['model_settings']['seasonOctMarch'])
+    basetopeak = float(config['model_settings']['basetopeak'])
 
     urban_profile = config['inputfiles']['Kenyaurban_profile']
     text_file = config['inputfiles']['Kenyatext_file']
@@ -301,7 +303,7 @@ for j in dict_modelruns.keys():
     peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV_file, distribution, distribution_row, distribution_length_cell_ref, scenarios_folder, spatial, elecdemand_df.iloc[0][2040])
     addtimestep(timesteps,input_data, '%s_run/scenarios/input_data_%i.csv' %(country, int(temporal_id)))
     residual_path = '%s_run/scenarios/residual_capacity%i_demand_%i_spatialresolution.csv' %(country, elecdemand_df.iloc[0][2040], spatial)
-    distribution_elec_startyear(demand, capacitytoactivity, distr_losses, year_array, residual_path)
+    distribution_elec_startyear(demand, capacitytoactivity, distr_losses, basetopeak,year_array, residual_path)
 
     print("8. Optimise PV and battery")
 
