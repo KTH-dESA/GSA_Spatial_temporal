@@ -10,6 +10,7 @@ Module author: Nandi Moksnes <nandi@kth.se>
 
 """
 import pandas as pd
+import numpy as np
 import os
 pd.options.mode.chained_assignment = None
 from typing import Any, Union
@@ -30,11 +31,13 @@ def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath, spatial, 
     noHV = pd.read_csv(noHV_file)
     HV = pd.read_csv(HV_file)
     minigrid = pd.read_csv(minigridcsv)
+    
+    neartable = pd.read_csv(path)
+    # The table includes the raw data from ArcMap function
+    near_adj_points: Union[Union[Series, ExtensionArray, ndarray, DataFrame, None], Any] = neartable[neartable["DISTANCE"] > 0]
+    near_adj_points["INFUEL"] = np.nan
+    near_adj_points["INTECH"] = np.nan
     try:
-        neartable = pd.read_csv(path)
-        # The table includes the raw data from ArcMap function
-        near_adj_points: Union[Union[Series, ExtensionArray, ndarray, DataFrame, None], Any] = neartable[neartable["DISTANCE"] > 0]
-
         if country == 'Benin':
             near_adj_points.loc[(near_adj_points.SENDID.isin(HV.id)), 'SendTech'] = 'BENEL1TRP00X'
         else:
@@ -50,11 +53,12 @@ def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath, spatial, 
 
         central = near_adj_points.loc[(near_adj_points.SENDID.isin(HV.id))]
 
-        central_minigrid = central.loc[central.NEARID.isin(minigrid.id)]
-        for m in central_minigrid.index:
-            near_adj_points.loc[near_adj_points.index == m, 'INFUEL'] = 'TREL2'
-            near_adj_points.loc[(near_adj_points.index == m , 'INTECH')] = "TRHV_"+ str(int(near_adj_points.SENDID[m])) + "_" + str(int(near_adj_points.NEARID[m]))
-            near_adj_points.loc[near_adj_points.index == m, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[m]))
+        # central_minigrid = central.loc[central.NEARID.isin(minigrid.id)]
+        # m=0
+        # for m in central_minigrid.index:
+        #     near_adj_points.loc[near_adj_points.index == m, 'INFUEL'] = 'TREL2'
+        #     near_adj_points.loc[(near_adj_points.index == m , 'INTECH')] = "TRHV_"+ str(int(near_adj_points.SENDID[m])) + "_" + str(int(near_adj_points.NEARID[m]))
+        #     near_adj_points.loc[near_adj_points.index == m, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[m]))
 
         #select where no inputfuel is present and their recieving cell has no HV in baseyear
         nan_intech = near_adj_points.loc[near_adj_points.INFUEL.isnull()]
@@ -66,24 +70,28 @@ def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath, spatial, 
             near_adj_points.loc[near_adj_points.index == l , 'INTECH'] = "TRHV_" + str(int(near_adj_points.SENDID[l])) + "_" + str(int(near_adj_points.NEARID[l]))
             near_adj_points.loc[near_adj_points.index == l, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[l]))
 
-        nan_intech_minigr = near_adj_points.loc[near_adj_points.INFUEL.isnull()]
-        nan_intech_minigrid = nan_intech_minigr.loc[nan_intech_minigr.NEARID.isin(minigrid.id)]
-        #add input fuel to the (isnan INFUEL + isin noHV) selection
+        # nan_intech_minigr = near_adj_points.loc[near_adj_points.INFUEL.isnull()]
+        # nan_intech_minigrid = nan_intech_minigr.loc[nan_intech_minigr.NEARID.isin(minigrid.id)]
+        # #add input fuel to the (isnan INFUEL + isin noHV) selection
 
-        for l in nan_intech_minigrid.index:
-            near_adj_points.loc[near_adj_points.index == l, 'INFUEL'] = "EL2_" + str(int(near_adj_points.SENDID[l]))
-            near_adj_points.loc[near_adj_points.index == l , 'INTECH'] = "TRHV_" + str(int(near_adj_points.SENDID[l])) + "_" + str(int(near_adj_points.NEARID[l]))
-            near_adj_points.loc[near_adj_points.index == l, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[l]))
+        # for l in nan_intech_minigrid.index:
+        #     near_adj_points.loc[near_adj_points.index == l, 'INFUEL'] = "EL2_" + str(int(near_adj_points.SENDID[l]))
+        #     near_adj_points.loc[near_adj_points.index == l , 'INTECH'] = "TRHV_" + str(int(near_adj_points.SENDID[l])) + "_" + str(int(near_adj_points.NEARID[l]))
+        #     near_adj_points.loc[near_adj_points.index == l, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[l]))
 
+
+        try:
         #Allow for connections over cells with no population ("nan")
-        not_grid = near_adj_points[~near_adj_points.SENDID.isin(HV.id)]
-        nan = not_grid.loc[not_grid.INFUEL.isnull()]
-        not_grid_reciever = nan[~nan.NEARID.isin(HV.id)]
-        for j in not_grid_reciever.index:
-            near_adj_points.loc[near_adj_points.index == j, 'INFUEL'] = "EL2_" + str(int(near_adj_points.SENDID[j]))
-            near_adj_points.loc[near_adj_points.index == j , 'INTECH'] = "TRHV_" + str(int(near_adj_points.SENDID[j])) + "_" + str(int(near_adj_points.NEARID[j]))
-            near_adj_points.loc[near_adj_points.index == j, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[j]))
-
+            not_grid = near_adj_points[~near_adj_points.SENDID.isin(HV.id)]
+            nan = not_grid.loc[not_grid.INFUEL.isnull()]
+            not_grid_reciever = nan[~nan.NEARID.isin(HV.id)]
+            for j in not_grid_reciever.index:
+                near_adj_points.loc[near_adj_points.index == j, 'INFUEL'] = "EL2_" + str(int(near_adj_points.SENDID[j]))
+                near_adj_points.loc[near_adj_points.index == j , 'INTECH'] = "TRHV_" + str(int(near_adj_points.SENDID[j])) + "_" + str(int(near_adj_points.NEARID[j]))
+                near_adj_points.loc[near_adj_points.index == j, 'OUTFUEL'] = "EL2_" + str(int(near_adj_points.NEARID[j]))
+        except:
+            print('no cells wth no population to overlap')
+        #try:
         nan_matrix = near_adj_points.loc[near_adj_points.INTECH.notnull()]
         #concat the two dataframes with the transmissionlines to one
         final_matrix = nan_matrix.drop(['OBJECTID *','INPUT_FID','NEAR_FID','NEARID','SENDID'], axis=1)
@@ -92,8 +100,10 @@ def transmission_matrix(path, noHV_file, HV_file, minigridcsv, topath, spatial, 
         final_matrix.to_csv(os.path.join(topath,'%i_adjacencymatrix.csv' %(spatial)))
         return(final_matrix)
     except:
-        print("No neartable in the folder. Please check that there are no cells to connect.")
-        exit
+        print('No adjacencymatrix built')
+
+        #print("No neartable in the folder. Please check that there are no cells to connect.")
+        #exit
 
     
 
@@ -160,7 +170,7 @@ def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv
 
     TRLV_TRLVM.to_csv(os.path.join(tofolder,'%i_%i_peakdemand.csv') %(spatail, demand_scneario))
 
-def distribution_elec_startyear(demand, capacitytoactivity, distrlosses, years, savepath):
+def distribution_elec_startyear(demand, capacitytoactivity, distrlosses,basetopeak, years, savepath):
     demand_df =pd.read_csv(demand)
     elecdemand = demand_df.loc[demand_df.Fuel.str.endswith('_1', na=False)]
     elecdemand['Technology'] = elecdemand['Fuel'].str.replace('EL3_', 'EL00d_')
@@ -169,7 +179,7 @@ def distribution_elec_startyear(demand, capacitytoactivity, distrlosses, years, 
     elecdemand.index = elecdemand['Technology']
 
     demand_column = elecdemand[years[0]]
-    capacity_distrib  = demand_column.apply(lambda row: row/(capacitytoactivity*distrlosses)) 
+    capacity_distrib  = demand_column.apply(lambda row: row*basetopeak/(capacitytoactivity*distrlosses)) 
 
     #capacity_distrib = elecdemand['new_column']
     #df= capacity_distrib
