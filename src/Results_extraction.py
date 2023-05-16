@@ -2,7 +2,7 @@
 Module: Results_morris
 =============================
 
-A module for building the logic around peakdemand, transmissionlines and distributionlines.
+A module for extracting the results
 
 ---------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -32,6 +32,8 @@ from typing import List
 from logging import getLogger
 
 logger = getLogger(__name__)
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def load_csvs(paths, years):
     """Creates a dataframe dictionary from the csv files in /data : dict_df
@@ -95,19 +97,34 @@ def creating_Y_to_morris(dict, path, years):
     #TODO add sort function on index
     df.to_csv(os.path.join(path,'totaldiscounted_results.csv'))
 
-    Y_capacity = {}
-    #NewCapacity
-    for i in dict.keys():
-        newcap = {}
-        newcap['NewCapacity'] = dict[i]['NewCapacity']['sumall'].sum(axis=0)
-        Y_capacity[i] = newcap
+    ##
 
-    df = pd.DataFrame.from_dict(Y_capacity, orient="index")
+    Y_transmshare = {}
+    #NewCapacity for TRLV CANNOT BE DONE AS THE PEAKDEMAND AND km AFFECT THE NEWCAPACITY! However peakdemand*km is the equivalent
+    for i in dict.keys():
+        #newcap = {}
+        newcap = dict[i]['NewCapacity'][['tech','sumall']] #.sum(axis=0)
+        #This function selects the transmission lines
+        transmission_select = newcap[newcap['tech'].str.startswith('TRHV')]
+        transmission  = transmission_select['sumall'].sum(axis=0)
+        Y_transmshare[i] = transmission
+
+    df = pd.DataFrame.from_dict(Y_transmshare, orient="index")
     df.to_csv(os.path.join(path,'New_capacity.csv'))
 
-    return Y_totalcost, Y_capacity
+    Y_capitalcost = {}
+    #NewCapacity
+    for i in dict.keys():
+        capitalcost = {}
+        capitalcost['Capitalcost'] = dict[i]['CapitalInvestment']['sumall'].sum(axis=0)
+        Y_capitalcost[i] = capitalcost
 
-def run_morris(dict_y, paramvalues_path, problem_path, save_file):
+    df = pd.DataFrame.from_dict( Y_capitalcost, orient="index")
+    df.to_csv(os.path.join(path,'Capitalinvestment_results.csv'))
+
+    return Y_totalcost, Y_transmshare, Y_capitalcost
+
+def run_morris(dict_y, paramvalues_path, problem_path, save_file, unit):
 
     # Perform the sensitivity analysis using the model output
     # Specify which column of the output file to analyze (zero-indexed)
@@ -195,7 +212,7 @@ def run_morris(dict_y, paramvalues_path, problem_path, save_file):
 
         return problem
 
-    def sa_results(parameters: dict, X: np.array, Y: np.array, save_file: str):
+    def sa_results(parameters: dict, X: np.array, Y: np.array, save_file: str, unit: str):
         """Performs SA and plots results. 
 
         Parameters
@@ -221,8 +238,8 @@ def run_morris(dict_y, paramvalues_path, problem_path, save_file):
         title = Path(save_file).stem.capitalize()
         fig, axs = plt.subplots(2, figsize=(10,8))
         fig.suptitle(title, fontsize=20)
-        plot_morris.horizontal_bar_plot(axs[0], Si, unit="(\$)")
-        plot_morris.covariance_plot(axs[1], Si, unit="(\$)")
+        plot_morris.horizontal_bar_plot(axs[0], Si, unit="(\%s)" %(unit))
+        plot_morris.covariance_plot(axs[1], Si, unit="(\%s)" %(unit))
 
         fig.savefig(f'{save_file}.png', bbox_inches='tight')
     
@@ -236,18 +253,41 @@ def run_morris(dict_y, paramvalues_path, problem_path, save_file):
     df_2 = df_2.sort_index()
     Y = df_2.to_numpy()
 
-    sa_results(parameters, X, Y, save_file)
+    sa_results(parameters, X, Y, save_file, unit)
+# def extract_results_PV(folder, morris_sample):
+
+#     current = os.getcwd()
+#     os.chdir(folder)
+#     files = os.listdir(folder)
+#     shapefiles = []
+#     for file in files:
+#         if file.endswith('.csv'):
+#             f = os.path.abspath(file)
+#             csv += [f]
+#     keyword = ['capacityfactor_solar_batteries_Tier']
+#     PVbatt = []
+#     out = [f for f in shapefiles if any(xs in f for xs in keyword)]
+#     for f in out:
+#         results_file = pd.read_csv(f)
+#         PVbatt += [results_file]
     
+#     morris = pd.read_csv(morris_sample)
+#     #TODO add the match between the PV size and sample
+#     PV_results = 0
+
+#     return PV_results
 
 def main(folder, outputdataframe):
     years = ['2020', '2021', '2022','2023','2024','2025','2026','2027','2028','2029','2030','2031',	'2032',	'2033',	'2034',	'2035',	'2036',	'2037',	'2038',	'2039',	'2040', '2041']
     dict_df = load_csvs(folder, years)
     dict_results = read_data(dict_df, years)
-    totaldiscountedcost, capacity = creating_Y_to_morris(dict_results, 'Beninsensitivity', years)
-    run_morris(totaldiscountedcost, 'Beninsensitivity/sample_morris.csv', 'config/Beninparameters.csv', 'Beninsensitivity/totaldiscountedcost')
-    run_morris(capacity, 'Beninsensitivity/sample_morris.csv', 'config/Beninparameters.csv', 'Beninsensitivity/newcapacity')
+    totaldiscountedcost, transmcap, capitalinvestment = creating_Y_to_morris(dict_results, '%ssensitivity'%(country), years)
+    #PV_battery = extract_results_PV('Kenya_run/scenarios')
+    run_morris(totaldiscountedcost, '%ssensitivity/sample_morris.csv' %(country), 'config/%sparameters.csv'%(country), '%ssensitivity/totaldiscountedcost %s'%(country, country), '$')
+    run_morris(capitalinvestment, '%ssensitivity/sample_morris.csv'%(country), 'config/%sparameters.csv'%(country), '%ssensitivity/capitalinvestment %s'%(country, country), '$')
+    run_morris(transmcap, '%ssensitivity/sample_morris.csv'%(country), 'config/%sparameters.csv'%(country), '%ssensitivity/transmission capacity %s'%(country, country), 'kW')
 
-
-main('Benin_run/temp/results', 'Benin_run/sensitivity')
+country = 'Kenya'
+main('%s_run/results' %(country), '%s_run/sensitivity' %(country))
 
 
