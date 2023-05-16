@@ -1,6 +1,6 @@
 name,group,indexes,min_value_base_year,max_value_base_year,min_value_end_year,max_value_end_year,dist,interpolation_index,action,floor
 Spatial,Spatial,GLOBAL,1,100,1,100,unif,None,fixed,Y
-DiscountRate,DiscountRate,GLOBAL,0.05,0.15,0.05,0.15,unif,None,fixed,N
+DiscountRate,DiscountRate,GLOBAL,0.08,0.15,0.08,0.15,unif,None,fixed,N
 Dailytemporalresolution,Dailytemporalresolution,GLOBAL,1,24,1,24,unif,None,fixed,Y
 CapitalCost_PV,CapitalCost_PV,SOPV,2743,2743,671,1651,unif,YEAR,interpolate,N
 CapitalCost_Battery_kWh,CapitalCost_Battery_kWh,battery,685,685,277,439,unif,YEAR,interpolate,N
