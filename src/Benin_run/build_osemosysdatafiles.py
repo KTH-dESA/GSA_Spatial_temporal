@@ -1034,6 +1034,10 @@ def capitalcost_dynamic(df, outPutFile, CapitalCost_PV, CapitalCost_batt, Capita
                 dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPV", location, k, pvcapitalcost))
                 dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPVBattery", location, k, sopvcapitalcostbatt_rural))
             dataToInsert += "%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], "SOMG8c", location, k, sopvcapitalcostbatt_rural)
+    
+    for k in CapitalCost_WI.index:  # year is an object so I cannot match it with a number (e.g. startyear)
+        windcapitalcost = CapitalCost_WI.loc[k][0]
+        dataToInsert += "%s\t%s\t%s\t%f\n" % (input_data['region'][0], 'WI31ph', k, windcapitalcost)
 
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
