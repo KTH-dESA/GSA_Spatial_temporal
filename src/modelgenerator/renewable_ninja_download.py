@@ -245,7 +245,7 @@ def adjust_timezone(path, time_zone_offset):
 def uncertainty_capacityfactor(path, CapacityFactor_adj):
     
     def reduce_num(x):
-        if x >= -CapacityFactor_adj:
+        if x >= -CapacityFactor_adj and x !=0:
             return x + CapacityFactor_adj
         else:
             return 0
