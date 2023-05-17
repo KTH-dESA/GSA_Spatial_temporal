@@ -92,32 +92,32 @@ def elec(demandcells, scenario, country):
     HV_all = allcells.filter(lambda x: (x['elec'].mean() > 0) ) #and ((x['MV'].min() < 1)) or ((x['LV'].min() < 1)) or ((x['Grid'].min() < 1)))
     HV = HV_all.groupby(["id"])
     HV_df = HV.sum(numeric_only=True).reset_index()[['id']]
-    HV_df.to_csv(os.path.join(os.getcwd(),'%s_run/%i_HV_cells.csv') %(country, scenario))
+    HV_df.to_csv(os.path.join(os.getcwd(),'%s_run/scenarios/%i_HV_cells.csv') %(country, scenario))
 
     elec_all = allcells.filter(lambda x: (x['elec'].mean() > 0))
     elec = elec_all.groupby(["id"])
-    elec.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'%s_run/%i_elec.csv')%(country, scenario))
+    #elec.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'%s_run/%i_elec.csv')%(country, scenario))
     elec.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'%s_run/scenarios/%i_elec.csv')%(country, scenario))
 
     elec_df = elec.sum(numeric_only=True).reset_index()[['id']]
     noHV_elec = (
         pd.merge(elec_df, HV_df, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
-    noHV_elec.to_csv(os.path.join(os.getcwd(), '%s_run/%i_elec_noHV_cells.csv')%(country, scenario))
+    noHV_elec.to_csv(os.path.join(os.getcwd(), '%s_run/scenarios/%i_elec_noHV_cells.csv')%(country, scenario))
 
     #noHV_all = allcells.filter()
     #noHV_all = allcells.filter(lambda x: (x['p'].mean() == 0 ) or (x['Minigrid'].min() < 5000) and (x['MV'].min() > 1) or (x['LV'].min() > 1))
     all_pointid = demand_cell['id'].drop_duplicates().dropna()
     noHV = (pd.merge(all_pointid,HV_df, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
     noHV_nominigrid= (pd.merge(noHV,noHV_elec, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge', axis=1))
-    noHV_nominigrid.to_csv(os.path.join(os.getcwd(),'%s_run/%i_noHV_cells.csv')%(country, scenario))
+    noHV_nominigrid.to_csv(os.path.join(os.getcwd(),'%s_run/scenarios/%i_noHV_cells.csv')%(country, scenario))
 
     minigrid = pd.DataFrame({'id' : [np.nan]})
     minigrid_all = minigrid.groupby(["id"])
-    minigrid_all.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'%s_run/%i_minigridcells.csv')%(country, scenario))
+    minigrid_all.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'%s_run/scenarios/%i_minigridcells.csv')%(country, scenario))
 
     unelec_all = allcells.filter(lambda x: (x['elec'].mean() == 0 ))
     unelec = unelec_all.groupby(["id"])
-    unelec.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'%s_run/%i_un_elec.csv')%(country, scenario))
+    #unelec.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'%s_run/%i_un_elec.csv')%(country, scenario))
     unelec.sum(numeric_only=True).reset_index()[['id']].to_csv(os.path.join(os.getcwd(),'%s_run/scenarios/%i_un_elec.csv')%(country, scenario))
 
 def calculate_demand(settlements, elecdemand, unelecdemand, scenario, spatial, input_data_csv, country):
