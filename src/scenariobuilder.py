@@ -23,7 +23,7 @@ config = ConfigParser()
 config.read('config/config_input.ini')
 
 #Choose which country tobuild
-country = 'Kenya'#sys.argv[1]
+country = 'Kenya' #sys.argv[1]
 
 if country == 'Benin':
     # Benin
@@ -128,10 +128,10 @@ for j in dict_modelruns.keys():
     spatial = int(float(modelrun.iloc[0][1]))
     Dailytemporalresolution= int(float(modelrun.iloc[2][1]))
     DiscountRate = float(modelrun.iloc[1][1])
-    CapitalCost_PV_raw = modelrun.iloc[3][1]
-    CapitalCost_PV = split_data_onecell(CapitalCost_PV_raw)
-    CapitalCost_batt_raw = modelrun.iloc[4][1]
-    CapitalCost_batt = split_data_onecell(CapitalCost_batt_raw)
+    CapitalCost_PV = int(float(modelrun.iloc[3][1]))
+    #CapitalCost_PV = split_data_onecell(CapitalCost_PV_raw)
+    CapitalCost_batt = int(float(modelrun.iloc[4][1]))
+    #CapitalCost_batt = split_data_onecell(CapitalCost_batt_raw)
     CapitalCost_WI_raw = modelrun.iloc[5][1]
     CapitalCost_WI = split_data_onecell(CapitalCost_WI_raw)
     CapitalCost_transm = float(modelrun.iloc[6][1])
@@ -140,8 +140,8 @@ for j in dict_modelruns.keys():
     DemandProfileTier = int(float(modelrun.iloc[9][1]))
     FuelpriceNG_raw = modelrun.iloc[10][1]
     FuelpriceNG = split_data_onecell(FuelpriceNG_raw)
-    FuelpriceDIESEL_raw = modelrun.iloc[11][1]
-    FuelpriceDIESEL = split_data_onecell(FuelpriceDIESEL_raw)
+    FuelpriceCRUDEOIL = int(float(modelrun.iloc[11][1]))
+    #FuelpriceCRUDEOIL = split_data_onecell(FuelpriceCRUDEOIL_raw)
     FuelpriceCOAL_raw = modelrun.iloc[12][1]
     FuelpriceCOAL = split_data_onecell(FuelpriceCOAL_raw)
     CapitalCost_distribution_ext = float(modelrun.iloc[13][1])
@@ -160,6 +160,40 @@ for j in dict_modelruns.keys():
     unelecdemand_df_all = df[(df['Tier'] == DemandProfileTier) & (df['Electrified'] == 0)]
     unelecdemand_df = unelecdemand_df_all.loc[:, '2020':'2040']
     unelecdemand_df.columns = unelecdemand_df.columns.astype('int')
+
+    df_oil = pd.read_csv('%sinput_data/fuelprice_PV_price.csv' %(country))
+
+    # Diesel price for selected level
+    Diesel_all = df_oil[(df_oil['Level'] == FuelpriceCRUDEOIL) & (df_oil['Type'] == 'Diesel')]
+    Diesel_df = Diesel_all.loc[:, '2020':'2040']
+    Diesel_df.columns = Diesel_df.columns.astype('int')
+
+    # Heavy fuel oil price for selected level
+    Heavyfueloil_df_all = df_oil[(df_oil['Level'] == FuelpriceCRUDEOIL) & (df_oil['Type'] == 'Heavy Fuel oil')]
+    Heavyfueloil_df = Heavyfueloil_df_all.loc[:, '2020':'2040']
+    Heavyfueloil_df.columns = Heavyfueloil_df.columns.astype('int')
+
+    # SOPV price for selected level
+    SOPV_all = df_oil[(df_oil['Level'] == CapitalCost_PV) & (df_oil['Type'] == 'SOPV')]
+    SOPV_df = SOPV_all.loc[:, '2020':'2040']
+    SOPV_df.columns = SOPV_df.columns.astype('int')
+
+    # SOMG price for selected level
+    SOMG_df_all = df_oil[(df_oil['Level'] == CapitalCost_PV) & (df_oil['Type'] == 'SOMG')]
+    SOMG_df = SOMG_df_all.loc[:, '2020':'2040']
+    SOMG_df.columns = SOMG_df.columns.astype('int')
+
+    # smallbattery  price for selected level
+    RESBatt_all = df_oil[(df_oil['Level'] == CapitalCost_batt) & (df_oil['Type'] == 'RESBatt')]
+    RESBatt_df = RESBatt_all.loc[:, '2020':'2040']
+    RESBatt_df.columns = RESBatt_df.columns.astype('int')
+
+    # large battery price for selected level
+    COMBatt_df_all = df_oil[(df_oil['Level'] == CapitalCost_batt) & (df_oil['Type'] == 'COMBatt')]
+    COMBatt_df = COMBatt_df_all.loc[:, '2020':'2040']
+    COMBatt_df.columns = COMBatt_df.columns.astype('int')
+
+
 
     combined = str(spatial) + str(CapacityFactor_adj)
 
@@ -188,7 +222,7 @@ for j in dict_modelruns.keys():
         print(date)
         print("3. Identify unelectrified %i_polygons " %(spatial))
         polygons_all = projectedfolder+ '/'+polygon
-        noHV = '%s_run/%i_noHV_cells.csv' %(country, spatial)
+        noHV = '%s_run/scenarios/%i_noHV_cells.csv' %(country, spatial)
         shape =  "%s_run/scenarios/Demand/%i_un_elec_polygons.shp" %(country, spatial)
 
         noHV_polygons(polygons_all, noHV, shape, crs)
@@ -228,9 +262,9 @@ for j in dict_modelruns.keys():
         distribution_row = "_%isum" %(spatial)
 
         topath = '%s_run/scenarios/Demand' %(country)
-        noHV = '%s_run/%i_noHV_cells.csv' %(country, spatial)
-        HV_file = '%s_run/%i_HV_cells.csv' %(country, spatial)
-        minigrid = '%s_run/%i_elec_noHV_cells.csv' %(country, spatial)
+        noHV = '%s_run/scenarios/%i_noHV_cells.csv' %(country, spatial)
+        HV_file = '%s_run/scenarios/%i_HV_cells.csv' %(country, spatial)
+        minigrid = '%s_run/scenarios/%i_elec_noHV_cells.csv' %(country, spatial)
         neartable = '%s_run/scenarios/Demand/%i_Near_table.csv' %(country, spatial)
         if os.path.isfile('%s_run/scenarios/Demand/%i_adjacencymatrix.csv' %(country, spatial)):
             print('File already exists, skipping calculations.')
@@ -240,11 +274,11 @@ for j in dict_modelruns.keys():
         date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
         print(date)
 
-        elec_noHV_cells = '%s_run/%i_elec_noHV_cells.csv' %(country, spatial)
+        elec_noHV_cells = '%s_run/scenarios/%i_elec_noHV_cells.csv' %(country, spatial)
         renewable_path = '%stemp/%i' %(country, spatial)
         pop_shp = projectedfolder + files.loc['pop','filename']
-        unelec = '%s_run/%i_un_elec.csv' %(country, spatial)
-        elec_ = '%s_run/%i_elec.csv' %(country, spatial)
+        unelec = '%s_run/scenarios/%i_un_elec.csv' %(country, spatial)
+        elec_ = '%s_run/scenarios/%i_elec.csv' %(country, spatial)
 
         #Solar and wind csv files
         renewableninja(renewable_path, scenarios_folder, spatial, CapacityFactor_adj)
@@ -288,9 +322,9 @@ for j in dict_modelruns.keys():
     distribution = '%s_run/scenarios/%i_distributionlines.csv' %(country, spatial)
     distribution_row = "_%isum" %(spatial)
 
-    noHV = '%s_run/%i_noHV_cells.csv' %(country, spatial)
-    HV_file = '%s_run/%i_HV_cells.csv' %(country, spatial)
-    minigrid = '%s_run/%i_elec_noHV_cells.csv' %(country, spatial)
+    #noHV = '%s_run/%i_noHV_cells.csv' %(country, spatial)
+    HV_file = '%s_run/scenarios/%i_HV_cells.csv' %(country, spatial)
+    #minigrid = '%s_run/%i_elec_noHV_cells.csv' %(country, spatial)
     neartable = '%s_run/scenarios/Demand/%i_Near_table.csv' %(country, spatial)
     demand = '%s_run/scenarios/%i_demand_%i_spatialresolution.csv' %(country, elecdemand_df.iloc[0][2040], spatial)
     
@@ -335,10 +369,6 @@ for j in dict_modelruns.keys():
     else:
         battery_to_pv(loadprofile_high,  capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePVhigh, highscenario,  startDate, endDate, startDate, endDate, country)
 
-    #demand_runs[j] = temporal_unique
-            
-    #else:
-        #print('Scenario already run')
 
     ####################### Make txt file #############################
     dict_df = load_csvs(scenarios_folder) #args.data_path) #
@@ -348,9 +378,9 @@ for j in dict_modelruns.keys():
     if os.path.isfile('%s_run/output/' %(country) +comb):
         print('File already exists, skipping calculations.')
     else:
-        outPutFile = functions_to_run(dict_df, outPutFile, spatial, elecdemand_df.iloc[0][2040], DiscountRate, temporal_id, CapitalCost_PV, 
-                                    CapitalCost_batt, CapitalCost_WI, CapitalCost_distribution, CapacityFactor_adj, 
-                                    FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, DemandProfileTier, country)
+        outPutFile = functions_to_run(dict_df, outPutFile, spatial, elecdemand_df.iloc[0][2040], DiscountRate, temporal_id, SOPV_df, 
+                                        RESBatt_df, CapitalCost_WI, CapitalCost_distribution, CapacityFactor_adj, 
+                                        FuelpriceNG, Diesel_df, FuelpriceCOAL, DemandProfileTier, country, COMBatt_df, SOMG_df, Heavyfueloil_df)
 
         #write data file
         if not os.path.exists(output_folder):

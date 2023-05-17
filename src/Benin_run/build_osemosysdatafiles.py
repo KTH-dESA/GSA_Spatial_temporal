@@ -47,7 +47,7 @@ def make_outputfile(param_file):
     return outPutFile
 
 def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_scenario, temporal, CapitalCost_PV, 
-                                  CapitalCost_batt, CapitalCost_WI, CapitalCost_distribution, CapacityFactor_adj, FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, DemandProfileTier, country):
+                                  CapitalCost_batt, CapitalCost_WI, CapitalCost_distribution, CapacityFactor_adj, FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, DemandProfileTier, country, COMBatt_df, SOMG_df, Heavyfueloil_df):
     """Runs all the functions for the different parameters
 
     Arguments
@@ -97,7 +97,7 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
         print('No demand file')
 ####################################################################################
     outPutFile = capitalcost_dynamic(dict_df['%i_GIS_data' %(spatial)], outPutFile,  CapitalCost_PV, 
-                                   CapitalCost_batt, CapitalCost_WI, dict_df['input_data_%i'%(temporal)],dict_df['%i_elec' %(spatial)],dict_df['%i_un_elec' %(spatial)], dict_df['capacityfactor_solar_batteries_Tier%i_loca%i_uncertain%f' %(DemandProfileTier, spatial, CapacityFactor_adj)], dict_df['capacityfactor_solar_batteries_urban_loca%i_uncertain%f' %(spatial, CapacityFactor_adj)])
+                                   CapitalCost_batt, CapitalCost_WI, COMBatt_df, SOMG_df, dict_df['input_data_%i'%(temporal)],dict_df['%i_elec' %(spatial)],dict_df['%i_un_elec' %(spatial)], dict_df['capacityfactor_solar_batteries_Tier%i_loca%i_uncertain%f' %(DemandProfileTier, spatial, CapacityFactor_adj)], dict_df['capacityfactor_solar_batteries_urban_loca%i_uncertain%f' %(spatial, CapacityFactor_adj)])
 ###########################################################################
     if '%i_capitalcost'%(spatial) in dict_df:
         outPutFile = capitalcost(outPutFile, dict_df['%i_capitalcost'%(spatial)], dict_df['input_data_%i'%(temporal)])
@@ -125,7 +125,7 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
         print('No emissions file')
 ########################################################
     if '%i_variable_cost' %(spatial) in dict_df:
-        outPutFile = variblecost(dict_df['%i_GIS_data' %(spatial)], outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['%i_variable_cost' %(spatial)],FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL)
+        outPutFile = variblecost(dict_df['%i_GIS_data' %(spatial)], outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['%i_variable_cost' %(spatial)],FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, Heavyfueloil_df)
     else:
         print('No variable_cost file')
 #############################################################
@@ -565,7 +565,7 @@ def emissionactivity(df, outPutFile, input_data, emissions):
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return (outPutFile)
 
-def variblecost(df, outPutFile, input_data, variable_cost, gas, diesel, coal):
+def variblecost(df, outPutFile, input_data, variable_cost, gas, diesel, coal, heavyfueloil):
     """
     Builds the Variable cost (Region, Technology, ModeofOperation, Year, Variablecost)
     -------------
@@ -599,9 +599,13 @@ def variblecost(df, outPutFile, input_data, variable_cost, gas, diesel, coal):
         gas_price = gas.loc[i][0]
         dataToInsert += "%s\t%s\t%i\t%s\t%f\n" % (input_data['region'][0], 'GAS_IMP', 1,i, gas_price)
     
-    for i in diesel.index:
-        diesel_price = diesel.loc[i][0]
-        dataToInsert += "%s\t%s\t%i\t%s\t%f\n" % (input_data['region'][0], 'DIESEL_IMP', 1,i, diesel_price)
+    for i in range(len(diesel.columns)):
+        diesel_price = diesel.iloc[0,i]
+        dataToInsert += "%s\t%s\t%i\t%s\t%f\n" % (input_data['region'][0], 'DIESEL_IMP', 1,diesel.columns[i], diesel_price)
+    
+    for i in range(len(heavyfueloil.columns)):
+        heavyfueloil_price = heavyfueloil.iloc[0,i]
+        dataToInsert += "%s\t%s\t%i\t%s\t%f\n" % (input_data['region'][0], 'HeavyFueloil_IMP', 1,heavyfueloil.columns[i], heavyfueloil_price)
 
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
@@ -990,7 +994,7 @@ def specifiedannualdemand(outPutFile, demand, input_data):
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
 
-def capitalcost_dynamic(df, outPutFile, CapitalCost_PV, CapitalCost_batt, CapitalCost_WI, input_data, elec, un_elec, PV_sizing_rural, PVsizing_urban):
+def capitalcost_dynamic(df, outPutFile, CapitalCost_PV, CapitalCost_batt, CapitalCost_WI, COMBatt_df, SOMG_df, input_data, elec, un_elec, PV_sizing_rural, PVsizing_urban):
     """
     builds the Capitalcost (Region, Technology, Year, CapitalCost) where the cost is dynamic. Here when the capacity factor vary for Wind
     -------------
@@ -1019,21 +1023,26 @@ def capitalcost_dynamic(df, outPutFile, CapitalCost_PV, CapitalCost_batt, Capita
         for k in CapitalCost_WI.index:  # year is an object so I cannot match it with a number (e.g. startyear)
             windcapitalcost = CapitalCost_WI.loc[k][0]
             dataToInsert += "%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], "WI", location, k, windcapitalcost)
-            
-        for k in CapitalCost_PV.index:  # year is an object so I cannot match it with a number (e.g. startyear)
-            pvcapitalcost = CapitalCost_PV.loc[k][0]
-            batterycost = CapitalCost_batt.loc[k][0]
-            sopvcapitalcostbatt_rural = pvcapitalcost*PV_sizing_rural.loc[row['Location']]['PV_size']+ batterycost*PV_sizing_rural.loc[row['Location']]['Battery_hours'] + 2476 #average constant from paper 3
-            sopvcapitalcostbatt_urban = pvcapitalcost*PVsizing_urban.loc[row['Location']]['PV_size']+ batterycost*PVsizing_urban.loc[row['Location']]['Battery_hours'] + 2476 #average constant from paper 3
+        
+        for k in range(len(CapitalCost_PV.columns)):  # year is an object so I cannot match it with a number (e.g. startyear)
+            pvcapitalcost = CapitalCost_PV.iloc[0,k]
+            batterycost = CapitalCost_batt.iloc[0,k]
+            MGPVcost = SOMG_df.iloc[0,k]
+            COMBatterycost = COMBatt_df.iloc[0,k]
+            sopvcapitalcostbatt_rural = pvcapitalcost*PV_sizing_rural.loc[row['Location']]['PV_size']+ batterycost*PV_sizing_rural.loc[row['Location']]['Battery_hours'] + 1339 #average constant+ capacity from ATB2022
+            sopvcapitalcostbatt_urban = pvcapitalcost*PVsizing_urban.loc[row['Location']]['PV_size']+ batterycost*PVsizing_urban.loc[row['Location']]['Battery_hours'] + 1339 #average constant +capacity from ATB2022
+            soMGcapitalcostbatt_rural = MGPVcost*PV_sizing_rural.loc[row['Location']]['PV_size']+ COMBatterycost*PV_sizing_rural.loc[row['Location']]['Battery_hours'] + 717 #average constant+ capacity from ATB2022
+            soMGcapitalcostbatt_urban = MGPVcost*PVsizing_urban.loc[row['Location']]['PV_size']+ COMBatterycost*PVsizing_urban.loc[row['Location']]['Battery_hours'] + 717 #average constant +capacity from ATB2022
+           
             if elec['id'].eq(row['Location']).any():
-                dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], "SOPV", location, k, pvcapitalcost))
-                dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPV", location, k, pvcapitalcost))
-                dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], "SOPVBattery", location, k, sopvcapitalcostbatt_urban))
-                dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPVBattery", location, k, sopvcapitalcostbatt_rural))
+                dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], "SOPV", location, CapitalCost_PV.columns[k], pvcapitalcost))
+                dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPV", location, CapitalCost_PV.columns[k], pvcapitalcost))
+                dataToInsert += ("%s\t%s_%s_1\t%s\t%f\n" % (input_data['region'][0], "SOPVBattery", location, CapitalCost_PV.columns[k], sopvcapitalcostbatt_urban))
+                dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPVBattery", location, CapitalCost_PV.columns[k], sopvcapitalcostbatt_rural))
             if un_elec['id'].eq(row['Location']).any():
-                dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPV", location, k, pvcapitalcost))
-                dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPVBattery", location, k, sopvcapitalcostbatt_rural))
-            dataToInsert += "%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], "SOMG8c", location, k, sopvcapitalcostbatt_rural)
+                dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPV", location, CapitalCost_PV.columns[k], pvcapitalcost))
+                dataToInsert += ("%s\t%s_%s_0\t%s\t%f\n" % (input_data['region'][0], "SOPVBattery", location, CapitalCost_PV.columns[k], sopvcapitalcostbatt_rural))
+            dataToInsert += "%s\t%s_%s\t%s\t%f\n" % (input_data['region'][0], "SOMGBattery", location, CapitalCost_PV.columns[k], soMGcapitalcostbatt_rural)
     
     for k in CapitalCost_WI.index:  # year is an object so I cannot match it with a number (e.g. startyear)
         windcapitalcost = CapitalCost_WI.loc[k][0]
