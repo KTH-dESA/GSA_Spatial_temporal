@@ -427,17 +427,17 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
     #For all cells
     for k in range(1,len(gis)+1):
 
-        output_temp = [0,  "EL2_%i" % (k),"SOMG8c_%i" %(k), 1, 1]
+        output_temp = [0,  "EL2_%i" % (k),"SOMGBattery_%i" %(k), 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
         
-        fixedcost_temp = ["SOMG8c_%i" %(k), 44]
+        fixedcost_temp = ["SOMGBattery_%i" %(k), 44]
         fixedcost.loc[-1] = fixedcost_temp  # adding a row
         fixedcost.index = fixedcost.index + 1  # shifting index
         fixedcost = fixedcost.sort_index()
 
-        operationallife_temp = ["SOMG8c_%i" %(k), 30]
+        operationallife_temp = ["SOMGBattery_%i" %(k), 30]
         operationallife.loc[-1] = operationallife_temp  # adding a row
         operationallife.index = operationallife.index + 1  # shifting index
         operationallife = operationallife.sort_index()
@@ -463,7 +463,7 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
             outputactivity.index = outputactivity.index + 1  # shifting index
             outputactivity = outputactivity.sort_index()
 
-            input_temp = [0,  "DSFUEL", "DSGEN_%i" %(k), 4, 1]
+            input_temp = [0,  "KEDS", "DSGEN_%i" %(k), 4, 1]
             inputactivity.loc[-1] = input_temp  # adding a row
             inputactivity.index = inputactivity.index + 1  # shifting index
             inputactivity = inputactivity.sort_index()
