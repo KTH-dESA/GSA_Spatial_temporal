@@ -1,6 +1,6 @@
 """
 Author: Will Usher, modified by Nandi Moksnes
-Generates a sample from a list of parameters
+Generates a sample from a list of parameters, and a sample file of the mean nominal values of x as input to Scaled elementary effect
 
 
 Arguments
@@ -18,13 +18,13 @@ To run the script on the command line, type::
 
 The ``parameters.csv`` CSV input file should be formatted as follows::
 
-    name,group,indexes,min_value_base_year,max_value_base_year,min_value_end_year,max_value_end_year,dist,interpolation_index,action
-    DiscountRate,discountrate,"REGION",0.05,0.15,0.05,0.15,unif,None,fixed
-    CapitalCost,CapitalCostNG,"REGION,AONGCCC01N",2100,3100,742,1800,unif,YEAR,interpolate
+    name,group,indexes,min_value_base_year,max_value_base_year,min_value_end_year,max_value_end_year,dist,interpolation_index,floor
+    DiscountRate,discountrate,"REGION",0.05,0.15,0.05,0.15,unif,None,fixed, Y
+    CapitalCost,CapitalCostNG,"REGION,AONGCCC01N",2100,3100,742,1800,unif,YEAR,interpolate, N
 
 The output sample file is formatted as follows::
 
-   'name', 'indexes', 'value_base_year', 'value_end_year', 'action', 'interpolation_index'
+   'name', 'indexes', 'value_base_year', 'value_end_year', 'action', 'interpolation_index', 'floor'
     DiscountRate,"REGION",0.05,0.05,fixed,None
     CapitalCost,"REGION,AONGCCC01N",2100,742,interpolate,YEAR
 
@@ -34,14 +34,19 @@ import csv
 import numpy as np
 from typing import List
 import sys
+import pandas as pd
 
 from logging import getLogger
 
 logger = getLogger(__name__)
-#TODO an if-then statement and set CapacityOfOneTechnologyUnit to 1 if the sample value is >=0.5 and 0 otherwise.
-def expand(morris_sample, parameters, output_files):
+
+def expand(morris_sample, parameters, output_files, path_sensitivity):
+    #Create a dataframe for the nominal x mean values for Scaled elementary Effects (Sin and Gearney, 2009)
+    num_rows, num_cols = morris_sample.shape
+    df = pd.DataFrame(index=range(num_rows),columns=range(num_cols))
     sample_list = []
     for model_run, sample_row in enumerate(morris_sample):
+        nominal_modelrun_x = []
         filepath = output_files + '/sample_'+str(int(model_run))+".txt"
         sample_list += [filepath]
         with open(filepath, 'w') as csvfile:
@@ -76,4 +81,20 @@ def expand(morris_sample, parameters, output_files):
                         'floor': param['floor']}
                 writer.writerow(data)
 
+                # create sample nominal values
+                if (value_end_year-value_base_year)==0:
+                    mean = value_base_year
+                else:
+                    mean = value_base_year+(value_end_year-value_base_year)/2
+                nominal_modelrun_x.append(mean)
+        df.loc[model_run] = nominal_modelrun_x
+    df.to_csv(path_sensitivity, index=False, header=False)
     return sample_list
+sample_file = 'Kenyasensitivity/sample_morris.csv'
+parameters_file = 'config/Kenyaparameters.csv'
+with open(parameters_file, 'r') as csv_file:
+    parameter_list = list(csv.DictReader(csv_file))
+output_files_sample = 'Kenya_run/sensitivity_range'
+path_sensitivity = 'Kenyasensitivity/sample_morris_nominal.csv'
+morris_sample = np.loadtxt(sample_file, delimiter=",")
+samplelist = expand(morris_sample, parameter_list, output_files_sample, path_sensitivity)
