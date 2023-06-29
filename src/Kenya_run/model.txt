@@ -171,6 +171,7 @@ param CapitalCostkmkW {r in REGION, t in TECHNOLOGY, y in YEAR};
 
 ######### Network ###############
 var km {r in REGION, t in TECHNOLOGY, y in YEAR}>=0;
+var NewCapacityDistr {r in REGION, t in TECHNOLOGY, y in YEAR}>=0;
 
 
 ##############
@@ -378,6 +379,7 @@ s.t. CAa5_TotalNewCapacity{r in REGION, t in TECHNOLOGY, y in YEAR: CapacityOfOn
 
 s.t. CAa6_NewCapacityDistribution{r in REGION, t in TECHNOLOGY, y in YEAR}: Peakdemand[r,t,y] * (sum{yy in YEAR: y-yy>=0} km[r,t,yy]) >= TotalCapacityAnnual[r,t,y];
 s.t. CAa7_DistributionkmLimit{r in REGION, t in TECHNOLOGY, y in YEAR}: (sum{yy in YEAR: y-yy>=0} km[r,t,yy]) <= MaxKmPerTech[r,t,y];
+s.t. CAa8_NewCapacityDistribution_report{r in REGION, t in TECHNOLOGY, y in YEAR}: Peakdemand[r,t,y] * km[r,t,y] = NewCapacityDistr[r,t,y];
 
 s.t. NetworkCostPerCapacitykm{r in REGION, t in TECHNOLOGY, y in YEAR}: km[r,t,y] * CapitalCostkmkW[r,t,y] = CapitalCostnetwork[r,t,y];
 
