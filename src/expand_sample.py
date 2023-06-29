@@ -90,11 +90,11 @@ def expand(morris_sample, parameters, output_files, path_sensitivity):
         df.loc[model_run] = nominal_modelrun_x
     df.to_csv(path_sensitivity, index=False, header=False)
     return sample_list
-sample_file = 'Kenyasensitivity/sample_morris.csv'
-parameters_file = 'config/Kenyaparameters.csv'
-with open(parameters_file, 'r') as csv_file:
-    parameter_list = list(csv.DictReader(csv_file))
-output_files_sample = 'Kenya_run/sensitivity_range'
-path_sensitivity = 'Kenyasensitivity/sample_morris_nominal.csv'
-morris_sample = np.loadtxt(sample_file, delimiter=",")
-samplelist = expand(morris_sample, parameter_list, output_files_sample, path_sensitivity)
+# sample_file = 'kenyasensitivity/sample_morris.csv'
+# parameters_file = 'config/kenyaparameters.csv'
+# with open(parameters_file, 'r') as csv_file:
+#     parameter_list = list(csv.DictReader(csv_file))
+# output_files_sample = 'kenya_run/sensitivity_range'
+# path_sensitivity = 'kenyasensitivity/sample_morris_nominal.csv'
+# morris_sample = np.loadtxt(sample_file, delimiter=",")
+# samplelist = expand(morris_sample, parameter_list, output_files_sample, path_sensitivity)
