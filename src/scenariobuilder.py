@@ -23,12 +23,14 @@ config = ConfigParser()
 config.read('config/config_input.ini')
 
 #Choose which country tobuild
-country = 'Kenya' #sys.argv[1]
+country = sys.argv[1]
 
 if country == 'Benin':
     # Benin
     crs = config['geospatialdata']['Benincrs']
     sample_file = config['sensitivityanalysis']['Beninsample_file']
+    nominal_morris_sample = config['sensitivityanalysis']['Benin_nominalsample_file']
+    nominal_parameters_file =  config['sensitivityanalysis']['Beninnominalparameters_file']
     parameters_file = config['sensitivityanalysis']['Beninparameters_file']
     replicates =  int(config['sensitivityanalysis']['replicates'])
     scenarios_folder = config['inputfiles']['Beninscenarios_folder']
@@ -57,6 +59,8 @@ else:
     #Kenya
     crs = config['geospatialdata']['Kenyacrs']
     sample_file = config['sensitivityanalysis']['Kenyasample_file']
+    nominal_morris_sample = config['sensitivityanalysis']['Kenya_nominalsample_file']
+    nominal_parameters_file =  config['sensitivityanalysis']['Kenyanominalparameters_file']
     parameters_file = config['sensitivityanalysis']['Kenyaparameters_file']
     replicates =  int(config['sensitivityanalysis']['replicates'])
     scenarios_folder = config['inputfiles']['Kenyascenarios_folder']
@@ -101,7 +105,8 @@ createsample(reader, sample_file, replicates)
 with open(parameters_file, 'r') as csv_file:
     parameter_list = list(csv.DictReader(csv_file))
 morris_sample = np.loadtxt(sample_file, delimiter=",")
-samplelist = expand(morris_sample, parameter_list, output_files_sample)
+samplelist = expand(morris_sample, parameter_list, output_files_sample, nominal_morris_sample)
+
 
 for sample in samplelist:
     with open(sample, 'r') as csv_file:
