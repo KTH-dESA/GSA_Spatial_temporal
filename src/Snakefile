@@ -3,14 +3,13 @@ import sys
 
 localrules: all, clean
 wildcard_constraints:
+    #result_file="[^(objective)][a-zA-Z_\-]+",  ##Maybe not
     model_run="\d+"
 
-#Benfiles, = glob_wildcards("Beninrun/output/{file}.txt")
-#Kenfiles, = glob_wildcards("Kenyarun/output/{file}.txt")
+#files, = glob_wildcards("Benin_run/output/{file}.txt")
 
-MODELRUNS_Benin = range(150)
-#MODELRUNS_Kenya = range(len(Kenfiles))
-
+#DDfiles = [pd.read_csv("run/output/{file}.txt") for file in files]
+MODELRUNS = range(150)
 
 onstart:
     print('Checking user inputs...')
@@ -20,12 +19,12 @@ onsuccess:
 
 rule all:
     input:
-        expand("Beninrun/output/Beninsample_{model_runs}.txt", model_runs=MODELRUNS_Benin)
+        expand("Kenya_run/output/Kenyasample_{model_runs}.txt", model_runs=MODELRUNS)
 
-rule build_DD:
+
+rule build_scenarios:
+    message: "building DD-files"
     output:
-        "Beninrun/output/Beninsample_{model_runs}.txt"
-    log:
-        "Beninrun/temp/{model_runs}.log"
+        "Kenya_run/output/Kenyasample_{model_runs}.txt"
     shell:
-        "python scenariobuilder.py 'Benin' > {log}"
+        "python scenariobuilder.py 'Kenya'"

@@ -29,6 +29,8 @@ rule build_lp:
         model_path = "run/model.txt",
     output:
         temp("run/temp/Kenya_{model_runs}.lp")
+	benchmark:
+        "run/benchmarks/gen_lp/{model_runs}.tsv"
     log:
         "run/temp/{model_runs}.log"
     shell:
@@ -47,7 +49,7 @@ rule solve_lp:
         ilp="run/results/{model_runs}.ilp",
         cplex="run/results/{model_runs}.cplex",
     shell:
-        'cplex -c "read {input}" "baropt" "optimize" "write {output.solution}"'
+        'cplex -c "read {input}" "optimize" "write {output.solution}"'
 
 rule transform_file:
     message: "Transforming CPLEX sol file '{input}'"

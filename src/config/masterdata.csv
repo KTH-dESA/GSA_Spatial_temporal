@@ -1,0 +1,295 @@
+tech,Technology,Type,RET
+KEBMCHph,Biomass,Power plant,Y
+KECOSCpn,Coal,Power plant,N
+KEDSCCph,Thermal,Power plant,N
+DSGEN,Diesel minigrid,Mini grid,N
+EL00d,Distribution,Distribution,N
+KEGOBIph,Geothermal,Power plant,Y
+KEGOFSph,Geothermal,Power plant,Y
+KEHFCCph,Thermal,Power plant,N
+KEHYDMph2,Hydroelectric,Power plant,Y
+KEHYDMph3,Hydroelectric,Power plant,Y
+KEHYDMph3GI,Hydroelectric,Power plant,Y
+KEHYDMph3KA,Hydroelectric,Power plant,Y
+KEHYDMph3KIA,Hydroelectric,Power plant,Y
+KEHYDMph3KIN,Hydroelectric,Power plant,Y
+KEHYDMph3MA,Hydroelectric,Power plant,Y
+KEHYRRph1,Hydroelectric,Power plant,Y
+KEIMPETH,Import Ethiopia,Imports,Y
+KENGCCpn,Natural gas CC,Power plant,N
+KESOU1ph,Solar utility,Power plant,Y
+KEWI31ph,Wind central,Power plant,Y
+SOMGBattery,PV minigrid + battery,Mini grid,Y
+SOPV,PV Roof-top,Stand alone,Y
+SOPVBattery,PV Roof-top + battery,Stand alone,Y
+TRHV,Transmission between cells,Transmission,N
+TRLV,Distribution to unelectrified,Distribution,N
+TRLVM,Distribution to unelectrified,Distribution,N
+WI,Wind minigrid,Mini grid,Y
+KECO00i00,Coal import,Extraction/Import,N
+KEDS00i00,Diesel import,Extraction/Import,N
+KEBMCHx00,Biomass extraction,Extraction/Import,N
+KEEL00t00,Transmission,Transmission,N
+KEHF00i00,Heavy fuel oil import,Extraction/Import,N
+KENG00i00,Natural gas import,Extraction/Import,N
+KECO00x00,Coal extraction,Extraction/Import,N
+KEUR00i00,Uranium,Extraction/Import,N
+KESOC3pn,Concentrated solar power,Power plant,Y
+BENBACKSTOP,Backstop technology,Backstop,
+BENBO3PRP00X,Biofuel production,Extraction/Import,N
+BENBIOIMP00X,Biomass imports,Extraction/Import,N
+BENBIOEMP00X,Biomass exports,Exports,
+BENBIOPRP00X,Biomass extraction/production/refining,Extraction/Import,N
+BENBIOCHC01N,Biomass & Waste CHP plant with CCS - Air cooling (new),Power plant,Y
+BENBIOCHC02N,Biomass & Waste CHP plant  with CCS- MDT cooling (new),Power plant,Y
+BENBIOCHC03N,Biomass & Waste CHP plant with CCS - NDT cooling (new),Power plant,Y
+BENBIOCHC04N,Biomass & Waste CHP plant with CCS - OTF/OTS cooling (new),Power plant,Y
+BENBIOCHP01O,Biomass & Waste CHP plant - Air cooling (old),Power plant,Y
+BENBIOCHP02O,Biomass & Waste CHP plant - MDT cooling (old),Power plant,Y
+BENBIOCHP03O,Biomass & Waste CHP plant - NDT cooling (old),Power plant,Y
+BENBIOCHP04O,Biomass & Waste CHP plant - OTF/OTS cooling (old),Power plant,Y
+BENBIOCHP01N,Biomass & Waste CHP plant - Air cooling (new),Power plant,Y
+BENBIOCHP02N,Biomass & Waste CHP plant - MDT cooling (new),Power plant,Y
+BENBIOCHP03N,Biomass & Waste CHP plant - NDT cooling (new),Power plant,Y
+BENBIOCHP04N,Biomass & Waste CHP plant - OTF/OTS cooling (new),Power plant,Y
+BENCHAIMP00X,Charcoal imports,Extraction/Import,N
+BENCOAIMP00X,Coal imports (inland transport, maritime freight),
+BENCOAEMP00X,Coal exports,Exports,
+BENCOADIP00X,Coal process (non-power sector),Conversion,
+BENCOAPRP00X,Coal extraction (mining),Extraction/Import,N
+BENCOASCC01N,Coal power plant with CCS - Air cooling (new),Power plant,N
+BENCOASCC02N,Coal power plant with CCS - MDT cooling (new),Power plant,N
+BENCOASCC03N,Coal power plant with CCS - NDT cooling (new),Power plant,N
+BENCOASCC04N,Coal power plant with CCS - OTF/OTS cooling (new),Power plant,N
+BENCOASCP01O,Coal power plant - Air cooling (old),Power plant,N
+BENCOASCP02O,Coal power plant - MDT cooling (old),Power plant,N
+BENCOASCP03O,Coal power plant - NDT cooling (old),Power plant,N
+BENCOASCP04O,Coal power plant - OTF/OTS cooling (old),Power plant,N
+BENCOASCP01N,Coal power plant - Air cooling (new),Power plant,N
+BENCOASCP02N,Coal power plant - MDT cooling (new),Power plant,N
+BENCOASCP03N,Coal power plant - NDT cooling (new),Power plant,N
+BENCOASCP04N,Coal power plant - OTF/OTS cooling (new),Power plant,N
+BENCO1IMP00X,Crude Oil imports,Extraction/Import,N
+BENCO1DIP00X,Crude Oil process (non-power sector),Conversion,
+BENCO1PRP00X,Crude Oil extraction,Extraction/Import,N
+BENCO1EXP00X,Crude Oil exports,Exports,
+BENCO1RCP00X,Crude oil refinery capacity,Conversion,
+BENCO1R1P00X,Crude oil refinery 1,Conversion,
+BENCO1R2P00X,Crude oil refinery 2,Conversion,
+BENEL1TRP00X,Transmission technology (Secondary to Tertiary),Transmission,N
+BENEL2DIP00X,Distribution technology (Distribution to final electricity demand),Distribution,
+BENEL3DIP00X,Distribution technology (Distribution to final current-unelectrified demand),Distribution,
+BENEL4DIP00X,Distribution technology (Distribution Mini-grid to final current-unelectrified demand),Distribution,
+BENETHPRP00X,Ethanol production,Extraction/Import,N
+BENBIODIP00X,Firewood process (non-power sector),Conversion,
+BENGEOCVP01O,Geothermal power plant - Air cooling (old),Power plant,Y
+BENGEOCVP02O,Geothermal power plant - MDT cooling (old),Power plant,Y
+BENGEOCVP03O,Geothermal power plant - NDT cooling (old),Power plant,Y
+BENGEOCVP04O,Geothermal power plant - OTF/OTS cooling (old),Power plant,Y
+BENGEOCVP01N,Geothermal power plant - Air cooling (new),Power plant,Y
+BENGEOCVP02N,Geothermal power plant - MDT cooling (new),Power plant,Y
+BENGEOCVP03N,Geothermal power plant - NDT cooling (new),Power plant,Y
+BENGEOCVP04N,Geothermal power plant - OTF/OTS cooling (new),Power plant,Y
+BENHE2DIP00X,Heat network,Transmission&Distribution,
+BENHFOIMP00X,Heavy Fuel Oil imports,Extraction/Import,N
+BENHFOEMP00X,Heavy Fuel Oil exports,Exports,
+BENHFODIP00X,Heavy Fuel Oil process (non-power sector),Conversion,
+BENHFOGCP01O,Oil fired gas turbine (SCGT) - Air cooling (old),Power plant,N
+BENHFOGCP02O,Oil fired gas turbine (SCGT) - MDT cooling (old),Power plant,N
+BENHFOGCP03O,Oil fired gas turbine (SCGT) - NDT cooling (old),Power plant,N
+BENHFOGCP04O,Oil fired gas turbine (SCGT) - OTF/OTS cooling (old),Power plant,N
+BENHFOGCP01N,Oil fired gas turbine (SCGT) - Air cooling (new),Power plant,N
+BENHFOGCP02N,Oil fired gas turbine (SCGT) - MDT cooling (new),Power plant,N
+BENHFOGCP03N,Oil fired gas turbine (SCGT) - NDT cooling (new),Power plant,N
+BENHFOGCP04N,Oil fired gas turbine (SCGT) - OTF/OTS cooling (new),Power plant,N
+BENHYDLSP00X,Large hydropower plant (Dam),Power plant,Y
+BENHYDMSP00X,Medium hydropower plant (Run-of river),Power plant,Y
+BENHYDSSP00X,Small hydropower plant,Power plant,Y
+BENLFOIMP00X,Light Fuel Oil imports,Extraction/Import,N
+BENLFOEMP00X,Light Fuel Oil exports,Exports,
+BENLFODIP00X,Light Fuel Oil process (non-power sector),Conversion,
+BENLFORCP00X,Light Fuel Oil stand alone (1kW),Power plant,N
+BENLFORCP01O,Light Fuel Oil power plant - Air cooling (old),Power plant,N
+BENLFORCP02O,Light Fuel Oil power plant - MDT cooling (old),Power plant,N
+BENLFORCP03O,Light Fuel Oil power plant - NDT cooling (old),Power plant,N
+BENLFORCP04O,Light Fuel Oil power plant - OTF/OTS cooling (old),Power plant,N
+BENLFORCP01N,Light Fuel Oil power plant - Air cooling (new),Power plant,N
+BENLFORCP02N,Light Fuel Oil power plant - MDT cooling (new),Power plant,N
+BENLFORCP03N,Light Fuel Oil power plant - NDT cooling (new),Power plant,N
+BENLFORCP04N,Light Fuel Oil power plant - OTF/OTS cooling (new),Power plant,N
+BENNGAIMP00X,Natural gas imports (inland/offshore pipeline),Extraction/Import,N
+BENLNGIMP00X,Natural gas imports (LNG),Extraction/Import,N
+BENLNGEXP00X,Natural gas exports (Liquification terminal),Exports_NG,
+BENNGADIP00X,Natural gas process (non-power sector),Conversion,
+BENNGAPRP00X,Natural gas extraction,Extraction/Import,N
+BENNGACCC01N,Natural gas power plant (combined cycle) - CCS - Air cooling (new),Power plant,N
+BENNGACCC02N,Natural gas power plant (combined cycle) - CCS  - MDT cooling (new),Power plant,N
+BENNGACCC03N,Natural gas power plant (combined cycle) - CCS - NDT cooling (new),Power plant,N
+BENNGACCC04N,Natural gas power plant (combined cycle) - CCS  - OTF/OTS cooling (new),Power plant,N
+BENNGACCP01O,Natural gas power plant (combined cycle) - Air cooling (old),Power plant,N
+BENNGACCP02O,Natural gas power plant (combined cycle) - MDT cooling (old),Power plant,N
+BENNGACCP03O,Natural gas power plant (combined cycle) - NDT cooling (old),Power plant,N
+BENNGACCP04O,Natural gas power plant (combined cycle) - OTF/OTS cooling (old),Power plant,N
+BENNGACCP01N,Natural gas power plant (combined cycle) - Air cooling (new),Power plant,N
+BENNGACCP02N,Natural gas power plant (combined cycle) - MDT cooling (new),Power plant,N
+BENNGACCP03N,Natural gas power plant (combined cycle) - NDT cooling (new),Power plant,N
+BENNGACCP04N,Natural gas power plant (combined cycle) - OTF/OTS cooling (new),Power plant,N
+BENNGAGCP01O,Natural gas power plant (single cycle) - Air cooling (old),Power plant,N
+BENNGAGCP02O,Natural gas power plant (single cycle) - MDT cooling (old),Power plant,N
+BENNGAGCP03O,Natural gas power plant (single cycle) - NDT cooling (old),Power plant,N
+BENNGAGCP04O,Natural gas power plant (single cycle) - OTF/OTS cooling (old),Power plant,N
+BENNGAGCP01N,Natural gas power plant (single cycle) - Air cooling (new),Power plant,N
+BENNGAGCP02N,Natural gas power plant (single cycle) - MDT cooling (new),Power plant,N
+BENNGAGCP03N,Natural gas power plant (single cycle) - NDT cooling (new),Power plant,N
+BENNGAGCP04N,Natural gas power plant (single cycle) - OTF/OTS cooling (new),Power plant,N
+BENCHAPRP00X,Charcoal production,Extraction/Import,N
+BENURNPWP01O,Nuclear power plant - OTS/OTF cooling (old),Power plant,Y
+BENURNPWP01N,Nuclear power plant - OTS/OTF cooling (new),Power plant,Y
+BENSOLCNP01X,CSP (without storage),Power plant,Y
+BENSOLCSP01X,CSP (with storage),Power plant,Y
+BENSOLARP00X,Solar potential,Extraction/Import,N
+BENSOLPUP00X,Solar PV (utility),Power plant,Y
+BENSOLPRP00X,Solar PV (roof top),Power plant,Y
+BENSOLPSP00X,Solar PV with storage,Power plant,Y
+BENURNIMP00X,Uranium imports,Extraction/Import,N
+BENURNPRP00X,Uranium extraction,Extraction/Import,N
+BENWA2PRP00X,Water production technology,Extraction/Import,N
+BENWINPRP00X,Wind potential,Extraction/Import,N
+BENWINONP00X,Wind (onshore),Power plant,Y
+BENWINOFP00X,Wind (offshore),Power plant,Y
+BENLFOMGRID1,Light Fuel Oil (mini-grid) Future electrified,Mini grid,N
+BENLFOSALON1,Light Fuel Oil (Stand Alone) Future electrified,Stand alone,N
+BENSOLMGRID1,Solar (Mini-Grid) Future electrified,Mini grid,Y
+BENSOLPRSAL1,Solar (Stand Alone1) Future electrified,Stand alone,Y
+BENSOLPRSAL2,Solar (Stand Alone2) Future electrified,Stand alone,Y
+BENSOLPRSAL3,Solar (Stand Alone3) Future electrified,Stand alone,Y
+BENSOLPRSAL4,Solar (Stand Alone4) Future electrified,Stand alone,Y
+BENSOLPRSAL5,Solar (Stand Alone5) Future electrified,Stand alone,Y
+BENWINMGRID1,Wind (Mini-Grid) Future electrified,Mini grid,Y
+BENHYDMGRID1,Hydro (Mini-Grid) Future electrified,Mini grid,Y
+BENTO CHECK WITH VIG,Coal,,
+BENTO CHECK WITH VIG,Oil,,
+BENTO CHECK WITH VIG,Gas,,
+BENTO CHECK WITH VIG,Hydro,,
+BENTO CHECK WITH VIG,Nuclear,,
+BENTO CHECK WITH VIG,Other renewables,,
+BENTO CHECK WITH VIG,Backstop,,
+BENTO CHECK WITH VIG,Biofuel and Biomass production,,
+BENTO CHECK WITH VIG,Coal Production,,
+BENTO CHECK WITH VIG,Crude Oil production,,
+BENTO CHECK WITH VIG,Natural gas extraction,,
+BENTO CHECK WITH VIG,Solar CSP,,
+BENTO CHECK WITH VIG,Solar PV,,
+BENTO CHECK WITH VIG,Wind,,
+BENTO CHECK WITH VIG,Biomass,,
+BENTO CHECK WITH VIG,CO2,,
+BENTO CHECK WITH VIG,Transmission & Distribution,,
+BENDZAELMARBP00,Algeria - Morocco Historic EL trade link,Exports_EL,
+BENESPELMARBP00,Spain - Morocco Historic EL trade link,Exports_EL,
+BENEGYELSDNBP00,Egypt - Sudan Historic and Planned EL trade link,Exports_EL,
+BENEGYELJORBP00,Egypt - Jordan Historic EL trade link,Exports_EL,
+BENEGYELSAUBP00,Egypt - Saudi Arabia Planned EL trade link,Exports_EL,
+BENLBYELEGYBP00,Libya - Egypt Historic EL trade link,Exports_EL,
+BENMARELDZABP00,Morocco - Algeria Historic EL trade link,Exports_EL,
+BENTUNELDZABP00,Tunisia - Algeria Historic EL trade link,Exports_EL,
+BENDZAGAITABP00,Algeria - Italy Historic NG trade link,Exports_NG,
+BENDZAGAPRTBP00,Algeria - Portugal Historic NG trade link,Exports_NG,
+BENDZAGAESPBP00,Algeria - Spain Historic and Planned NG trade link,Exports_NG,
+BENDZAGAMARBP00,Algeria - Morocco Historic NG trade link,Exports_NG,
+BENDZAGATUNBP00,Algeria - Tunisia Historic NG trade link,Exports_NG,
+BENEGYGATURBP00,Egypt - Turkey Historic and Planned NG trade link,Exports_NG,
+BENISRGAEGYBP00,Israel - Egypt Planned NG trade link,Exports_NG,
+BENLBYGAITABP00,Libya - Italy Historic NG trade link,Exports_NG,
+BENNGAGADZABP00,Nigeria - Algeria Planned NG trade link,Exports_NG,
+BENTO CHECK WITH VIG,power_trade,,
+BENTO CHECK WITH VIG,gas_trade,,
+BENBDIELRWABP00,Burundi - Rwanda EL existing trade link,Exports_EL,
+BENCODELBDIBP00,DRC - Burundi EL existing and planned trade link,Exports_EL,
+BENCODELRWABP00,DRC - Rwanda EL existing and planned trade link,Exports_EL,
+BENETHELKENBP00,Ethiopia - Kenya EL planned trade link,Exports_EL,
+BENETHELDJIBP00,Ethiopia - Djibouti EL existing trade link,Exports_EL,
+BENETHELSDNBP00,Ethiopia - Sudan EL existing trade link,Exports_EL,
+BENKENELUGABP00,Kenya - Uganda EL existing and planned trade link,Exports_EL,
+BENKENELTZABP00,Kenya - Tanzania EL existing and planned trade link,Exports_EL,
+BENRWAELBDIBP00,Rwanda - Burundi EL existing trade link,Exports_EL,
+BENRWAELTZABP00,Rwanda - Tanzania EL planned trade link,Exports_EL,
+BENTZAELBDIBP00,Tanzania - Burundi EL planned trade link,Exports_EL,
+BENTZAELKENBP00,Tanzania - Kenya EL planned trade link,Exports_EL,
+BENTZAELUGABP00,Tanzania - Uganda EL existing trade link,Exports_EL,
+BENUGAELKENBP00,Uganda - Kenya EL existing and planned trade link,Exports_EL,
+BENUGAELTZABP00,Uganda - Tanzania EL existing and planned trade link,Exports_EL,
+BENUGAELRWABP00,Uganda - Rwanda EL existing trade link,Exports_EL,
+BENSENELMLIBP00,Senegal - Mali EL existing trade link,Exports_EL,
+BENETHGADJIBP00,Ethiopia - Djibouti NG planned trade link,Exports_NG,
+BENTZAGAUGABP00,Tanzania - Uganda NG planned trade link,Exports_NG,
+BENBWAELZAFBP00,Botswana - South Africa EL existing trade link,Exports_EL,
+BENCODELZAFBP00,DRC - South Africa EL planned trade link,Exports_EL,
+BENCODELZMBBP00,DRC - Zambia EL existing trade link,Exports_EL,
+BENLSOELZAFBP00,Lesotho - South Africa EL existing trade link,Exports_EL,
+BENMOZELZAFBP00,Mozambique - South Africa EL existing trade link,Exports_EL,
+BENMOZELSWZBP00,Mozambique - Swaziland EL existing trade link,Exports_EL,
+BENMOZELZWEBP00,Mozambique - Zimbabwe EL existing trade link,Exports_EL,
+BENZAFELSWZBP00,South Africa - Swaziland EL existing trade link,Exports_EL,
+BENZAFELZWEBP00,South Africa - Zimbabwe EL existing trade link,Exports_EL,
+BENZMBELZWEBP00,Zambia - Zimbabwe EL existing trade link,Exports_EL,
+BENAGOELCODBP00,Angola - DRC EL planned trade link,Exports_EL,
+BENBWAELZMBBP00,Botswana - Zambia EL planned trade link,Exports_EL,
+BENBWAELNAMBP00,Botswana - Namibia EL planned trade link,Exports_EL,
+BENBWAELZWEBP00,Botswana - Zimbabwe EL planned trade link,Exports_EL,
+BENMWIELMOZBP00,Malawi - Mozambique EL planned trade link,Exports_EL,
+BENMWIELTZABP00,Malawi - Tanzania EL planned trade link,Exports_EL,
+BENNAMELAGOBP00,Namibia - Angola EL planned trade link,Exports_EL,
+BENNAMELZAFBP00,Namibia - South Africa EL existing trade link,Exports_EL,
+BENNAMELZMBBP00,Namibia - Zambia EL planned trade link,Exports_EL,
+BENNAMELZWEBP00,Namibia - Zimbabwe EL planned trade link,Exports_EL,
+BENTZAELZMBBP00,Tanzania - Zambia EL planned trade link,Exports_EL,
+BENZMBELTZABP00,Zambia - Tanzania EL planned trade link,Exports_EL,
+BENBENELNERBP00,Benin - Niger EL planned trade link,Exports_EL,
+BENBENELGHABP00,Benin - Ghana EL planned trade link,Exports_EL,
+BENGHAELBENBP00,Ghana - Benin EL planned trade link,Exports_EL,
+BENNERELBENBP00,Niger - Benin EL planned trade link,Exports_EL,
+BENTGOELBENBP00,Togo - Benin EL existing trade link,Exports_EL,
+BENBFAELNERBP00,Burkina Faso - Niger EL planned trade link,Exports_EL,
+BENCIVELBFABP00,Cote dï Ivoire - Burkina Faso EL existing trade link,Exports_EL,
+BENGHAELBFABP00,Ghana - Burkina Faso EL planned trade link,Exports_EL,
+BENNERELBFABP00,Niger - Burkina Faso EL existing and planned trade link,Exports_EL,
+BENCIVELSLEBP00,Cote dï Ivoire - Sierra Leone EL planned trade link,Exports_EL,
+BENCIVELGHABP00,Cote dï Ivoire - Ghana EL planned trade link,Exports_EL,
+BENCIVELLBRBP00,Cote dï Ivoire - Liberia EL planned trade link,Exports_EL,
+BENGHAELCIVBP00,Ghana - Cote dï Ivoire EL existing trade link,Exports_EL,
+BENMLIELCIVBP00,Mali - Cote dï Ivoire EL planned trade link,Exports_EL,
+BENGMBELGNBBP00,Gambia - Guinea Bissau EL planned trade link,Exports_EL,
+BENGMBELSENBP00,Gambia - Senegal EL planned trade link,Exports_EL,
+BENTGOELGHABP00,Togo - Ghana EL planned trade link,Exports_EL,
+BENGHAELTGOBP00,Ghana - Togo EL existing and planned trade link,Exports_EL,
+BENGHAELMLIBP00,Ghana - Mali EL planned trade link,Exports_EL,
+BENGINELMLIBP00,Guinea - Mali EL planned trade link,Exports_EL,
+BENGINELSENBP00,Guinea - Senegal EL planned trade link,Exports_EL,
+BENSENELMRTBP00,Senegal - Mauritania EL planned trade link,Exports_EL,
+BENNGAELBENBP00,Nigeria - Benin EL existing trade link,Exports_EL,
+BENNGAELNERBP00,Nigeria - Niger EL existing trade link,Exports_EL,
+BENNGAGABENBP00,Nigeria - Benin Historic NG trade link,Exports_NG,
+BENNGAGAGHABP00,Nigeria - Ghana Historic NG trade link,Exports_NG,
+BENNGAGANERBP00,Nigeria - Niger Historic NG trade link,Exports_NG,
+BENNGAGATGOBP00,Nigeria - Togo Historic NG trade link,Exports_NG,
+BENCMRELTCDBP00,Cameroon - Chad EL planned trade link,Exports_EL,
+BENCODELCOGBP00,DRC - Congo EL existing trade link,Exports_EL,
+BENMOZGAZAFBP00,Mozambique - South Africa Historic NG trade link,Exports_NG,
+BENTO CHECK WITH VIG,Geothermal,,
+BENTO CHECK WITH VIG,Crude oil Refinery,,
+BENMARGAS00IPIX, Intermediate technology for NG transferred through a pipeline to the imported country (input fuel MAGASP (exported by other countries) - output fuel MAGASF (the final fuel used in the country)),,
+BENTUNGAS00IPIX, Intermediate technology for NG transferred through a pipeline to the imported country (input fuel MAGASP (exported by other countries) - output fuel MAGASF (the final fuel used in the country)),,
+BENDZAGAS00IPIX, Intermediate technology for NG transferred through a pipeline to the imported country (input fuel MAGASP (exported by other countries) - output fuel MAGASF (the final fuel used in the country)),,
+BENDJIGAS00IPIX, Intermediate technology for NG transferred through a pipeline to the imported country (input fuel MAGASP (exported by other countries) - output fuel MAGASF (the final fuel used in the country)),,
+BENUGAGAS00IPIX, Intermediate technology for NG transferred through a pipeline to the imported country (input fuel MAGASP (exported by other countries) - output fuel MAGASF (the final fuel used in the country)),,
+BENBENGAS00IPIX, Intermediate technology for NG transferred through a pipeline to the imported country (input fuel MAGASP (exported by other countries) - output fuel MAGASF (the final fuel used in the country)),,
+BENGHAGAS00IPIX, Intermediate technology for NG transferred through a pipeline to the imported country (input fuel MAGASP (exported by other countries) - output fuel MAGASF (the final fuel used in the country)),,
+BENNERGAS00IPIX, Intermediate technology for NG transferred through a pipeline to the imported country (input fuel MAGASP (exported by other countries) - output fuel MAGASF (the final fuel used in the country)),,
+BENTGOGAS00IPIX, Intermediate technology for NG transferred through a pipeline to the imported country (input fuel MAGASP (exported by other countries) - output fuel MAGASF (the final fuel used in the country)),,
+BENZAFGAS00IPIX, Intermediate technology for NG transferred through a pipeline to the imported country (input fuel MAGASP (exported by other countries) - output fuel MAGASF (the final fuel used in the country)),,
+COAL,Coal imp,Extraction/Import,N
+DIESEL,Diesel imports,Extraction/Import,N
+GAS,Gas imports,Extraction/Import,N
+HeavyFueloil,Heavy fuel oil imports,Extraction/Import,N
+Imports,Imports,Power plant,Y
+WI31ph,Wind central,Power plant,Y
