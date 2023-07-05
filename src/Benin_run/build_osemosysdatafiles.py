@@ -787,33 +787,33 @@ def capacityfactor(outPutFile, df, input_data, capacityfactor_wind, capacityfact
 
     cache = {}
 
-    def calculate_average(data, startdate, enddate, sliceStart, sliceEnd, location):
-        key = f'{startdate}-{enddate}-{sliceStart}-{sliceEnd}-{location}'
-        if key in cache:
-            return cache[key]
-
-        mask = (data.index > startdate) & (data.index <= enddate)
-        thisMonthOnly = data.loc[mask]
-        between_time = thisMonthOnly[(location)].between_time(sliceStart, sliceEnd)
-        slice_ = sum(between_time)
-
-        try:
-            average = slice_ / len(between_time)
-        except ZeroDivisionError:
-            average = 0
-
-        cache[key] = average
-        return average
-
     # def calculate_average(data, startdate, enddate, sliceStart, sliceEnd, location):
+    #     key = f'{startdate}-{enddate}-{sliceStart}-{sliceEnd}-{location}'
+    #     if key in cache:
+    #         return cache[key]
+
     #     mask = (data.index > startdate) & (data.index <= enddate)
     #     thisMonthOnly = data.loc[mask]
-    #     slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
+    #     between_time = thisMonthOnly[(location)].between_time(sliceStart, sliceEnd)
+    #     slice_ = sum(between_time)
+
     #     try:
-    #         average = ((slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd))))
+    #         average = slice_ / len(between_time)
     #     except ZeroDivisionError:
     #         average = 0
-    #     return (average)
+
+    #     cache[key] = average
+    #     return average
+
+    def calculate_average(data, startdate, enddate, sliceStart, sliceEnd, location):
+        mask = (data.index > startdate) & (data.index <= enddate)
+        thisMonthOnly = data.loc[mask]
+        slice = sum(thisMonthOnly[(location)].between_time(sliceStart, sliceEnd))
+        try:
+            average = ((slice / len(thisMonthOnly.between_time(sliceStart, sliceEnd))))
+        except ZeroDivisionError:
+            average = 0
+        return (average)
 
     #SolarPV
     for k, row in df.iterrows():
