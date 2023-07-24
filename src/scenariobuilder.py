@@ -22,7 +22,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 config = ConfigParser()
 config.read('config/config_input.ini')
 
-#Choose which country tobuild
+#Choose which country to build
 country = sys.argv[1]
 
 if country == 'Benin':

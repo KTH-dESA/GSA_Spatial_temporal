@@ -278,7 +278,7 @@ def run_morris(dict_y, paramvalues_path, nom_path, problem_path, save_file, unit
 
         problem = create_salib_problem(parameters)
 
-        Si = analyze_morris.analyze(problem, X, Y, NOM_X, print_to_console=False)
+        Si = analyze_morris.analyze(problem, NOM_X, Y, scaled=True, print_to_console=False)
 
         # Save text based results
         Si.to_df().to_csv(f'{save_file}.csv')
@@ -325,7 +325,7 @@ def join_results(kenyatotalcost_csv, benintotalcost_csv, kenya_distr, benin_dist
     joined_df = pd.concat([df.assign(OutputVariable=param_name) for df, param_name in zip(dfs, param_names)])
     joined_df = joined_df.reset_index(drop=True)
     joined_df = joined_df.rename(columns = {'Unnamed: 0':'Parameter'})
-    df = joined_df.pivot(index='OutputVariable', columns='Parameter', values='scaled_EE')
+    df = joined_df.pivot(index='OutputVariable', columns='Parameter', values='mu_star')
 
     df.to_csv(f'{save_file}.csv')
 
@@ -341,7 +341,7 @@ def main(folder, masterdata):
     years = ['2020', '2021', '2022','2023','2024','2025','2026','2027','2028','2029','2030','2031',	'2032',	'2033',	'2034',	'2035',	'2036',	'2037',	'2038',	'2039',	'2040', '2041']
     years_included_analysis =  ['2020','2021', '2022','2023','2024','2025','2026','2027','2028','2029','2030','2031','2032','2033',	'2034',	'2035',	'2036',	'2037']
     dict_df = load_csvs(folder, years)
-    dict_results = read_data(dict_df, years_included_analysis, '%ssensitivity/run4_results/' %(country))
+    dict_results = read_data(dict_df, years_included_analysis, '%ssensitivity/latest_run/' %(country))
     totaldiscountedcost, transmcap, capitalinvestment, RET_share, km, PV_share= creating_Y_to_morris(dict_results, '%ssensitivity'%(country), years, masterdata)
     #PV_battery = extract_results_PV('Kenya_run/scenarios')
     run_morris(totaldiscountedcost, '%ssensitivity/sample_morris.csv' %(country), '%ssensitivity/sample_morris_nominal.csv' %(country), 'config/%sparameters.csv'%(country), '%ssensitivity/Total discounted cost %s'%(country, country), '\$')
@@ -357,4 +357,4 @@ for country in countries:
     masterdata = 'config/masterdata.csv'
 
     main('%s_run/results' %(country), masterdata)
-    join_results('Kenyasensitivity/Total discounted cost Kenya.csv', 'Beninsensitivity/Total discounted cost Benin.csv', 'Kenyasensitivity/number of km distributionlines Kenya.csv','Beninsensitivity/number of km distributionlines Benin.csv', 'Kenyasensitivity/Renewable energy production share Kenya.csv' ,'Beninsensitivity/Renewable energy production share Benin.csv', 'matrix_Sin_mu')
+join_results('Kenyasensitivity/Total discounted cost Kenya.csv', 'Beninsensitivity/Total discounted cost Benin.csv', 'Kenyasensitivity/number of km distributionlines Kenya.csv','Beninsensitivity/number of km distributionlines Benin.csv', 'Kenyasensitivity/Renewable energy production share Kenya.csv' ,'Beninsensitivity/Renewable energy production share Benin.csv', 'matrix_Sin_mu')
