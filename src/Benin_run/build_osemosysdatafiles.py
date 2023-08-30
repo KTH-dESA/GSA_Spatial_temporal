@@ -62,16 +62,16 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
         print('No operational_life file')
 #######################################################################
     if '%i_%i_peakdemand' %(spatial, demand_scenario) in dict_df:
-        outPutFile = peakdemand(outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['%i_%i_peakdemand' %(spatial, demand_scenario)])
+        outPutFile = peakdemand(outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['%i_%i_%ipeakdemand' %(spatial, demand_scenario, temporal)])
     else:
         print('No peakdemand file')
 #################################################################################
     if '%i_distributionlines' %(spatial) in dict_df:
-        outPutFile = maxkm(outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['%i_distributionlines' %(spatial) ], dict_df['%i_distribution' %(spatial)], dict_df['%i_elec' %(spatial)])
+        outPutFile = maxkm(outPutFile, dict_df['input_data_%i'%(temporal)], dict_df['%i_distributionlines' %(spatial) ], dict_df['%i_distribution' %(spatial)], dict_df['%i_HV_cells' %(spatial)])
     else:
         print('No distributionlines file')
 ########################################################################################################
-    outPutFile = capitalcostkmkW(outPutFile, dict_df['input_data_%i'%(temporal)], CapitalCost_distribution, dict_df['%i_%i_peakdemand'%(spatial, demand_scenario)])
+    outPutFile = capitalcostkmkW(outPutFile, dict_df['input_data_%i'%(temporal)], CapitalCost_distribution, dict_df['%i_%i_%ipeakdemand' %(spatial, demand_scenario, temporal)])
 
 ########################################################################################################
     # if '%i_capitalcost'%(spatial) in dict_df:
@@ -465,7 +465,7 @@ def peakdemand(outPutFile,input_data, peakdemand):
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]
     return(outPutFile)
 
-def maxkm(outPutFile,input_data, distributionlines, distributioncelllength, elec):
+def maxkm(outPutFile,input_data, distributionlines, distributioncelllength, HV):
     dataToInsert = ""
     print("Max km Distribution", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     param = "param MaxKmPerTech default 9999999999999 :=\n"
@@ -487,7 +487,7 @@ def maxkm(outPutFile,input_data, distributionlines, distributioncelllength, elec
         year = int(input_data['startyear'][0])
         while year <= int(input_data['endyear'][0]):
             dataToInsert += "%s\tTRLV_%i_0\t%i\t%f\n" % (input_data['region'][0],j, year, km)
-            if elec['id'].eq(j).any():
+            if HV['id'].eq(j).any():
                 dataToInsert += "%s\tTRLVM_%i_0\t%i\t%f\n" % (input_data['region'][0], j, year, km)
             year += 1
     outPutFile = outPutFile[:startIndex] + dataToInsert + outPutFile[startIndex:]

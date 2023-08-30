@@ -18,7 +18,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 config = ConfigParser()
 config.read('config/config_input.ini')
 
-country = 'Kenya'
+country = 'Benin'
 if country == 'Kenya':
     crs = config['geospatialdata']['Kenyacrs']
 
@@ -66,6 +66,9 @@ else:
     min_night_lights = float(config['electrification_Benin']['min_night_lights'])
     max_grid_dist = int(config['electrification_Benin']['max_grid_dist'])
     max_road_dist = int(config['electrification_Benin']['max_road_dist'])
+    dist_to_trans = int(config['electrification_Benin']['dist_to_trans'])
+    dist_to_sub = int(config['electrification_Benin']['dist_to_sub'])
+    dist_minig = int(config['electrification_Benin']['dist_minig'])
     pop_cutoff2 = int(config['electrification_Benin']['pop_cutoff2'])
     urban_elec_ratio =  float(config['electrification_Benin']['urban_elec_ratio'])
     rural_elec_ratio = float(config['electrification_Benin']['rural_elec_ratio'])
@@ -79,25 +82,25 @@ else:
 date = datetime. now(). strftime("%Y_%m_%d-%I:%M:%S_%p")
 print(date)
 print("1. The files in input_data/GIS_data are downloaded and placed in a temp folder.")
-URL_viirs = 'https://eogdata.mines.edu/nighttime_light/annual/v20/2020/VNL_v2_npp_2020_global_vcmslcfg_c202102150000.average_masked.tif.gz'
+#URL_viirs = 'https://eogdata.mines.edu/nighttime_light/annual/v20/2020/VNL_v2_npp_2020_global_vcmslcfg_c202102150000.average_masked.tif.gz'
 
-download_url_data(GIS_URL_Kenya, 'temp')
-download_viirs(URL_viirs, 'temp')
-unzip_all(KenyaUnzip, '../temp', '../GIS_data')
+#download_url_data(GIS_URL_Kenya, 'temp')
+#download_viirs(URL_viirs, 'temp')
+#unzip_all(KenyaUnzip, '../temp', '../GIS_data')
 
 # 2. The files are then projected and clipped to the administrative boundaries.
 date = datetime. now(). strftime("%Y_%m_%d-%I:%M:%S_%p")
 print(date)
 print("2. The files are then projected and clipped to the administrative boundaries.")
 
-project_main('../GIS_Data', Kenyaprojectedfolder, files, crs)
+#project_main('../GIS_Data', Kenyaprojectedfolder, files, crs)
 # 3. Through QGIS make raster to point layer and save (MANUAL STEP)
 date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
 print(date)
 print("3. Through QGIS make raster to point layer and save (download from zenodo)")
 #Make sure you are in the /src directory when you start this script
 print(os.getcwd())
-download_url_data("input_data/zenodo.txt", "Projected_files")
+#download_url_data("input_data/zenodo.txt", "Projected_files")
 
 # 4. The GIS layers are prepared to for a heuristic approximation for electrified settlements
 date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")

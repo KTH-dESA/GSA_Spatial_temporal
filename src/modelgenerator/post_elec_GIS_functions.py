@@ -89,7 +89,7 @@ def elec(demandcells, scenario, country):
     demand_cell = pd.read_csv(demandcells)
 
     allcells = demand_cell.groupby(["id"])
-    HV_all = allcells.filter(lambda x: (x['elec'].mean() > 0) ) #and ((x['MV'].min() < 1)) or ((x['LV'].min() < 1)) or ((x['Grid'].min() < 1)))
+    HV_all = allcells.filter(lambda x: (x['elec'].mean() > 0) and ((x['Grid'].min() < 1)))
     HV = HV_all.groupby(["id"])
     HV_df = HV.sum(numeric_only=True).reset_index()[['id']]
     HV_df.to_csv(os.path.join(os.getcwd(),'%s_run/scenarios/%i_HV_cells.csv') %(country, scenario))

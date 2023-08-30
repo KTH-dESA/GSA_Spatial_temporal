@@ -306,12 +306,12 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
 
     # Electrified by minigrid in base year
     for m in elec_noHV_cells['id']:
-        input_temp = [0, "EL2_%i" %(m), "TRLV_%i_1" %(m), 1, 1]
+        input_temp = [0, "TREL2","EL00d_%i" %(m), 1, 1]
         inputactivity.loc[-1] = input_temp  # adding a row
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_1" % (m), "TRLV_%i_1" % (m), 0.83, 1]
+        output_temp = [0, "EL3_%i_1" % (m), "EL00d_%i" % (k), 0.83, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()

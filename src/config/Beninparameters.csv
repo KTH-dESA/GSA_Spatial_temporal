@@ -6,7 +6,7 @@ CapitalCost_PV,Capital Cost PV,SOPV,1,4,1,4,unif,None,fixed,Y
 CapitalCost_Battery_kWh,CapitalCost Battery kWh,battery,1,4,1,4,unif,None,fixed,Y
 CapitalCost_Wind,Capital Cost Wind,WI,1405,1405,589,913,unif,YEAR,interpolate,N
 CapitalCost_transm,CapitalCost transmission lines,Transmission,2,4,2,4,unif,None,fixed,N
-CapitalCost_distribution,Capital Cost distribution lines,Distribution,10000,28000,10000,28000,unif,None,fixed,N
+CapitalCost_distribution,Capital Cost distribution lines,Distribution,17448,35448,17448,35448,unif,None,fixed,N
 CapacityFactor_error,Capacity Factor error,SOPV,-0.05,0.05,-0.05,0.05,unif,None,fixed,N
 Demand,Demand,GLOBAL,1,4,1,4,unif,None,fixed,Y
 FuelpriceNG,Fuel price natural gas,Natural gas,9,9,4,8,unif,YEAR,interpolate,N

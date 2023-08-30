@@ -48,6 +48,7 @@ if country == 'Benin':
     Rpath = config['renewableninja']['Rpath']
     seasonAprSept = int(config['model_settings']['seasonAprSept'])
     seasonOctMarch = int(config['model_settings']['seasonOctMarch'])
+    PVshare_baseyear = float(config['model_settings']['Benin_PVshare_baseyear'])
 
     urban_profile = config['inputfiles']['Beninurban_profile']
     text_file = config['inputfiles']['Benintext_file']
@@ -79,6 +80,7 @@ else:
     seasonAprSept = int(config['model_settings']['seasonAprSept'])
     seasonOctMarch = int(config['model_settings']['seasonOctMarch'])
     basetopeak = float(config['model_settings']['basetopeak'])
+    PVshare_baseyear = float(config['model_settings']['Kenya_PVshare_baseyear'])
 
     urban_profile = config['inputfiles']['Kenyaurban_profile']
     text_file = config['inputfiles']['Kenyatext_file']
@@ -271,8 +273,9 @@ for j in dict_modelruns.keys():
         HV_file = '%s_run/scenarios/%i_HV_cells.csv' %(country, spatial)
         minigrid = '%s_run/scenarios/%i_elec_noHV_cells.csv' %(country, spatial)
         neartable = '%s_run/scenarios/Demand/%i_Near_table.csv' %(country, spatial)
-        if os.path.isfile('%s_run/scenarios/Demand/%i_adjacencymatrix.csv' %(country, spatial)):
-            print('File already exists, skipping calculations.')
+
+        if spatial == 1:
+            print('only one cell')
         else:
             transmission_matrix(neartable, noHV, HV_file, minigrid, topath, spatial, country)
 
@@ -332,6 +335,7 @@ for j in dict_modelruns.keys():
     #minigrid = '%s_run/%i_elec_noHV_cells.csv' %(country, spatial)
     neartable = '%s_run/scenarios/Demand/%i_Near_table.csv' %(country, spatial)
     demand = '%s_run/scenarios/%i_demand_%i_spatialresolution.csv' %(country, elecdemand_df.iloc[0][2040], spatial)
+    PV_capacityfactor_PV_battery = 1
     
     temporal_id = float(Dailytemporalresolution)
 
@@ -339,10 +343,11 @@ for j in dict_modelruns.keys():
     specifieddemand, timesteps = demandprofile_calculation(tier_profile, temporal_id, seasonAprSept, seasonOctMarch, '%s_run/scenarios/specifiedrural_demand_time%i_tier%i.csv' %(country, int(temporal_id), DemandProfileTier), year_array, 'Minute')
     specifieddemandurban, timesteps = demandprofile_calculation(urban_profile, temporal_id, seasonAprSept, seasonOctMarch, '%s_run/scenarios/specifieddemand_%i.csv' %(country, int(temporal_id)), year_array, 'hour')
     
-    peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV_file, distribution, distribution_row, distribution_length_cell_ref, scenarios_folder, spatial, elecdemand_df.iloc[0][2040])
+    peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV_file, distribution, distribution_row, distribution_length_cell_ref, scenarios_folder, spatial, elecdemand_df.iloc[0][2040], int(temporal_id))
     addtimestep(timesteps,input_data, '%s_run/scenarios/input_data_%i.csv' %(country, int(temporal_id)))
     residual_path = '%s_run/scenarios/residual_capacity%i_demand_%i_spatialresolution.csv' %(country, elecdemand_df.iloc[0][2040], spatial)
-    distribution_elec_startyear(demand, capacitytoactivity, distr_losses, basetopeak,year_array, residual_path)
+    distribution_elec_startyear(demand, capacitytoactivity, distr_losses, basetopeak,year_array, residual_path, PVshare_baseyear, PV_capacityfactor_PV_battery)
+    #transformer_calculation(distribution, distribution_length_cell_ref, demandcells, input_data, spatial, scenarios_folder, cost_transf=3500, connectioncost=125)
 
     print("8. Optimise PV and battery")
 
