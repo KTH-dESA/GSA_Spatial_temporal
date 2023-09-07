@@ -316,6 +316,9 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
+        capitalcost.loc[k+m]['Capitalcost'] = distribu_cost
+        capitalcost.loc[k+m]['Technology'] =  "EL00d_%i" %(k)
+        
         input_temp = [0,"EL2_%i" %(m),"TRLV_%i_0" %(m), 1, 1]
         inputactivity.loc[-1] = input_temp  # adding a row
         inputactivity.index = inputactivity.index + 1  # shifting index
@@ -554,7 +557,7 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
     fixedcost.to_csv(os.path.join(path, '%i_fixed_cost.csv' %(scenario)))
     variablecost.to_csv(os.path.join(path, '%i_variable_cost.csv' %(scenario)))
     operationallife.to_csv(os.path.join(path, '%i_operationallife.csv' %(scenario)))
-    capitalcost.to_csv(os.path.join(path, '%i_capitalcost.csv' %(scenario)))
+    capitalcost.to_csv(os.path.join(path, '%i_%i_%icapitalcost.csv' %(scenario, int(distribu_cost), int(capital_cost_HV))))
     inputactivity.to_csv(os.path.join(path, '%i_inputactivity.csv' %(scenario)))
     outputactivity.to_csv(os.path.join(path, '%i_outputactivity.csv'%(scenario)))
     capacitytoactiv.to_csv(os.path.join(path, '%i_capacitytoactivity.csv'%(scenario)))
