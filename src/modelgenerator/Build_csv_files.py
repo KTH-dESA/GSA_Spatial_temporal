@@ -196,8 +196,8 @@ def annualload(minuteload, topath, nr_timeslice):
 #     fullyearhours.to_csv(topath)
 #     return topath
 
-loadprofile_high = '../%sinput_data/high_Jan.csv' %('Kenya')
-highload_yearly = highprofile_aggre(loadprofile_high, '../%s_run/scenarios/annualload_tier%i_temporal%i.csv' %('Kenya', 4, 9), 9)
+# loadprofile_high = '../%sinput_data/high_Jan.csv' %('Kenya')
+# highload_yearly = highprofile_aggre(loadprofile_high, '../%s_run/scenarios/annualload_tier%i_temporal%i.csv' %('Kenya', 4, 9), 9)
 
 def renewableninja(path, dest, spatial, CapacityFactor_adj):
     """
