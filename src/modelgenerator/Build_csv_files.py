@@ -11,12 +11,14 @@ Module author: Nandi Moksnes <nandi@kth.se>
 
 """
 import pandas as pd
+from datetime import datetime, timedelta
 import geopandas as gpd
 import os
 import fnmatch
 import numpy as np
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-from modelgenerator.PV_battery_optimisation import optimize_battery_pv
+from PV_battery_optimisation import optimize_battery_pv #modelgenerator.
 
 pd.options.mode.chained_assignment = None
 
@@ -67,7 +69,6 @@ def battery_to_pv(loadprofile, capacityfactor_pv, efficiency_discharge, efficien
     for row in df.iterrows():
         location = str(row[0])
         capacityf_solar_batteries_location = capacityf_solar_batteries[[location]]
-        #charging = charging_binary(capacityf_solar_batteries_location,adjusted_load, location)
         PVadj, batterytime = optimize_battery_pv(capacityf_solar_batteries_location, location, adjusted_load, efficiency_discharge,  efficiency_charge, pv_cost, battery_cost, scenario, country)
         PV_size[location]= PVadj
         battery_size[location] = batterytime
@@ -79,14 +80,52 @@ def battery_to_pv(loadprofile, capacityfactor_pv, efficiency_discharge, efficien
 
     df_PV_battery_size.to_csv(tofilePV)
 
-def annualload(minuteload, topath):
+def annualload(minuteload, topath, nr_timeslice):
     minutedf = pd.read_csv(minuteload)
-    minutedf['Minute'] = pd.to_datetime(minutedf['Minute'])
+    minutedf['Datetime'] = pd.to_datetime('1900-01-01 ' + minutedf['Minute'])
+    minutedf.set_index('Datetime', inplace=True)
+    length = str(1440/nr_timeslice)+'min'
 
-    hourlydata = minutedf.groupby(minutedf['Minute'].dt.hour)['Load'].mean()
-    s = hourlydata.squeeze()
+    minutedf_group = minutedf.groupby([pd.Grouper(freq=length)]).mean().reset_index()
+    minutedf_group.set_index('Datetime', inplace=True)
+
+    #minutedf_group.index = df2.index.map(lambda x: x.replace(year=df1.index.year[0]))
+
+    # # Use resample to assign values to each hour
+    # hourly_data = minutedf_group.resample('H').ffill()
+
+    # hourly_intervals = pd.date_range(start='00:00', end='23:00', freq='H')
+
+    # # Reindex to include any missing hours
+    # result = minutedf_group.reindex(hourly_intervals)
+
+    # # Fill any NaN values from 21:20 until 23:00 with the value from 21:20
+    # result['Load'].fillna(method='ffill', inplace=True)
+
+    # print(result)
+    hours = []
+    # Vi loopar igenom alla timmarna som hours ska innehålla
+    for i in range(0,24):
+        # TODO: fixa datumformatet. Av någon anledning grupperar den in minute till dagens datum.
+        fromDate =  pd.to_datetime(f'1900-01-01 {i}:00')
+        toDate = fromDate + timedelta(hours=1)
+
+        # Vi försöker plocka ut alla "Load" från vår dataframe där "Minute" infaller inom timmen vi just nu jobbar i.
+        #TODO: Fixa filtreringen. Jag fick inte ur Load för innevarande timme.
+        # mask = (minutedf_group['Minute'] > fromDate) & (minutedf_group['Minute'] <= toDate)
+        # value = minutedf_group.where(minutedf_group['Minute'] > fromDate and minutedf_group['Minute']<toDate)
+        result = minutedf_group.loc[fromDate:toDate]
+        if (result.values.size == 0):
+            value = hours[i-1]
+        else:
+            value = result.values[0][0]
+        # Vi sätter värdet på timmen.        
+        hours.append(value)  
+    rural_dataframe = pd.DataFrame(hours)
+        
+    s = rural_dataframe.squeeze()
+
     fullyearhours = pd.DataFrame(np.tile(s, 365), columns = ['Load'])
-
     # create a new DataFrame with a datetime index that spans the entire year
     start_date = pd.to_datetime('1900-01-01')
     end_date = pd.to_datetime('1901-01-01')
@@ -98,6 +137,67 @@ def annualload(minuteload, topath):
 
     fullyearhours.to_csv(topath)
     return topath
+
+# def highprofile_aggre(hourlyprofile, topath, nr_timeslice):
+#     hourlydf = pd.read_csv(hourlyprofile)
+#     hourlydf['Datetime'] = pd.to_datetime(hourlydf['adjtime'])
+#     hourlydf.set_index('Datetime', inplace=True)
+#     length = str(1440/nr_timeslice)+'min'
+
+#     hourlydf_group = hourlydf.groupby([pd.Grouper(freq=length)]).mean().reset_index()
+#     hourlydf_group.set_index('Datetime', inplace=True)
+
+#     #minutedf_group.index = df2.index.map(lambda x: x.replace(year=df1.index.year[0]))
+
+#     # # Use resample to assign values to each hour
+#     # hourly_data = minutedf_group.resample('H').ffill()
+
+#     # hourly_intervals = pd.date_range(start='00:00', end='23:00', freq='H')
+
+#     # # Reindex to include any missing hours
+#     # result = minutedf_group.reindex(hourly_intervals)
+
+#     # # Fill any NaN values from 21:20 until 23:00 with the value from 21:20
+#     # result['Load'].fillna(method='ffill', inplace=True)
+
+#     # print(result)
+#     hours = []
+#     # Vi loopar igenom alla timmarna som hours ska innehålla
+#     for i in range(1,25):
+#         # TODO: fixa datumformatet. Av någon anledning grupperar den in minute till dagens datum.
+#         fromDate =  pd.to_datetime(f'2016-01-01 {i}:00')
+#         toDate = fromDate + timedelta(hours=1)
+
+#         # Vi försöker plocka ut alla "Load" från vår dataframe där "Minute" infaller inom timmen vi just nu jobbar i.
+#         #TODO: Fixa filtreringen. Jag fick inte ur Load för innevarande timme.
+#         # mask = (minutedf_group['Minute'] > fromDate) & (minutedf_group['Minute'] <= toDate)
+#         # value = minutedf_group.where(minutedf_group['Minute'] > fromDate and minutedf_group['Minute']<toDate)
+#         result = hourlydf_group.loc[fromDate:toDate]
+#         if (result.values.size == 0):
+#             value = hours[i-1]
+#         else:
+#             value = result.values[0][0]
+#         # Vi sätter värdet på timmen.        
+#         hours.append(value)  
+#     urban_dataframe = pd.DataFrame(hours)
+        
+#     s = urban_dataframe.squeeze()
+
+#     fullyearhours = pd.DataFrame(np.tile(s, 365), columns = ['Load'])
+#     # create a new DataFrame with a datetime index that spans the entire year
+#     start_date = pd.to_datetime('2016-01-01')
+#     end_date = pd.to_datetime('2017-01-01')
+#     idx = pd.date_range(start=start_date, end=end_date, freq='H')
+#     yearly_data = pd.DataFrame(index=idx)
+
+#     fullyearhours.index = yearly_data.index[:8760]
+#     fullyearhours['adjtime'] = fullyearhours.index
+
+#     fullyearhours.to_csv(topath)
+#     return topath
+
+loadprofile_high = '../%sinput_data/high_Jan.csv' %('Kenya')
+highload_yearly = highprofile_aggre(loadprofile_high, '../%s_run/scenarios/annualload_tier%i_temporal%i.csv' %('Kenya', 4, 9), 9)
 
 def renewableninja(path, dest, spatial, CapacityFactor_adj):
     """
