@@ -119,40 +119,16 @@ def annualload(minuteload, topath, nr_timeslice):
 
 def highprofile_aggre(hourlyprofile, topath, nr_timeslice):
     hourlydf = pd.read_csv(hourlyprofile)
-    hourlydf['Datetime'] = pd.to_datetime(hourlydf['adjtime'])
-    hourlydf.set_index('Datetime', inplace=True)
+    hourlydf['adjtime'] = pd.to_datetime(hourlydf['adjtime'])
+    hourlydf.set_index('adjtime', inplace=True)
     length = str(1440/nr_timeslice)+'min'
 
     hourlydf_group = hourlydf.groupby([pd.Grouper(freq=length)]).mean().reset_index()
-    hourlydf_group.set_index('Datetime', inplace=True)
+    hourlydf_group.set_index('adjtime', inplace=True)
+    
+    hourly_data = hourlydf_group.resample('H').ffill()
 
-    hours = []
-    for i in range(0,24):
-        fromDate =  pd.to_datetime(f'2016-01-01 {i}:00')
-        toDate = fromDate + timedelta(hours=1)
-
-        result = hourlydf_group.loc[fromDate:toDate]
-        if (result.values.size == 0):
-            value = hours[i-1]
-        else:
-            value = result.values[0][1]
-     
-        hours.append(value)  
-    urban_dataframe = pd.DataFrame(hours)
-        
-    s = urban_dataframe.squeeze()
-
-    fullyearhours = pd.DataFrame(np.tile(s, 365), columns = ['Load'])
-    # create a new DataFrame with a datetime index that spans the entire year
-    start_date = pd.to_datetime('2016-01-01')
-    end_date = pd.to_datetime('2017-01-01')
-    idx = pd.date_range(start=start_date, end=end_date, freq='H')
-    yearly_data = pd.DataFrame(index=idx)
-
-    fullyearhours.index = yearly_data.index[:8760]
-    fullyearhours['adjtime'] = fullyearhours.index
-
-    fullyearhours.to_csv(topath)
+    hourly_data.to_csv(topath)
     return topath
 
 def renewableninja(path, dest, spatial, CapacityFactor_adj):
@@ -367,13 +343,13 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
 
-        output_temp = [0, "EL3_%i_1" % (m), "EL00d_%i" % (k), 0.83, 1]
+        output_temp = [0, "EL3_%i_1" % (m), "EL00d_%i" % (m), 0.83, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
 
         capitalcost.loc[k+m]['Capitalcost'] = distribu_cost
-        capitalcost.loc[k+m]['Technology'] =  "EL00d_%i" %(k)
+        capitalcost.loc[k+m]['Technology'] =  "EL00d_%i" %(m)
         
         input_temp = [0,"EL2_%i" %(m),"TRLV_%i_0" %(m), 1, 1]
         inputactivity.loc[-1] = input_temp  # adding a row

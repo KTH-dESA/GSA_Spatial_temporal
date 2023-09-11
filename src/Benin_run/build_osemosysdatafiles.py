@@ -47,7 +47,7 @@ def make_outputfile(param_file):
     return outPutFile
 
 def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_scenario, temporal, CapitalCost_PV, 
-                                  CapitalCost_batt, CapitalCost_WI, CapitalCost_distribution, CapacityFactor_adj, FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, DemandProfileTier, country, COMBatt_df, SOMG_df, Heavyfueloil_df):
+                                  CapitalCost_batt, CapitalCost_WI, CapitalCost_distribution, CapacityFactor_adj, FuelpriceNG, FuelpriceDIESEL, FuelpriceCOAL, DemandProfileTier, country, COMBatt_df, SOMG_df, Heavyfueloil_df, distribution_str, transmiss):
     """Runs all the functions for the different parameters
 
     Arguments
@@ -97,12 +97,9 @@ def functions_to_run(dict_df, outPutFile,spatial, demand_scenario, discountrate_
         print('No demand file')
 ####################################################################################
     outPutFile = capitalcost_dynamic(dict_df['%i_GIS_data' %(spatial)], outPutFile,  CapitalCost_PV, 
-                                   CapitalCost_batt, CapitalCost_WI, COMBatt_df, SOMG_df, dict_df['input_data_%i'%(temporal)],dict_df['%i_elec' %(spatial)],dict_df['%i_un_elec' %(spatial)], dict_df['capacityfactor_solar_batteries_Tier%i_loca%i_uncertain%f' %(DemandProfileTier, spatial, CapacityFactor_adj)], dict_df['capacityfactor_solar_batteries_urban_loca%i_uncertain%f' %(spatial, CapacityFactor_adj)])
+                                   CapitalCost_batt, CapitalCost_WI, COMBatt_df, SOMG_df, dict_df['input_data_%i'%(temporal)],dict_df['%i_elec' %(spatial)],dict_df['%i_un_elec' %(spatial)], dict_df['capacityfactor_solar_batteries_Tier%i_loca%i_uncertain%f_temporal%i' %(DemandProfileTier, spatial, CapacityFactor_adj, int(temporal))], dict_df['capacityfactor_solar_batteries_urban_loca%i_uncertain%f_temporal%i' %(spatial, CapacityFactor_adj, int(temporal))])
 ###########################################################################
-    if '%i_capitalcost'%(spatial) in dict_df:
-        outPutFile = capitalcost(outPutFile, dict_df['%i_capitalcost'%(spatial)], dict_df['input_data_%i'%(temporal)])
-    else:
-        print('No capitalcost file')
+    outPutFile = capitalcost(outPutFile, dict_df['%i_%i_%icapitalcost' %(spatial, int(distribution_str), int(transmiss))], dict_df['input_data_%i'%(temporal)])
 
 #################################################################################
 
@@ -784,26 +781,6 @@ def capacityfactor(outPutFile, df, input_data, capacityfactor_wind, capacityfact
     capacityfactor_solar_p = pd.to_datetime(capacityfactor_solar_['adjtime'], errors='coerce', format='%Y/%m/%d %H:%M')
     capacityfactor_solar_.index = capacityfactor_solar_p
     capacityfactor_solar_pv = capacityfactor_solar_.drop(columns=['adjtime'])
-
-    cache = {}
-
-    # def calculate_average(data, startdate, enddate, sliceStart, sliceEnd, location):
-    #     key = f'{startdate}-{enddate}-{sliceStart}-{sliceEnd}-{location}'
-    #     if key in cache:
-    #         return cache[key]
-
-    #     mask = (data.index > startdate) & (data.index <= enddate)
-    #     thisMonthOnly = data.loc[mask]
-    #     between_time = thisMonthOnly[(location)].between_time(sliceStart, sliceEnd)
-    #     slice_ = sum(between_time)
-
-    #     try:
-    #         average = slice_ / len(between_time)
-    #     except ZeroDivisionError:
-    #         average = 0
-
-    #     cache[key] = average
-    #     return average
 
     def calculate_average(data, startdate, enddate, sliceStart, sliceEnd, location):
         mask = (data.index > startdate) & (data.index <= enddate)

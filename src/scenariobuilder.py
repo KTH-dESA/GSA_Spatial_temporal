@@ -201,103 +201,94 @@ for j in dict_modelruns.keys():
     COMBatt_df.columns = COMBatt_df.columns.astype('int')
 
 
+    print('1. Aggregating the number of cells per polygon from Pathfinder')
+    polygon = str(spatial) + "_polygon.shp"
+    point = str(spatial) + "_point.shp"
+    path_polygon = projectedfolder + '/'+ polygon
 
-    combined = str(spatial) + str(CapacityFactor_adj)
+    zonalstat_pathfinder(pathfinder_raster_country, path_polygon, spatial, country)
 
-    if combined not in scenario_runs.values():
+    print("2. Create the demandcells.csv file and the classifications")
+    
+    shape =  projectedfolder +'/'+ polygon
+    gdp =  projectedfolder + '/'+files.loc['gdp','filename']
+    demandcells = os.path.join(os.getcwd(), '%s_run/scenarios/Demand/%i_demand_cells.csv' %(country, spatial))
 
-        print('1. Aggregating the number of cells per polygon from Pathfinder')
-        polygon = str(spatial) + "_polygon.shp"
-        point = str(spatial) + "_point.shp"
-        path_polygon = projectedfolder + '/'+ polygon
+    if not os.path.exists('%s_run/scenarios/Demand' %(country)):
+        os.makedirs('%s_run/scenarios/Demand' %(country))
 
-        zonalstat_pathfinder(pathfinder_raster_country, path_polygon, spatial, country)
+    join_elec(elec_shp, gdp, shape, spatial, country)
+    elec(demandcells, spatial, country)
 
-        print("2. Create the demandcells.csv file and the classifications")
-        
-        shape =  projectedfolder +'/'+ polygon
-        gdp =  projectedfolder + '/'+files.loc['gdp','filename']
-        demandcells = os.path.join(os.getcwd(), '%s_run/scenarios/Demand/%i_demand_cells.csv' %(country, spatial))
+    date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
+    print(date)
+    print("3. Identify unelectrified %i_polygons " %(spatial))
+    polygons_all = projectedfolder+ '/'+polygon
+    noHV = '%s_run/scenarios/%i_noHV_cells.csv' %(country, spatial)
+    shape =  "%s_run/scenarios/Demand/%i_un_elec_polygons.shp" %(country, spatial)
 
-        if not os.path.exists('%s_run/scenarios/Demand' %(country)):
-            os.makedirs('%s_run/scenarios/Demand' %(country))
+    noHV_polygons(polygons_all, noHV, shape, crs)
 
-        join_elec(elec_shp, gdp, shape, spatial, country)
-        elec(demandcells, spatial, country)
+    #To be able to download you need to install the package curl from R and also have R installed on your computer
+    # Easiest is to write  install.packages("curl") in the R prompt
 
-        date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
-        print(date)
-        print("3. Identify unelectrified %i_polygons " %(spatial))
-        polygons_all = projectedfolder+ '/'+polygon
-        noHV = '%s_run/scenarios/%i_noHV_cells.csv' %(country, spatial)
-        shape =  "%s_run/scenarios/Demand/%i_un_elec_polygons.shp" %(country, spatial)
+    print("4. Download Renewable Ninja files for scenario %i" %(spatial))
+    # add your token for API from your own log in on Renewable Ninjas
 
-        noHV_polygons(polygons_all, noHV, shape, crs)
+    shapefile = projectedfolder + '/'+point
+    #Add the path to the RScript.exe under Program Files and add here
 
-        #To be able to download you need to install the package curl from R and also have R installed on your computer
-        # Easiest is to write  install.packages("curl") in the R prompt
+    srcpath = os.path.dirname(os.path.abspath(__file__))
+    path = "%stemp/%i" %(country, spatial)
 
-        print("4. Download Renewable Ninja files for scenario %i" %(spatial))
-        # add your token for API from your own log in on Renewable Ninjas
+    if not os.path.exists('%stemp/%i' %(country, spatial)):
+        os.makedirs('%stemp/%i' %(country, spatial))
+    coordinates = project_vector(shapefile)
+    wind, solar = csv_make(coordinates, path)
+    down = download(path, Rpath, srcpath, wind, solar, token)
+    adjust_timezone(path, time_zone_offset)
+    uncertainty_capacityfactor(path, CapacityFactor_adj)
 
-        shapefile = projectedfolder + '/'+point
-        #Add the path to the RScript.exe under Program Files and add here
+    print("5. Build transmission technologies")
 
-        srcpath = os.path.dirname(os.path.abspath(__file__))
-        path = "%stemp/%i" %(country, spatial)
+    date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
+    print(date)
 
-        if not os.path.exists('%stemp/%i' %(country, spatial)):
-            os.makedirs('%stemp/%i' %(country, spatial))
-        coordinates = project_vector(shapefile)
-        wind, solar = csv_make(coordinates, path)
-        down = download(path, Rpath, srcpath, wind, solar, token)
-        adjust_timezone(path, time_zone_offset)
-        uncertainty_capacityfactor(path, CapacityFactor_adj)
-
-        print("5. Build transmission technologies")
-
-        date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
-        print(date)
-
-        demandcells = os.path.join(os.getcwd(), '%s_run/scenarios/Demand/%i_demand_cells.csv' %(country, spatial))
-        input_data =  os.path.join(os.getcwd(), '%s_run/scenarios/input_data.csv' %(country))
-        if os.path.isfile('%s_run/scenarios/%i_distribution.csv' %(country, spatial)):
-            print('File already exists, skipping calculations.')
-        else:
-            distribution_length_cell_ref = network_length(demandcells, input_data, scenarios_folder, spatial)
-        distribution = '%s_run/scenarios/%i_distributionlines.csv' %(country, spatial)
-        distribution_row = "_%isum" %(spatial)
-
-        topath = '%s_run/scenarios/Demand' %(country)
-        noHV = '%s_run/scenarios/%i_noHV_cells.csv' %(country, spatial)
-        HV_file = '%s_run/scenarios/%i_HV_cells.csv' %(country, spatial)
-        minigrid = '%s_run/scenarios/%i_elec_noHV_cells.csv' %(country, spatial)
-        neartable = '%s_run/scenarios/Demand/%i_Near_table.csv' %(country, spatial)
-
-        if spatial == 1:
-            print('only one cell')
-        else:
-            transmission_matrix(neartable, noHV, HV_file, minigrid, topath, spatial, country)
-
-        date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
-        print(date)
-
-        elec_noHV_cells = '%s_run/scenarios/%i_elec_noHV_cells.csv' %(country, spatial)
-        renewable_path = '%stemp/%i' %(country, spatial)
-        pop_shp = projectedfolder + files.loc['pop','filename']
-        unelec = '%s_run/scenarios/%i_un_elec.csv' %(country, spatial)
-        elec_ = '%s_run/scenarios/%i_elec.csv' %(country, spatial)
-
-        #Solar and wind csv files
-        renewableninja(renewable_path, scenarios_folder, spatial, CapacityFactor_adj)
-        #Location file
-        gisfile_ref = GIS_file(scenarios_folder, projectedfolder + '/'+ point, spatial)
-        matrix = '%s_run/scenarios/Demand/%i_adjacencymatrix.csv' %(country, spatial)
-        capital_cost_transmission_distrib(elec_, noHV, HV_file, elec_noHV_cells, unelec, CapitalCost_transm, substation, capacitytoactivity, scenarios_folder, matrix, gisfile_ref, spatial, CapitalCost_distribution_ext, diesel = True)
-        scenario_runs[j] = combined
-        
+    demandcells = os.path.join(os.getcwd(), '%s_run/scenarios/Demand/%i_demand_cells.csv' %(country, spatial))
+    input_data =  os.path.join(os.getcwd(), '%s_run/scenarios/input_data.csv' %(country))
+    if os.path.isfile('%s_run/scenarios/%i_distribution.csv' %(country, spatial)):
+        print('File already exists, skipping calculations.')
     else:
-        print('Scenario already run')
+        distribution_length_cell_ref = network_length(demandcells, input_data, scenarios_folder, spatial)
+    distribution = '%s_run/scenarios/%i_distributionlines.csv' %(country, spatial)
+    distribution_row = "_%isum" %(spatial)
+
+    topath = '%s_run/scenarios/Demand' %(country)
+    noHV = '%s_run/scenarios/%i_noHV_cells.csv' %(country, spatial)
+    HV_file = '%s_run/scenarios/%i_HV_cells.csv' %(country, spatial)
+    minigrid = '%s_run/scenarios/%i_elec_noHV_cells.csv' %(country, spatial)
+    neartable = '%s_run/scenarios/Demand/%i_Near_table.csv' %(country, spatial)
+
+    if spatial == 1:
+        print('only one cell')
+    else:
+        transmission_matrix(neartable, noHV, HV_file, minigrid, topath, spatial, country)
+
+    date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
+    print(date)
+
+    elec_noHV_cells = '%s_run/scenarios/%i_elec_noHV_cells.csv' %(country, spatial)
+    renewable_path = '%stemp/%i' %(country, spatial)
+    pop_shp = projectedfolder + files.loc['pop','filename']
+    unelec = '%s_run/scenarios/%i_un_elec.csv' %(country, spatial)
+    elec_ = '%s_run/scenarios/%i_elec.csv' %(country, spatial)
+
+    #Solar and wind csv files
+    renewableninja(renewable_path, scenarios_folder, spatial, CapacityFactor_adj)
+    #Location file
+    gisfile_ref = GIS_file(scenarios_folder, projectedfolder + '/'+ point, spatial)
+    matrix = '%s_run/scenarios/Demand/%i_adjacencymatrix.csv' %(country, spatial)
+    capital_cost_transmission_distrib(elec_, noHV, HV_file, elec_noHV_cells, unelec, CapitalCost_transm, substation, capacitytoactivity, scenarios_folder, matrix, gisfile_ref, spatial, CapitalCost_distribution_ext, diesel = True)
 
 #Read scenarios from sample file
 
@@ -354,18 +345,21 @@ for j in dict_modelruns.keys():
     date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
     print(date)
 
-    load_yearly = annualload(tier_profile, '%s_run/scenarios/annualload_tier%i.csv' %(country, DemandProfileTier))
+    load_yearly = annualload(tier_profile, '%s_run/scenarios/annualload_tier%i_temporal%i.csv' %(country, DemandProfileTier, int(temporal_id)),int(temporal_id))
     loadprofile_high = '%sinput_data/high_Jan.csv' %(country)
-    capacityfactor_pv = '%s_run/scenarios/uncertain%f_spatial%i_capacityfactor_solar.csv' %(country, CapacityFactor_adj,spatial)
-    tofilePV = '%s_run/scenarios/capacityfactor_solar_batteries_Tier%i_loca%i_uncertain%f.csv' %(country, DemandProfileTier, spatial, CapacityFactor_adj)
-    tofilePVhigh = '%s_run/scenarios/capacityfactor_solar_batteries_urban_loca%i_uncertain%f.csv' %(country, spatial, CapacityFactor_adj)
+    highload_yearly = highprofile_aggre(loadprofile_high, '%s_run/scenarios/urbanannualload_tier%i_temporal%i.csv' %(country, DemandProfileTier, int(temporal_id)),int(temporal_id))
+    capacityfactor_pv_input = '%s_run/scenarios/uncertain%f_spatial%i_capacityfactor_solar.csv' %(country, CapacityFactor_adj,spatial)
+    capacityfactor_pv_output = '%s_run/scenarios/uncertain%f_spatial%i_temporal_%icapacityfactor_solar.csv' %(country, CapacityFactor_adj,spatial, int(temporal_id))
+    capacityfactor_pv = highprofile_aggre(capacityfactor_pv_input, capacityfactor_pv_output,int(temporal_id))
+    tofilePV = '%s_run/scenarios/capacityfactor_solar_batteries_Tier%i_loca%i_uncertain%f_temporal%i.csv' %(country, DemandProfileTier, spatial, CapacityFactor_adj, int(temporal_id))
+    tofilePVhigh = '%s_run/scenarios/capacityfactor_solar_batteries_urban_loca%i_uncertain%f_temporal%i.csv' %(country, spatial, CapacityFactor_adj, int(temporal_id))
     efficiency_discharge = 0.98 # Koko (2022)
     efficiency_charge = 0.95 # Koko (2022)
     pvcost = 2540 #ATB 2021 version for 2021 value
     batterycost_kWh = 522  #ATB 2021 version for 2021 value with adjusted Kenyan value
     locations = '%s_run/scenarios/%i_GIS_data.csv' %(country, spatial)
-    scenario = 'Tier%i_loca%i_uncertain%f.csv' %(DemandProfileTier, spatial, CapacityFactor_adj)
-    highscenario = 'High_loca%i_uncertain%f.csv' %(spatial, CapacityFactor_adj)
+    scenario = 'Tier%i_loca%i_uncertain%f_time_%i.csv' %(DemandProfileTier, spatial, CapacityFactor_adj, int(temporal_id))
+    highscenario = 'High_loca%i_uncertain%f_time_%i.csv' %(spatial, CapacityFactor_adj,int(temporal_id))
     startDate = pd.to_datetime("2016-01-02")
     endDate = pd.to_datetime("2016-02-02")
     startDate_load = pd.to_datetime("1900-01-02")
@@ -377,7 +371,7 @@ for j in dict_modelruns.keys():
     if os.path.isfile(tofilePVhigh):
         print('File already exists, skipping calculations.')
     else:
-        battery_to_pv(loadprofile_high,  capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePVhigh, highscenario,  startDate, endDate, startDate, endDate, country)
+        battery_to_pv(highload_yearly,  capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePVhigh, highscenario,  startDate, endDate, startDate, endDate, country)
 
 
     ####################### Make txt file #############################
@@ -390,7 +384,7 @@ for j in dict_modelruns.keys():
     else:
         outPutFile = functions_to_run(dict_df, outPutFile, spatial, elecdemand_df.iloc[0][2040], DiscountRate, temporal_id, SOPV_df, 
                                         RESBatt_df, CapitalCost_WI, CapitalCost_distribution, CapacityFactor_adj, 
-                                        FuelpriceNG, Diesel_df, FuelpriceCOAL, DemandProfileTier, country, COMBatt_df, SOMG_df, Heavyfueloil_df)
+                                        FuelpriceNG, Diesel_df, FuelpriceCOAL, DemandProfileTier, country, COMBatt_df, SOMG_df, Heavyfueloil_df, CapitalCost_distribution_ext, CapitalCost_transm)
 
         #write data file
         if not os.path.exists(output_folder):
