@@ -252,6 +252,11 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
 
+        operationallife_temp = ["TRLV_%i_0" %(k), 60]
+        operationallife.loc[-1] = operationallife_temp  # adding a row
+        operationallife.index = operationallife.index + 1  # shifting index
+        operationallife = operationallife.sort_index()
+
         #The TRLVM is introduced as one technology cannot input two fuels in the same timeslice
         #This is for minigrid supply
         input_temp = [0, "EL2_%i" %(k), "TRLVM_%i_0" %(k), 1, 1]
@@ -271,6 +276,11 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         outputactivity.loc[-1] = output_temp  # adding a row
         outputactivity.index = outputactivity.index + 1  # shifting index
         outputactivity = outputactivity.sort_index()
+
+        operationallife_temp = ["EL00d_%i" % (k), 60]
+        operationallife.loc[-1] = operationallife_temp  # adding a row
+        operationallife.index = operationallife.index + 1  # shifting index
+        operationallife = operationallife.sort_index()
 
         output_temp = [0, "EL3_%i_0" % (k), "TRLV_%i_0" % (k), 0.83, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
@@ -350,11 +360,21 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
 
         capitalcost.loc[k+m]['Capitalcost'] = distribu_cost
         capitalcost.loc[k+m]['Technology'] =  "EL00d_%i" %(m)
+
+        operationallife_temp = ["EL00d_%i" % (m), 60]
+        operationallife.loc[-1] = operationallife_temp  # adding a row
+        operationallife.index = operationallife.index + 1  # shifting index
+        operationallife = operationallife.sort_index()
         
         input_temp = [0,"EL2_%i" %(m),"TRLV_%i_0" %(m), 1, 1]
         inputactivity.loc[-1] = input_temp  # adding a row
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
+
+        operationallife_temp = ["TRLV_%i_0" %(m), 60]
+        operationallife.loc[-1] = operationallife_temp  # adding a row
+        operationallife.index = operationallife.index + 1  # shifting index
+        operationallife = operationallife.sort_index()
 
         output_temp = [0, "EL3_%i_1" % (m), "BACKSTOP", 1, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
@@ -418,6 +438,11 @@ def capital_cost_transmission_distrib(elec, noHV_file, HV_file, elec_noHV_cells_
         inputactivity.loc[-1] = input_temp  # adding a row
         inputactivity.index = inputactivity.index + 1  # shifting index
         inputactivity = inputactivity.sort_index()
+
+        operationallife_temp = ["TRLV_%i_0" %(j), 60]
+        operationallife.loc[-1] = operationallife_temp  # adding a row
+        operationallife.index = operationallife.index + 1  # shifting index
+        operationallife = operationallife.sort_index()
 
         output_temp = [0, "EL3_%i_0" % (j), "TRLV_%i_0" % (j), 0.83, 1]
         outputactivity.loc[-1] = output_temp  # adding a row
