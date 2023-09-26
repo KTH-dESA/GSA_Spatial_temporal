@@ -7,10 +7,8 @@ This repository is for the paper
 Nandi Moksnes (1) *, William Usher (1)
 1)	KTH Royal Institute of Technology
 
-To be able to run the model you need to have approx 256 GB RAM. This model has been run on a High performance cluster at KTH.
-The shell file is therefor applicable for the HPC at PDC Dardel from NAISS (National Academic Infrastructure for Supercomputing in Sweden).
-
-The workflow is only tested on a Windows computer and Linux for the modelsruns (Snakemake runs file), therefore there might be small adjustements needed for other OS.
+To be able to run the model you need to have approx 256 GB RAM. 
+The workflow is only tested on a Windows computer, therefore, there might be small adjustements needed for other OS.
 
 # Python dependencies
 The workflow has a number packages that needs to be installed.
