@@ -115,7 +115,7 @@ def merge_transmission(proj_path):
         if file.endswith('.shp'):
             f = os.path.abspath(file)
             shapefiles += [f]
-    keyword = ['132kV', '220kV']
+    keyword = ['132kV', '220kV', '66kV']
     tmiss_list = []
     out = [f for f in shapefiles if any(xs in f for xs in keyword)]
     for f in out:
@@ -142,7 +142,7 @@ def merge_mv(proj_path, fil):
         if file.endswith('.shp'):
             f = os.path.abspath(file)
             shapefiles += [f]
-    keyword = ['33kV', '66kV']
+    keyword = ['33kV', '11kV']
     tmiss_list = []
     out = [f for f in shapefiles if any(xs in f for xs in keyword)]
     for f in out:

@@ -71,7 +71,7 @@ def remove_grid_from_results_multiply_with_lenght(dict_pathfinder, dict_weight,t
         while j < row_length:
             m = 0
             while m < col_length:
-                if path_weight.iloc[(i + j), (k + m)] < 0.5:
+                if path_weight.iloc[(i + j), (k + m)] < 0.12:
                     elec_path.iloc[(i + j), (k + m)] = 0
                 m += 1
             j += 1

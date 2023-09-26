@@ -1,15 +1,15 @@
 name,group,indexes,min_value_base_year,max_value_base_year,min_value_end_year,max_value_end_year,dist,interpolation_index,action,floor
-Spatial,spatial,GLOBAL,1,100,1,100,unif,None,fixed,Y
-DiscountRate,discountrate,GLOBAL,0.05,0.15,0.05,0.15,unif,None,fixed,N
-Dailytemporalresolution,time,GLOBAL,1,24,1,24,unif,None,fixed,Y
-CapitalCost_PV,cost,SOPV,2743,2743,671,1651,unif,YEAR,interpolate,N
-CapitalCost_Battery_kWh,costbattery,battery,685,685,277,439,unif,YEAR,interpolate,N
-CapitalCost_Wind,costwi,WI,1405,1405,589,913,unif,YEAR,interpolate,N
-CapitalCost_transm,costnetwork,Transmission,2,4,2,4,unif,None,fixed,N
-CapitalCost_distribution,costdistribution,Distribution,10000,28000,10000,28000,unif,None,fixed,N
-CapacityFactor_error,capacityfactor,SOPV,-0.05,0.05,-0.05,0.05,unif,None,fixed,N
-Demand,demandprofile,GLOBAL,1,4,1,4,unif,None,fixed,Y
-FuelpriceNG,fuel_ng,Natural gas,9,9,4,8,unif,YEAR,interpolate,N
-FuelpriceDIESEL,fuel_ds,Diesel,17,17,7,14,unif,YEAR,interpolate,N
-FuelpriceCOAL,fuel_co,Coal,5,5,2.2,2.9,unif,YEAR,interpolate,N
-CapitalCost_distribution_strength,costdistribution_str,Distribution,50,400,50,400,unif,None,fixed,N
+Spatial,Spatial resolution,GLOBAL,1,100,1,100,unif,None,fixed,Y
+DiscountRate,Discount Rate,GLOBAL,0.07,0.2,0.07,0.2,unif,None,fixed,N
+Dailytemporalresolution,Temporal resolution,GLOBAL,1,24,1,24,unif,None,fixed,Y
+CapitalCost_PV,Capital Cost PV,SOPV,1,4,1,4,unif,None,fixed,Y
+CapitalCost_Battery_kWh,CapitalCost Battery kWh,battery,1,4,1,4,unif,None,fixed,Y
+CapitalCost_Wind,Capital Cost Wind,WI,1405,1405,589,913,unif,YEAR,interpolate,N
+CapitalCost_transm,CapitalCost transmission lines,Transmission,2,4,2,4,unif,None,fixed,N
+CapitalCost_distribution,Capital Cost distribution lines,Distribution,17448,35448,17448,35448,unif,None,fixed,N
+CapacityFactor_error,Capacity Factor error,SOPV,-0.05,0.05,-0.05,0.05,unif,None,fixed,N
+Demand,Demand,GLOBAL,1,4,1,4,unif,None,fixed,Y
+FuelpriceNG,Fuel price natural gas,Natural gas,9,9,4,8,unif,YEAR,interpolate,N
+FuelpriceCRUDEOIL,Fuel price crude oil,Oil,1,4,1,4,unif,None,fixed,Y
+FuelpriceCOAL,Fuel price coal,Coal,5,5,2.2,2.9,unif,YEAR,interpolate,N
+CapitalCost_distribution_strength,Capital Cost distribution strengthening,Distribution,50,400,50,400,unif,None,fixed,N

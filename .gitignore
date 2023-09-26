@@ -107,10 +107,11 @@ src/Benin_run/temp/**
 csv
 **.lp
 **.sol
-src/Benin_run/**
+
 src/Beninsensitivity/**
 src/Benintemp/**
 src/Kenyatemp/**
+src/Benin_run/**
 src/Kenya_run/**
 src/Kenyasensitivity/**
 src/Benininput_data/Benin_demand.xlsx
@@ -119,3 +120,6 @@ src/Benininput_data/high_Jan.csv
 src/Benininput_data/Kenya_GIS_files.csv
 src/Benininput_data/T1-T5 loadprofile.xlsx
 src/Benininput_data/T3_load profile_Narayan.xls
+src/Kenya_0_sortedCapitalCostnetwork.csv
+src/Kenya_run/output/**
+src/Sensitivity_analysis.py
