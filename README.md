@@ -32,4 +32,5 @@ To run the code you need to create accounts in the following places:
 - https://payneinstitute.mines.edu/eog/nighttime-lights/ and the password is entered in the first cell in the notebook
 
 # Run the model
-TBD
+Run first the src/build_initial_countrydata.py and make sure that the base files look as expected.
+Then run the src/scenario_builder.py to build all the scenarios.
