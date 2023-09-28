@@ -10,6 +10,11 @@ Nandi Moksnes (1) *, William Usher (1)
 To be able to run the model you need to have approx 256 GB RAM. 
 The workflow is only tested on a Windows computer, therefore, there might be small adjustements needed for other OS.
 
+### Modelled input parameters
+
+![image](https://github.com/KTH-dESA/GSA_Spatial_temporal/assets/30128518/ecde38dd-310b-4c27-9a21-9ea791614a31)
+
+
 # Python dependencies
 The workflow has a number packages that needs to be installed.
 
