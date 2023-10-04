@@ -1,8 +1,8 @@
-## Global Sensitivity Analysis - Spatial and temporal analysis for energy access
+## Quantifying the relative importance of the spatial and temporal resolution in energy systems optimisation model
 
 This repository is for the paper
 
-**Global sensitivity analysis spatial and temporal resolution in energy systems optimization model**
+**Quantifying the relative importance of the spatial and temporal resolution in energy systems optimisation model**
 
 Nandi Moksnes (1) *, William Usher (1)
 1)	KTH Royal Institute of Technology
