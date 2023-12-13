@@ -2,7 +2,7 @@
 
 This repository is for the paper
 
-**Quantifying the relative importance of the spatial and temporal resolution in energy systems optimisation model**
+[**Quantifying the relative importance of the spatial and temporal resolution in energy systems optimisation model**](https://arxiv.org/abs/2310.10518)
 
 Nandi Moksnes (1) *, William Usher (1)
 1)	KTH Royal Institute of Technology
