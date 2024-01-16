@@ -123,3 +123,10 @@ src/Benininput_data/T3_load profile_Narayan.xls
 src/Kenya_0_sortedCapitalCostnetwork.csv
 src/Kenya_run/output/**
 src/Sensitivity_analysis.py
+src/matrix_Sin_mu.csv
+src/GSA_test.py
+src/cluster.py
+src/matrix_Sin_mu.png
+src/Kenyainput_data/high_Jan.csv
+src/config/masterdata.xlsx
+.vscode/launch.json

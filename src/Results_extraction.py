@@ -91,7 +91,7 @@ def creating_Y_to_morris(dict, path, years, masterdata):
         Y_totalcost[i] = totaldiscounted_cost
 
     df = pd.DataFrame.from_dict(Y_totalcost, orient="index")
-    #TODO add sort function on index
+
     df.to_csv(os.path.join(path,'totaldiscounted_results.csv'))
 
     Y_transmshare = {}
@@ -171,9 +171,16 @@ def creating_Y_to_morris(dict, path, years, masterdata):
     df = pd.DataFrame.from_dict( Y_capitalcost, orient="index")
     df.to_csv(os.path.join(path,'Capitalinvestment_results.csv'))
 
-    return Y_totalcost, Y_transmshare, Y_capitalcost, YRET_share, Ykm_share, YPV_share
+    #TODO: Add PV and battery to the analysis
+    Y_PVbattery = {}
+    # Y_PVbattery[i] = 
 
-def run_morris(dict_y, paramvalues_path, nom_path, problem_path, save_file, unit):
+    # df = pd.DataFrame.from_dict( Y_PVBattery, orient="index")
+    # df.to_csv(os.path.join(path,'Capitalinvestment_results.csv'))
+
+    return Y_totalcost, Y_transmshare, Y_capitalcost, YRET_share, Ykm_share, YPV_share, Y_PVbattery
+
+def run_morris(dict_y, paramvalues_path, nom_path, problem_path, save_file, unit, scale=False):
 
     # Perform the sensitivity analysis using the model output
     # Specify which column of the output file to analyze (zero-indexed)
@@ -275,10 +282,14 @@ def run_morris(dict_y, paramvalues_path, nom_path, problem_path, save_file, unit
         save_file : str
             File path to save results
         """
+        if scale == True:
+            S_X = NOM_X 
+        else:
+            S_X = X
 
         problem = create_salib_problem(parameters)
 
-        Si = analyze_morris.analyze(problem, NOM_X, Y, scaled=True, print_to_console=False)
+        Si = analyze_morris.analyze(problem, S_X, Y, scaled = scale, print_to_console=False)
 
         # Save text based results
         Si.to_df().to_csv(f'{save_file}.csv')
@@ -342,14 +353,20 @@ def main(folder, masterdata):
     years_included_analysis =  ['2020','2021', '2022','2023','2024','2025','2026','2027','2028','2029','2030','2031','2032','2033',	'2034',	'2035',	'2036',	'2037']
     dict_df = load_csvs(folder, years)
     dict_results = read_data(dict_df, years_included_analysis, '%ssensitivity/latest_run/' %(country))
-    totaldiscountedcost, transmcap, capitalinvestment, RET_share, km, PV_share= creating_Y_to_morris(dict_results, '%ssensitivity'%(country), years, masterdata)
-    #PV_battery = extract_results_PV('Kenya_run/scenarios')
-    run_morris(totaldiscountedcost, '%ssensitivity/sample_morris.csv' %(country), '%ssensitivity/sample_morris_nominal.csv' %(country), 'config/%sparameters.csv'%(country), '%ssensitivity/Total discounted cost %s'%(country, country), '\$')
-    run_morris(capitalinvestment, '%ssensitivity/sample_morris.csv'%(country), '%ssensitivity/sample_morris_nominal.csv' %(country),'config/%sparameters.csv'%(country), '%ssensitivity/Capital investment %s'%(country, country), '\$')
-    run_morris(transmcap, '%ssensitivity/sample_morris.csv'%(country),'%ssensitivity/sample_morris_nominal.csv' %(country), 'config/%sparameters.csv'%(country), '%ssensitivity/Expansion of transmission %s'%(country, country), 'kW')
-    run_morris(RET_share, '%ssensitivity/sample_morris.csv'%(country), '%ssensitivity/sample_morris_nominal.csv' %(country),'config/%sparameters.csv'%(country), '%ssensitivity/Renewable energy production share %s'%(country, country), '%')
-    run_morris(km, '%ssensitivity/sample_morris.csv'%(country),'%ssensitivity/sample_morris_nominal.csv' %(country), 'config/%sparameters.csv'%(country), '%ssensitivity/number of km distributionlines %s'%(country, country), 'km') 
-    run_morris(PV_share, '%ssensitivity/sample_morris.csv'%(country),'%ssensitivity/sample_morris_nominal.csv' %(country), 'config/%sparameters.csv'%(country), '%ssensitivity/PV panel share %s'%(country, country), '%')
+    totaldiscountedcost, transmcap, capitalinvestment, RET_share, km, PV_share, PV_battery= creating_Y_to_morris(dict_results, '%ssensitivity'%(country), years, masterdata)
+    run_morris(totaldiscountedcost, '%ssensitivity/sample_morris.csv' %(country), '%ssensitivity/sample_morris_nominal.csv' %(country), 'config/%snominal_parameters.csv'%(country), '%ssensitivity/Total discounted cost %s'%(country, country), '\$', True)
+    run_morris(capitalinvestment, '%ssensitivity/sample_morris.csv'%(country), '%ssensitivity/sample_morris_nominal.csv' %(country),'config/%snominal_parameters.csv'%(country), '%ssensitivity/Capital investment %s'%(country, country), '\$', True)
+    run_morris(transmcap, '%ssensitivity/sample_morris.csv'%(country),'%ssensitivity/sample_morris_nominal.csv' %(country), 'config/%snominal_parameters.csv'%(country), '%ssensitivity/Expansion of transmission %s'%(country, country), 'kW', True)
+    run_morris(RET_share, '%ssensitivity/sample_morris.csv'%(country), '%ssensitivity/sample_morris_nominal.csv' %(country),'config/%snominal_parameters.csv'%(country), '%ssensitivity/Renewable energy production share %s'%(country, country), '%', True)
+    run_morris(km, '%ssensitivity/sample_morris.csv'%(country),'%ssensitivity/sample_morris_nominal.csv' %(country), 'config/%snominal_parameters.csv'%(country), '%ssensitivity/number of km distributionlines %s'%(country, country), 'km', True) 
+    run_morris(PV_share, '%ssensitivity/sample_morris.csv'%(country),'%ssensitivity/sample_morris_nominal.csv' %(country), 'config/%snominal_parameters.csv'%(country), '%ssensitivity/PV panel share %s'%(country, country), '%', True)
+
+    run_morris(totaldiscountedcost, '%ssensitivity/sample_morris.csv' %(country), '%ssensitivity/sample_morris_nominal.csv' %(country), 'config/%snominal_parameters.csv'%(country), '%ssensitivity/Total discounted cost unscaled %s'%(country, country), '\$')
+    run_morris(capitalinvestment, '%ssensitivity/sample_morris.csv'%(country), '%ssensitivity/sample_morris_nominal.csv' %(country),'config/%snominal_parameters.csv'%(country), '%ssensitivity/Capital investment unscaled %s'%(country, country), '\$')
+    run_morris(transmcap, '%ssensitivity/sample_morris.csv'%(country),'%ssensitivity/sample_morris_nominal.csv' %(country), 'config/%snominal_parameters.csv'%(country), '%ssensitivity/Expansion of transmission unscaled %s'%(country, country), 'kW')
+    run_morris(RET_share, '%ssensitivity/sample_morris.csv'%(country), '%ssensitivity/sample_morris_nominal.csv' %(country),'config/%snominal_parameters.csv'%(country), '%ssensitivity/Renewable energy production share unscaled %s'%(country, country), '%')
+    run_morris(km, '%ssensitivity/sample_morris.csv'%(country),'%ssensitivity/sample_morris_nominal.csv' %(country), 'config/%snominal_parameters.csv'%(country), '%ssensitivity/number of km distributionlines unscaled %s'%(country, country), 'km') 
+    run_morris(PV_share, '%ssensitivity/sample_morris.csv'%(country),'%ssensitivity/sample_morris_nominal.csv' %(country), 'config/%snominal_parameters.csv'%(country), '%ssensitivity/PV panel share unscaled %s'%(country, country), '%')
 
 countries = ['Kenya', 'Benin']
 for country in countries:
