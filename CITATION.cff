@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+authors:
+- family-names: "Moksnes"
+  given-names: "Nandi"
+title: "GSA_Spatial_temporal"
+version: 0.1.0
+date-released: 2023-10-18
+url: "https://github.com/KTH-dESA/GSA_Spatial_temporal"
+preferred-citation:
+  message: "If you use this software, please cite it as below."
+  authors:
+  - family-names: "Moksnes"
+    given-names: "Nandi"
+    orcid: "https://orcid.org/0000-0002-8641-564X"
+  - family-names: "Usher"
+    given-names: "William"
+    orcid: "https://orcid.org/0000-0001-9367-1791"
+  doi: https://doi.org/10.48550/arXiv.2310.10518
+  date-published: 2023-10
+  publisher:
+    name: Arxiv
+  start: 101263
+  title: "Quantifying the relative importance of the spatial and temporal resolution in energy systems optimisation model"
+  type: pre-print
+  url: "https://arxiv.org/abs/2310.10518"
