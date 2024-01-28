@@ -23,7 +23,7 @@ config = ConfigParser()
 config.read('config/config_input.ini')
 
 #Choose which country to build
-country = sys.argv[1]
+country = 'Kenya' #sys.argv[1]
 
 if country == 'Benin':
     # Benin
@@ -49,6 +49,7 @@ if country == 'Benin':
     seasonAprSept = int(config['model_settings']['seasonAprSept'])
     seasonOctMarch = int(config['model_settings']['seasonOctMarch'])
     PVshare_baseyear = float(config['model_settings']['Benin_PVshare_baseyear'])
+    typicalperiods = int(config['model_settings']['typicalperiods'])
 
     urban_profile = config['inputfiles']['Beninurban_profile']
     text_file = config['inputfiles']['Benintext_file']
@@ -81,6 +82,7 @@ else:
     seasonOctMarch = int(config['model_settings']['seasonOctMarch'])
     basetopeak = float(config['model_settings']['basetopeak'])
     PVshare_baseyear = float(config['model_settings']['Kenya_PVshare_baseyear'])
+    typicalperiods = int(config['model_settings']['typicalperiods'])
 
     urban_profile = config['inputfiles']['Kenyaurban_profile']
     text_file = config['inputfiles']['Kenyatext_file']
@@ -330,7 +332,10 @@ for j in dict_modelruns.keys():
     
     temporal_id = float(Dailytemporalresolution)
 
-    yearsplit = yearsplit_calculation(temporal_id,seasonAprSept , seasonOctMarch, '%s_run/scenarios/yearsplit_%f.csv' %(country, temporal_id), year_array)
+    #timeseries_df = join_demand_cf(demand_rural, demand_urban, solar_pv, wind)
+    temporal_clusters_index, temporal_clusters = clustering_tsam(timeseries_df, typicalperiods, Dailytemporalresolution)
+
+    yearsplit = yearsplit_calculation(temporal_clusters_index,  year_array, '%s_run/scenarios/yearsplit_%f.csv' %(country, temporal_id))
     specifieddemand, timesteps = demandprofile_calculation(tier_profile, temporal_id, seasonAprSept, seasonOctMarch, '%s_run/scenarios/specifiedrural_demand_time%i_tier%i.csv' %(country, int(temporal_id), DemandProfileTier), year_array, 'Minute')
     specifieddemandurban, timesteps = demandprofile_calculation(urban_profile, temporal_id, seasonAprSept, seasonOctMarch, '%s_run/scenarios/specifieddemand_%i.csv' %(country, int(temporal_id)), year_array, 'hour')
     
