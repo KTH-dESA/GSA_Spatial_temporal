@@ -1,21 +1,47 @@
 import pandas as pd
 from datetime import timedelta
+import tsam.timeseriesaggregation as tsam
+import matplotlib.pyplot as plt
+import copy
 
-def yearsplit_calculation(dayslices, seasonAprSep, seasonOctMarch, savepath, years):
-    slicearray = {}
-    hoursofyear = 8760
-    hours_per_day = 24/dayslices
-    #assert hours_per_day*dayslices == 24
-    #print('hours of day adds up to 24')
-    #no_timeslices = hours_per_day * round(365/seasonAprSep)
+def join_demand_cf(demand_rural, demand_urban, solar_pv, wind):
+    joined_df = pd.DataFrame([1,2,3])
+    return joined_df
 
-    for i in range(1,round(dayslices)+1):
-        ts_sum = 's'+str(i)
-        #ts_wint = 'WINTER'+str(i)
-        slicearray[ts_sum] = hours_per_day*seasonAprSep/hoursofyear
-        #slicearray[ts_wint] = hours_per_day*seasonOctMarch/hoursofyear
+#Clustering based on tsam with typical periods representing the seasons and segmentation the intraday 
+def clustering_tsam(timeseries_df, typicalperiods, intraday_steps):
 
-    assert 0.99<sum(slicearray.values())<1.01
+    aggregation = tsam.TimeSeriesAggregation(timeseries_df,
+    noTypicalPeriods = typicalperiods,
+    hoursPerPeriod = 24,
+    segmentation = True,
+    noSegments = intraday_steps,
+    representationMethod = "distributionAndMinMaxRepresentation",
+    distributionPeriodWise = False,
+    clusterMethod = 'hierarchical'
+    )
+
+    typPeriods_clusters = aggregation.createTypicalPeriods()
+    typPeriods_clusters.to_csv('typperiods_segmentation_%.csv')
+
+    typical_series_index = aggregation.indexMatching()
+    typical_series_index.to_csv('typicalperiods_segmentation_index.csv')
+    
+    return typical_series_index, typPeriods_clusters
+
+
+def yearsplit_calculation(temporal_clusters_index, years, savepath):
+    """ This function takes the number of timestamps (hours) in each cluster and creates the 
+        year split based on the time duration for each.
+    """
+    temporal_clusters_index['TimeSlice']=  temporal_clusters_index["PeriodNum"].astype(str) + temporal_clusters_index["SegmentIndex"].astype(str)
+    total_length = temporal_clusters_index.TimeSlice.size
+    slices = temporal_clusters_index.groupby(['TimeSlice']).size().reset_index()
+    slices.index = slices.TimeSlice
+    slicearray = slices.iloc[:,1].div(total_length, axis=0)
+    slicearray.drop(columns=["TimeSlice"])
+
+    assert 0.99<sum(slicearray.values)<1.01
     print('yearsplit adds up to 1')
 
     df = pd.DataFrame.from_dict([slicearray])
@@ -29,6 +55,7 @@ def yearsplit_calculation(dayslices, seasonAprSep, seasonOctMarch, savepath, yea
     return savepath
 
 def demandprofile_calculation(profile, dayslices, seasonAprSep, seasonOctMarch, savepath, years, header):
+
     minute_profile = pd.read_csv(profile)
     hours_per_timeslice = 24/dayslices
     minute_profile.index = pd.to_datetime(minute_profile[header], format='%H:%M')
