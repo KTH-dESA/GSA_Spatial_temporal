@@ -239,7 +239,7 @@ def adjust_timezone(path, time_zone_offset):
         if os.path.isfile(final_path):
             print('File already exists, skipping calculations.')
         else:
-            df.to_csv(final_path)
+            df.to_csv(final_path, index=False)
     return final_path
 
 def uncertainty_capacityfactor(path, CapacityFactor_adj):
@@ -264,4 +264,4 @@ def uncertainty_capacityfactor(path, CapacityFactor_adj):
         if os.path.isfile(final_path):
             print('File already exists, skipping calculations.')
         else:
-            adjusted_df.to_csv(final_path)
+            adjusted_df.to_csv(final_path,index=False)
