@@ -292,12 +292,6 @@ for j in dict_modelruns.keys():
     matrix = '%s_run/scenarios/Demand/%i_adjacencymatrix.csv' %(country, spatial)
     capital_cost_transmission_distrib(elec_, noHV, HV_file, elec_noHV_cells, unelec, CapitalCost_transm, substation, capacitytoactivity, scenarios_folder, matrix, gisfile_ref, spatial, CapitalCost_distribution_ext, diesel = True)
 
-#Read scenarios from sample file
-
-    #temporal_unique = str(Dailytemporalresolution) + str(spatial) + str(elecdemand_df.iloc[0][2040]) + str(DemandProfileTier)+ str(CapacityFactor_adj)
-
-    #if temporal_unique  not in demand_runs.values():
-    #Scenarios that are sensitive to spatial and demand simultaneously
     print("Running scenario %s" %j)
 
 #######################
@@ -323,19 +317,39 @@ for j in dict_modelruns.keys():
     distribution = '%s_run/scenarios/%i_distributionlines.csv' %(country, spatial)
     distribution_row = "_%isum" %(spatial)
 
-    #noHV = '%s_run/%i_noHV_cells.csv' %(country, spatial)
     HV_file = '%s_run/scenarios/%i_HV_cells.csv' %(country, spatial)
-    #minigrid = '%s_run/%i_elec_noHV_cells.csv' %(country, spatial)
     neartable = '%s_run/scenarios/Demand/%i_Near_table.csv' %(country, spatial)
     demand = '%s_run/scenarios/%i_demand_%i_spatialresolution.csv' %(country, elecdemand_df.iloc[0][2040], spatial)
     PV_capacityfactor_PV_battery = 1
+    loadprofile_high = '%sinput_data/high_Jan.csv' %(country)
+    highload_yearly = '%sinput_data/halfhourly_data_long.csv' %(country)
     
     temporal_id = float(Dailytemporalresolution)
 
-    #timeseries_df = join_demand_cf(demand_rural, demand_urban, solar_pv, wind)
-    temporal_clusters_index, temporal_clusters = clustering_tsam(timeseries_df, typicalperiods, Dailytemporalresolution)
+    #Create a annual timeseries for the demand profile
+    load_yearly_df = annualload(tier_profile, '%s_run/scenarios/annualload_tier%i.csv' %(country, DemandProfileTier))
+    #highload_yearly = highprofile_aggre(loadprofile_high, '%s_run/scenarios/urbanannualload_tier%i_temporal%i.csv' %(country, DemandProfileTier, int(temporal_id)))
+ 
+    #TODO join datasets
+    timeseries_df = join_demand_cf(load_yearly_df, highload_yearly, '%s_run/scenarios/uncertain%f_spatial%i_capacityfactor_solar.csv' %(country, CapacityFactor_adj,spatial),'%s_run/scenarios/uncertain%f_spatial%i_capacityfactor_wind.csv' %(country, CapacityFactor_adj,spatial))
+    #TODO add mapping of where to save the clusters
+    temporal_clusters_index, temporal_clusters = clustering_tsam(timeseries_df, typicalperiods, Dailytemporalresolution, country)
 
     yearsplit = yearsplit_calculation(temporal_clusters_index,  year_array, '%s_run/scenarios/yearsplit_%f.csv' %(country, temporal_id))
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     specifieddemand, timesteps = demandprofile_calculation(tier_profile, temporal_id, seasonAprSept, seasonOctMarch, '%s_run/scenarios/specifiedrural_demand_time%i_tier%i.csv' %(country, int(temporal_id), DemandProfileTier), year_array, 'Minute')
     specifieddemandurban, timesteps = demandprofile_calculation(urban_profile, temporal_id, seasonAprSept, seasonOctMarch, '%s_run/scenarios/specifieddemand_%i.csv' %(country, int(temporal_id)), year_array, 'hour')
     
@@ -350,12 +364,11 @@ for j in dict_modelruns.keys():
     date = datetime.now().strftime("%Y %m %d-%I:%M:%S_%p")
     print(date)
 
-    load_yearly = annualload(tier_profile, '%s_run/scenarios/annualload_tier%i_temporal%i.csv' %(country, DemandProfileTier, int(temporal_id)),int(temporal_id))
-    loadprofile_high = '%sinput_data/high_Jan.csv' %(country)
-    highload_yearly = highprofile_aggre(loadprofile_high, '%s_run/scenarios/urbanannualload_tier%i_temporal%i.csv' %(country, DemandProfileTier, int(temporal_id)),int(temporal_id))
+    #Adjusted with no smoothing of rural and central timeresolution
     capacityfactor_pv_input = '%s_run/scenarios/uncertain%f_spatial%i_capacityfactor_solar.csv' %(country, CapacityFactor_adj,spatial)
-    capacityfactor_pv_output = '%s_run/scenarios/uncertain%f_spatial%i_temporal_%icapacityfactor_solar.csv' %(country, CapacityFactor_adj,spatial, int(temporal_id))
-    capacityfactor_pv = highprofile_aggre(capacityfactor_pv_input, capacityfactor_pv_output,int(temporal_id))
+    #capacityfactor_pv_output = '%s_run/scenarios/uncertain%f_spatial%i_temporal_%icapacityfactor_solar.csv' %(country, CapacityFactor_adj,spatial, int(temporal_id))
+    
+    #capacityfactor_pv = highprofile_aggre(capacityfactor_pv_input, capacityfactor_pv_output,int(temporal_id))
     tofilePV = '%s_run/scenarios/capacityfactor_solar_batteries_Tier%i_loca%i_uncertain%f_temporal%i.csv' %(country, DemandProfileTier, spatial, CapacityFactor_adj, int(temporal_id))
     tofilePVhigh = '%s_run/scenarios/capacityfactor_solar_batteries_urban_loca%i_uncertain%f_temporal%i.csv' %(country, spatial, CapacityFactor_adj, int(temporal_id))
     efficiency_discharge = 0.98 # Koko (2022)
@@ -372,11 +385,11 @@ for j in dict_modelruns.keys():
     if os.path.isfile(tofilePV):
         print('File already exists, skipping calculations.')
     else:
-        battery_to_pv(load_yearly,  capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePV, scenario,  startDate, endDate, startDate_load, endDate_load, country)
+        battery_to_pv(load_yearly,  capacityfactor_pv_input, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePV, scenario,  startDate, endDate, startDate_load, endDate_load, country)
     if os.path.isfile(tofilePVhigh):
         print('File already exists, skipping calculations.')
     else:
-        battery_to_pv(highload_yearly,  capacityfactor_pv, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePVhigh, highscenario,  startDate, endDate, startDate, endDate, country)
+        battery_to_pv(highload_yearly,  capacityfactor_pv_input, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePVhigh, highscenario,  startDate, endDate, startDate, endDate, country)
 
 
     ####################### Make txt file #############################
