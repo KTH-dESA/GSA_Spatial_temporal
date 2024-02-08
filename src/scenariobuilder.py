@@ -330,25 +330,11 @@ for j in dict_modelruns.keys():
     load_yearly_df = annualload(tier_profile, '%s_run/scenarios/annualload_tier%i.csv' %(country, DemandProfileTier))
     #highload_yearly = highprofile_aggre(loadprofile_high, '%s_run/scenarios/urbanannualload_tier%i_temporal%i.csv' %(country, DemandProfileTier, int(temporal_id)))
  
-    #TODO join datasets
     timeseries_df = join_demand_cf(load_yearly_df, highload_yearly, '%s_run/scenarios/uncertain%f_spatial%i_capacityfactor_solar.csv' %(country, CapacityFactor_adj,spatial),'%s_run/scenarios/uncertain%f_spatial%i_capacityfactor_wind.csv' %(country, CapacityFactor_adj,spatial))
     #TODO add mapping of where to save the clusters
-    temporal_clusters_index, temporal_clusters = clustering_tsam(timeseries_df, typicalperiods, Dailytemporalresolution, country)
+    temporal_clusters_index, temporal_clusters = clustering_tsam(timeseries_df, typicalperiods, Dailytemporalresolution, DemandProfileTier, country)
 
     yearsplit = yearsplit_calculation(temporal_clusters_index,  year_array, '%s_run/scenarios/yearsplit_%f.csv' %(country, temporal_id))
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     specifieddemand, timesteps = demandprofile_calculation(tier_profile, temporal_id, seasonAprSept, seasonOctMarch, '%s_run/scenarios/specifiedrural_demand_time%i_tier%i.csv' %(country, int(temporal_id), DemandProfileTier), year_array, 'Minute')
     specifieddemandurban, timesteps = demandprofile_calculation(urban_profile, temporal_id, seasonAprSept, seasonOctMarch, '%s_run/scenarios/specifieddemand_%i.csv' %(country, int(temporal_id)), year_array, 'hour')

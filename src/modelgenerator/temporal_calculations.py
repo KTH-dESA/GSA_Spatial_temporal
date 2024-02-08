@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from datetime import timedelta
+from datetime import timedelta, datetime
 import tsam.timeseriesaggregation as tsam
 #import matplotlib.pyplot as plt
 import copy
@@ -27,40 +27,30 @@ def join_demand_cf(demand_rural, demand_urban, solar_pv, wind):
     wind_df = wind_df.drop('adjtime', axis=1)
     
     cf_merger = pd.concat([pv_df, wind_df], axis=1)
-    cf_merger['adjtime'] = pd.to_datetime(cf_merger["adjtime"], format="%Y-%m-%d %H:%M")
-    high_demand_df['adjtime'] = pd.to_datetime(high_demand_df["adjtime"], format="%Y-%m-%d %H:%M")
+    cf_merger['adjtime'] = pd.to_datetime(cf_merger["adjtime"], format="%Y-%m-%d %H:%M:%S.%f")
+    high_demand_df['adjtime'] = pd.to_datetime(high_demand_df["adjtime"], format="%Y-%m-%d %H:%M:%S.%f")
     cf_merge_highdem = pd.merge(high_demand_df, cf_merger, on=['adjtime'], how='left')
 
-    cf_merge_highdem['adjtime'] = pd.to_datetime(cf_merge_highdem['adjtime'])
-    demand_rural['adjtime'] = pd.to_datetime(demand_rural['adjtime'])
-    demand_rural_update = demand_rural.replace(year=2016) 
+    cf_merge_highdem['adjtime'] = pd.to_datetime(cf_merge_highdem['adjtime'], format='%Y-%m-%d %H:%M:%S.%f')
+    demand_rural['adjtime'] = pd.to_datetime(demand_rural['adjtime'], format='%Y-%m-%d %H:%M:%S.%f')
+
+    demand_rural['adjtime_2016'] = demand_rural.adjtime.apply(lambda x:x.replace(year=2016))
 
     # Create a new column representing the hour for each dataframe
     cf_merge_highdem['date'] = cf_merge_highdem['adjtime'].dt.date
     cf_merge_highdem['hour'] = cf_merge_highdem['adjtime'].dt.hour
-    print(cf_merge_highdem)
-    demand_rural_update['date'] = demand_rural_update['adjtime'].dt.date
-    demand_rural_update['hour'] = demand_rural_update['adjtime'].dt.hour
-
-    print(demand_rural_update)
+    demand_rural['date'] = demand_rural['adjtime_2016'].dt.date
+    demand_rural['hour'] = demand_rural['adjtime_2016'].dt.hour
 
     # Merge or join on the 'date' and 'hour' columns
     result = pd.merge(demand_rural,cf_merge_highdem, on=['date', 'hour'], how='inner')
-    print(result)
 
     # Drop the temporary columns if needed
-    result = result.drop(['hour', 'date'], axis=1)
+    result.index = result['adjtime_2016']
+    result = result.drop(['hour', 'date', 'adjtime_x', 'adjtime_y','adjtime_2016'], axis=1)
+
     result.to_csv('join_df.csv')
     return result
-country = 'Kenya'
-DemandProfileTier = 4
-CapacityFactor_adj = 0.016700
-spatial = 34
-print(os.getcwd())
-os. chdir(r"C:\\Users\\nandi\\OneDrive - KTH\\box_files\\PhD\\Paper 4 - GSA\\GSA_reprod\\GSA_Spatial_temporal\\src")
-print(os.getcwd())
-rural_demand_profile = pd.read_csv('%s_run/scenarios/annualload_tier%i.csv' %(country, DemandProfileTier))
-timeseries_df = join_demand_cf(rural_demand_profile, '%sinput_data/halfhourly_data_long.csv' %(country), '%s_run/scenarios/uncertain%f_spatial%i_capacityfactor_solar.csv' %(country, CapacityFactor_adj,spatial),'%s_run/scenarios/uncertain%f_spatial%i_capacityfactor_wind.csv' %(country, CapacityFactor_adj,spatial))
 
 #Clustering based on tsam with typical periods representing the seasons and segmentation the intraday 
 def clustering_tsam(timeseries_df, typicalperiods, intraday_steps, country):
