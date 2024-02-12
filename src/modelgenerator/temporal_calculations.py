@@ -6,19 +6,14 @@ import tsam.timeseriesaggregation as tsam
 import copy
 #from modelgenerator.Build_csv_files import *
 
-def join_demand_cf(demand_rural, demand_urban, solar_pv, wind):
+def join_demand_cf(demand_rural, demand_urban, solar_pv, wind, tofile):
     """
     This function joins together the datasets demand profile_rural, demandprofile_central, 
     wind and solar for all locations
-    """
-    print(os.getcwd())
-    os. chdir(r"C:\\Users\\nandi\\OneDrive - KTH\\box_files\\PhD\\Paper 4 - GSA\\GSA_reprod\\GSA_Spatial_temporal\\src")
-    print(os.getcwd())
-    
+    """    
     demand_rural =  demand_rural.rename(columns={c: c+'_Rural' for c in demand_rural.columns if c not in ['adjtime']})
     high_demand_df = pd.read_csv(demand_urban)
     high_demand_df =  high_demand_df.rename(columns={c: c+'_Central' for c in high_demand_df.columns if c not in ['adjtime']})
-    print(high_demand_df)
     pv_df = pd.read_csv(solar_pv)
     pv_df = pv_df.rename(columns={c: c+'_PV' for c in pv_df.columns if c not in ['adjtime']})
     wind_df = pd.read_csv(wind)
@@ -48,15 +43,14 @@ def join_demand_cf(demand_rural, demand_urban, solar_pv, wind):
     # Drop the temporary columns if needed
     result.index = result['adjtime_2016']
     result = result.drop(['hour', 'date', 'adjtime_x', 'adjtime_y','adjtime_2016'], axis=1)
-
-    result.to_csv('join_df.csv')
+    result.to_csv(tofile)
     return result
 
 #Clustering based on tsam with typical periods representing the seasons and segmentation the intraday 
-def clustering_tsam(timeseries_df, typicalperiods, intraday_steps, country):
+def clustering_tsam(timeseries_df, typicalperiods, intraday_steps, to_indexfile, to_clusterfile):
     """
     This function clusters the dataframe timeseries_df to the parameters typical periods and number of 
-    intraday_steps and saves it to the indexed and clustered 
+    intraday_steps and saves it to the indexed and clustered csv to the scenario folder per country
     """
 
     aggregation = tsam.TimeSeriesAggregation(timeseries_df,
@@ -70,21 +64,22 @@ def clustering_tsam(timeseries_df, typicalperiods, intraday_steps, country):
     )
 
     typPeriods_clusters = aggregation.createTypicalPeriods()
-    typPeriods_clusters.to_csv('%s_run/scenarios/typperiods_segmentation_%i.csv' %(country, intraday_steps))
+    typPeriods_clusters.to_csv(to_clusterfile)
 
     typical_series_index = aggregation.indexMatching()
-    typical_series_index.to_csv('%s_run/scenarios/typicalperiods_segmentation_index_daytypes%i.csv' %(country, intraday_steps))
+    typical_series_index.to_csv(to_indexfile)
     
-    return typical_series_index, typPeriods_clusters
+    return to_indexfile, to_clusterfile
 
 
 def yearsplit_calculation(temporal_clusters_index, years, savepath):
     """ This function takes the number of timestamps (hours) in each cluster and creates the 
         year split based on the time duration for each.
     """
-    temporal_clusters_index['TimeSlice']=  temporal_clusters_index["PeriodNum"].astype(str) + temporal_clusters_index["SegmentIndex"].astype(str)
-    total_length = temporal_clusters_index.TimeSlice.size
-    slices = temporal_clusters_index.groupby(['TimeSlice']).size().reset_index()
+    temporal_clusters_index_df= pd.read_csv(temporal_clusters_index)
+    temporal_clusters_index_df['TimeSlice']=  temporal_clusters_index_df["PeriodNum"].astype(str) + temporal_clusters_index_df["SegmentIndex"].astype(str)
+    total_length = temporal_clusters_index_df.TimeSlice.size
+    slices = temporal_clusters_index_df.groupby(['TimeSlice']).size().reset_index()
     slices.index = slices.TimeSlice
     slicearray = slices.iloc[:,1].div(total_length, axis=0)
     slicearray.drop(columns=["TimeSlice"])
@@ -102,78 +97,39 @@ def yearsplit_calculation(temporal_clusters_index, years, savepath):
 
     return savepath
 
-def demandprofile_calculation(profile, temporal_clusters_index, savepath, years, header):
+def timedependentprofile_calculation(clusters, temporal_clusters_index, savepath, years, rural_csv):
+    """This function calculates the timeslices from the clustering approach for demand, and capacityfactors for each location
+    """
+    #First identify the Timeslices which are Periodnum + SegmentIndex from the clustering
 
-    minute_profile = pd.read_csv(profile)
-    minute_profile.index = pd.to_datetime(minute_profile[header], format='%H:%M')
+    clusters_df= pd.read_csv(clusters)
+    temporal_clusters_index_df= pd.read_csv(temporal_clusters_index)
 
-    temporal_clusters_index['TimeSlice']=  temporal_clusters_index["PeriodNum"].astype(str) + temporal_clusters_index["SegmentIndex"].astype(str)
-    total_length = temporal_clusters_index.TimeSlice.size
-    
-    slices = temporal_clusters_index.groupby(['TimeSlice']).size().reset_index()
-    slices.index = slices.TimeSlice
-    slicearray = slices.iloc[:,1].div(total_length, axis=0)
-    slicearray.drop(columns=["TimeSlice"])
+    temporal_clusters_index_df['TimeSlice']=  temporal_clusters_index_df["PeriodNum"].astype(str) + temporal_clusters_index_df["SegmentIndex"].astype(str)
+    clusters_df.columns.values[0] = "PeriodIndex"
+    clusters_df['TimeSlice'] =  clusters_df["PeriodIndex"].astype(str) + clusters_df["Segment Step"].astype(str)
 
-    def calculate_sum(data, startdate, enddate):
-        mask = (data.index >= startdate) & (data.index <= enddate)
-        thisMonthOnly = data.loc[mask]
-        slice = sum(thisMonthOnly['Load'])
+    #Join the two datasets together to get the full dataset for the year.
+    merged_cluster_index = pd.merge(temporal_clusters_index_df, clusters_df, how="left", on=["TimeSlice"])
+    timeslices_clusters = merged_cluster_index.groupby("TimeSlice").sum().reset_index()
+    timeslices_clusters.index = timeslices_clusters['TimeSlice']
+    timeslices_clusters = timeslices_clusters.drop(columns=["TimeSlice",'PeriodNum', "Segment Step", "SegmentIndex", "TimeStep", "Segment Duration", "PeriodIndex"])
+  
+    #Divide the sum of each time slice with the total sum per column
+    timeslices_clusters_ts = timeslices_clusters.div(timeslices_clusters.sum(axis=0), axis=1)
+    timeslices_clusters_ts.to_csv(savepath)
 
-        return slice
-
-    def calculate_slice(data, startdate, enddate, summer, winter, startDay, endDay):
-        slice = calculate_sum(data, startdate, enddate)
-        totaldayload = calculate_sum(data, startDay, endDay)
-
-        totalloadyear= totaldayload*365
-        summer_ts = slice*summer/totalloadyear
-        winter_ts = slice*winter/totalloadyear
-
-        return summer_ts
-
-    # times = []
-    # for i in range(1,round(dayslices)+1):
-    #     ts_sum = 's'+str(i)
-    #     #ts_wint = 'WINTER'+str(i)
-    #     m = i-1
-    #     startDay =pd.to_datetime('1900-01-01 00:00:00')
-    #     endDay = pd.to_datetime('1900-01-02 00:00:00')
-    #     startDate = pd.to_datetime('1900-01-01 00:00:00')+ timedelta(hours = m*hours_per_timeslice)
-    #     endDate = pd.to_datetime('1900-01-01 00:00:00') + timedelta(hours = m*hours_per_timeslice+hours_per_timeslice)- timedelta(minutes=1)
-    #     times += [(startDate.strftime('%H:%M'), endDate.strftime('%H:%M'), i)]
-    #     slicearray[ts_sum]= calculate_slice(minute_profile, startDate, endDate, seasonAprSep, seasonOctMarch, startDay, endDay)
-
-    assert 0.99<sum(slicearray.values())<1.017
-    print("Demandprofile sum is 1 over the year")
-
-    df = pd.DataFrame.from_dict([slicearray])
+    ### Special case for rural demand which need to be for each year for peak demand calculation
+    demand_rural = timeslices_clusters_ts['Load_Rural']
+    df = pd.DataFrame.from_dict([demand_rural])
     df= df.T
     df.index.names = ['Timeslice']
-    profile = df[0]
     multiple = pd.concat([df.T]*(len(years))).T
     multiple.columns = years
     multiple.index = df.index
-    multiple.to_csv(savepath)
+    multiple.to_csv(rural_csv)
 
-    return savepath #, times
-
-def addtimestep(time, inputdata, savepath):
-    input_data_df = pd.read_csv(inputdata)
-    timeslices =  pd.DataFrame(time, columns =['Daysplitstart','Daysplitend','Daysplit'])
-    inputdata_timestep = pd.concat((input_data_df, timeslices),axis=1)
-
-    inputdata_timestep.to_csv(savepath)
+    return timeslices_clusters_ts, rural_csv
 
 
-# country = 'Kenya'
-# DemandProfileTier = 3
-# # tier_profile = '%sinput_data/T%i_load profile_Narayan.csv' %(country, DemandProfileTier)
-# highload_yearly = '%sinput_data/halfhourly_data_long.csv' %(country)
-# # temporal_id = 2
-# load_yearly_df = pd.read_csv('Kenya_run/scenarios/annualload_tier4_temporal9.csv')
-# # load_yearly = annualload(tier_profile, '%s_run/scenarios/annualload_tier%i_temporal%i.csv' %(country, DemandProfileTier, int(temporal_id)))
-
-# # timeseries_df = join_demand_cf(load_yearly, highload_yearly, '%stemp/1/timezoneoffset_solar_0-1.csv' %(country), '%stemp/1/timezoneoffset_wind_0-1.csv' %(country))
-# timeseries_df = join_demand_cf(load_yearly_df, highload_yearly, '%s_run/scenarios/uncertain0.016700_spatial34_capacityfactor_solar.csv' %(country),'%s_run/scenarios/uncertain0.016700_spatial34_capacityfactor_wind.csv' %(country))
- 
+  
