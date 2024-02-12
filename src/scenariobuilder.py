@@ -324,26 +324,26 @@ for j in dict_modelruns.keys():
     loadprofile_high = '%sinput_data/high_Jan.csv' %(country)
     highload_yearly = '%sinput_data/halfhourly_data_long.csv' %(country)
     
-    temporal_id = float(Dailytemporalresolution)
+    temporal_id = int(Dailytemporalresolution)
 
-    #Create a annual timeseries for the demand profile
-    load_yearly_df = annualload(tier_profile, '%s_run/scenarios/annualload_tier%i.csv' %(country, DemandProfileTier))
-    #highload_yearly = highprofile_aggre(loadprofile_high, '%s_run/scenarios/urbanannualload_tier%i_temporal%i.csv' %(country, DemandProfileTier, int(temporal_id)))
- 
-    timeseries_df = join_demand_cf(load_yearly_df, highload_yearly, '%s_run/scenarios/uncertain%f_spatial%i_capacityfactor_solar.csv' %(country, CapacityFactor_adj,spatial),'%s_run/scenarios/uncertain%f_spatial%i_capacityfactor_wind.csv' %(country, CapacityFactor_adj,spatial))
-    #TODO add mapping of where to save the clusters
-    temporal_clusters_index, temporal_clusters = clustering_tsam(timeseries_df, typicalperiods, Dailytemporalresolution, DemandProfileTier, country)
+    #Create a annual timeseries for the rural demand profile which is defined per day
+    load_yearly_df,  load_yearly_path= annualload(tier_profile, '%s_run/scenarios/annualload_tier%i.csv' %(country, DemandProfileTier))
+   
+    # Join the uncertainty_capacityfactor wind, solar and demand central and demand rural
+    timeseries_df = join_demand_cf(load_yearly_df, highload_yearly, '%s_run/scenarios/uncertain%f_spatial%i_capacityfactor_solar.csv' %(country, CapacityFactor_adj,spatial),'%s_run/scenarios/uncertain%f_spatial%i_capacityfactor_wind.csv' %(country, CapacityFactor_adj,spatial), '%s_run/scenarios/join_df_%itime_%iTier_%funcertainty_spatial%i.csv' %(country,temporal_id,DemandProfileTier, CapacityFactor_adj, spatial))
+    
+    #Calculate clusters where the period is over a day (24 hours) and
+    temporal_clusters_index, temporal_clusters = clustering_tsam(timeseries_df, typicalperiods, Dailytemporalresolution,'%s_run/scenarios/cluster_index_temporal%i_Tier%i_uncertaint%f_spatial_%i.csv' %(country, temporal_id, DemandProfileTier, CapacityFactor_adj,spatial),'%s_run/scenarios/cluster_temporal%i_Tier%i_uncertaint%f_spatial_%i.csv' %(country, temporal_id, DemandProfileTier, CapacityFactor_adj,spatial) )
 
-    yearsplit = yearsplit_calculation(temporal_clusters_index,  year_array, '%s_run/scenarios/yearsplit_%f.csv' %(country, temporal_id))
-    
-    specifieddemand, timesteps = demandprofile_calculation(tier_profile, temporal_id, seasonAprSept, seasonOctMarch, '%s_run/scenarios/specifiedrural_demand_time%i_tier%i.csv' %(country, int(temporal_id), DemandProfileTier), year_array, 'Minute')
-    specifieddemandurban, timesteps = demandprofile_calculation(urban_profile, temporal_id, seasonAprSept, seasonOctMarch, '%s_run/scenarios/specifieddemand_%i.csv' %(country, int(temporal_id)), year_array, 'hour')
-    
-    peakdemand_csv(demand, specifieddemand,capacitytoactivity, yearsplit, distr_losses, HV_file, distribution, distribution_row, distribution_length_cell_ref, scenarios_folder, spatial, elecdemand_df.iloc[0][2040], int(temporal_id))
-    addtimestep(timesteps,input_data, '%s_run/scenarios/input_data_%i.csv' %(country, int(temporal_id)))
+    yearsplit = yearsplit_calculation(temporal_clusters_index,  year_array, '%s_run/scenarios/yearsplit_temporal%i_Tier%i_uncertaint%f_spatial_%i.csv' %(country, temporal_id, DemandProfileTier, CapacityFactor_adj,spatial))
+
+    timedependent_df, rural_specified_csv = timedependentprofile_calculation(temporal_clusters, temporal_clusters_index, '%s_run/scenarios/timedependent_params_temporal%i_tier%i_uncertaint%f_spatial%i.csv' %(country, temporal_id, DemandProfileTier, CapacityFactor_adj,spatial), year_array, '%s_run/scenarios/specified_rural_profile_params_temporal%i_tier%i_uncertaint%f_spatial%i.csv' %(country, temporal_id, DemandProfileTier, CapacityFactor_adj,spatial))
+
+    peakdemand_csv(demand, rural_specified_csv,capacitytoactivity, yearsplit, distr_losses, HV_file, distribution, distribution_row, distribution_length_cell_ref, scenarios_folder, spatial, elecdemand_df.iloc[0][2040], int(temporal_id))
+
     residual_path = '%s_run/scenarios/residual_capacity%i_demand_%i_spatialresolution.csv' %(country, elecdemand_df.iloc[0][2040], spatial)
     distribution_elec_startyear(demand, capacitytoactivity, distr_losses, basetopeak,year_array, residual_path, PVshare_baseyear, PV_capacityfactor_PV_battery)
-    #transformer_calculation(distribution, distribution_length_cell_ref, demandcells, input_data, spatial, scenarios_folder, cost_transf=3500, connectioncost=125)
+    transformer_calculation(distribution, distribution_length_cell_ref, demandcells, input_data, spatial, scenarios_folder, cost_transf=3500, connectioncost=125)
 
     print("8. Optimise PV and battery")
 
@@ -354,9 +354,8 @@ for j in dict_modelruns.keys():
     capacityfactor_pv_input = '%s_run/scenarios/uncertain%f_spatial%i_capacityfactor_solar.csv' %(country, CapacityFactor_adj,spatial)
     #capacityfactor_pv_output = '%s_run/scenarios/uncertain%f_spatial%i_temporal_%icapacityfactor_solar.csv' %(country, CapacityFactor_adj,spatial, int(temporal_id))
     
-    #capacityfactor_pv = highprofile_aggre(capacityfactor_pv_input, capacityfactor_pv_output,int(temporal_id))
-    tofilePV = '%s_run/scenarios/capacityfactor_solar_batteries_Tier%i_loca%i_uncertain%f_temporal%i.csv' %(country, DemandProfileTier, spatial, CapacityFactor_adj, int(temporal_id))
-    tofilePVhigh = '%s_run/scenarios/capacityfactor_solar_batteries_urban_loca%i_uncertain%f_temporal%i.csv' %(country, spatial, CapacityFactor_adj, int(temporal_id))
+    tofilePV = '%s_run/scenarios/capacityfactor_solar_batteries_Tier%i_loca%i_uncertain%f.csv' %(country, DemandProfileTier, spatial, CapacityFactor_adj)
+    tofilePVhigh = '%s_run/scenarios/capacityfactor_solar_batteries_urban_loca%i_uncertain%f.csv' %(country, spatial, CapacityFactor_adj)
     efficiency_discharge = 0.98 # Koko (2022)
     efficiency_charge = 0.95 # Koko (2022)
     pvcost = 2540 #ATB 2021 version for 2021 value
@@ -371,7 +370,7 @@ for j in dict_modelruns.keys():
     if os.path.isfile(tofilePV):
         print('File already exists, skipping calculations.')
     else:
-        battery_to_pv(load_yearly,  capacityfactor_pv_input, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePV, scenario,  startDate, endDate, startDate_load, endDate_load, country)
+        battery_to_pv(load_yearly_path,  capacityfactor_pv_input, efficiency_discharge, efficiency_charge, locations, pvcost, batterycost_kWh, tofilePV, scenario,  startDate, endDate, startDate_load, endDate_load, country)
     if os.path.isfile(tofilePVhigh):
         print('File already exists, skipping calculations.')
     else:
