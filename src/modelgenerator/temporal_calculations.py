@@ -15,9 +15,9 @@ def join_demand_cf(demand_rural, demand_urban, solar_pv, wind, tofile):
     high_demand_df = pd.read_csv(demand_urban)
     high_demand_df =  high_demand_df.rename(columns={c: c+'_Central' for c in high_demand_df.columns if c not in ['adjtime']})
     pv_df = pd.read_csv(solar_pv)
-    pv_df = pv_df.rename(columns={c: c+'_PV' for c in pv_df.columns if c not in ['adjtime']})
+    pv_df = pv_df.rename(columns={c: 'SOPV_'+c for c in pv_df.columns if c not in ['adjtime']})
     wind_df = pd.read_csv(wind)
-    wind_df =  wind_df.rename(columns={c: c+'_Wind' for c in wind_df.columns if c not in ['adjtime']})
+    wind_df =  wind_df.rename(columns={c: 'WI'+c for c in wind_df.columns if c not in ['adjtime']})
     
     wind_df = wind_df.drop('adjtime', axis=1)
     
