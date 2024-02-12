@@ -26,15 +26,14 @@ def battery_to_pv(loadprofile, capacityfactor_pv, efficiency_discharge, efficien
     """This function re-distributes the load based on the load and capacity factor from renewable ninja
     """
 
-    def calculate_average(data, startdate, enddate):
+    def extract_one_month(data, startdate, enddate):
         mask = (data.index > startdate) & (data.index <= enddate)
         thisMonthOnly = data.loc[mask]
         return (thisMonthOnly)
 
-
     
     def indexfix(df_path):
-        df = pd.read_csv(df_path).dropna()
+        df = pd.read_csv(df_path)
         df_copy = df.copy()
         df_copy_datetime = pd.to_datetime(df_copy['adjtime'], errors='coerce', format='%Y/%m/%d %H:%M')
         df_copy.index = df_copy_datetime
@@ -45,8 +44,8 @@ def battery_to_pv(loadprofile, capacityfactor_pv, efficiency_discharge, efficien
     load = indexfix(loadprofile)
     df = pd.read_csv(locations, index_col=0, header=0)
     
-    PV_range = calculate_average(capacityf_solar, startDate, endDate)
-    load_range =calculate_average(load, startDate_load, endDate_load)
+    PV_range = extract_one_month(capacityf_solar, startDate, endDate)
+    load_range =extract_one_month(load, startDate_load, endDate_load)
 
     #normalise data
     def reduceload_data(data):
@@ -115,7 +114,7 @@ def annualload(minuteload, topath):
     fullyearhours['adjtime'] = fullyearhours.index
 
     fullyearhours.to_csv(topath)
-    return fullyearhours
+    return fullyearhours, topath
 
 def renewableninja(path, dest, spatial, CapacityFactor_adj):
     """
