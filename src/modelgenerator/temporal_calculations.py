@@ -109,19 +109,23 @@ def timedependentprofile_calculation(clusters, temporal_clusters_index, savepath
     temporal_clusters_index_df['TimeSlice']=  temporal_clusters_index_df["PeriodNum"].astype(str) + temporal_clusters_index_df["SegmentIndex"].astype(str)
     clusters_df.columns.values[0] = "PeriodIndex"
     clusters_df['TimeSlice'] =  clusters_df["PeriodIndex"].astype(str) + clusters_df["Segment Step"].astype(str)
+    clusters_df_dem = clusters_df[['TimeSlice','Load_Rural','Load_Central']]
+    clusters_df.index = clusters_df['TimeSlice']
+    cluster_df_nodem = clusters_df.drop(columns=['TimeSlice','Load_Rural','Load_Central','PeriodIndex',	'Segment Step',	'Segment Duration'])
 
     #Join the two datasets together to get the full dataset for the year.
-    merged_cluster_index = pd.merge(temporal_clusters_index_df, clusters_df, how="left", on=["TimeSlice"])
-    timeslices_clusters = merged_cluster_index.groupby("TimeSlice").sum().reset_index()
-    timeslices_clusters.index = timeslices_clusters['TimeSlice']
-    timeslices_clusters = timeslices_clusters.drop(columns=["TimeSlice",'PeriodNum', "Segment Step", "SegmentIndex", "TimeStep", "Segment Duration", "PeriodIndex"])
+    merged_cluster_index = pd.merge(temporal_clusters_index_df, clusters_df_dem, how="left", on=["TimeSlice"])
+    specf_dem_clusters = merged_cluster_index.groupby("TimeSlice").sum().reset_index()
+    specf_dem_clusters.index = specf_dem_clusters['TimeSlice']
+    specf_dem_clusters = specf_dem_clusters.drop(columns=['PeriodNum', "SegmentIndex", "TimeStep", 'TimeSlice'])
   
     #Divide the sum of each time slice with the total sum per column
-    timeslices_clusters_ts = timeslices_clusters.div(timeslices_clusters.sum(axis=0), axis=1)
-    timeslices_clusters_ts.to_csv(savepath)
+    specifiecdem_clusters_ts = specf_dem_clusters.div(specf_dem_clusters.sum(axis=0), axis=1)    
+    timeslices_clusters = cluster_df_nodem.join(specifiecdem_clusters_ts)
+    timeslices_clusters.to_csv(savepath)
 
     ### Special case for rural demand which need to be for each year for peak demand calculation
-    demand_rural = timeslices_clusters_ts['Load_Rural']
+    demand_rural = specifiecdem_clusters_ts['Load_Rural']
     df = pd.DataFrame.from_dict([demand_rural])
     df= df.T
     df.index.names = ['Timeslice']
@@ -130,7 +134,7 @@ def timedependentprofile_calculation(clusters, temporal_clusters_index, savepath
     multiple.index = df.index
     multiple.to_csv(rural_csv)
 
-    return timeslices_clusters_ts, rural_csv
+    return timeslices_clusters, rural_csv
 
 
   
