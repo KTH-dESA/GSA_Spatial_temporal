@@ -330,7 +330,7 @@ for j in dict_modelruns.keys():
     load_yearly_df,  load_yearly_path= annualload(tier_profile, '%s_run/scenarios/annualload_tier%i.csv' %(country, DemandProfileTier))
    
     # Join the uncertainty_capacityfactor wind, solar and demand central and demand rural
-    timeseries_df = join_demand_cf(load_yearly_df, highload_yearly, '%s_run/scenarios/uncertain%f_spatial%i_capacityfactor_solar.csv' %(country, CapacityFactor_adj,spatial),'%s_run/scenarios/uncertain%f_spatial%i_capacityfactor_wind.csv' %(country, CapacityFactor_adj,spatial), '%s_run/scenarios/join_df_%itime_%iTier_%funcertainty_spatial%i.csv' %(country,temporal_id,DemandProfileTier, CapacityFactor_adj, spatial))
+    timeseries_df = join_demand_cf(load_yearly_df, highload_yearly, '%s_run/scenarios/uncertain%f_spatial%i_capacityfactor_solar.csv' %(country, CapacityFactor_adj,spatial),'%s_run/scenarios/uncertain%f_spatial%i_capacityfactor_wind.csv' %(country, CapacityFactor_adj,spatial),'%s_run/scenarios/capacity_factor_other.csv' %(country),'%s_run/scenarios/join_df_%itime_%iTier_%funcertainty_spatial%i.csv' %(country,temporal_id,DemandProfileTier, CapacityFactor_adj, spatial))
     
     #Calculate clusters where the period is over a day (24 hours) and
     temporal_clusters_index, temporal_clusters = clustering_tsam(timeseries_df, typicalperiods, Dailytemporalresolution,'%s_run/scenarios/cluster_index_temporal%i_Tier%i_uncertaint%f_spatial_%i.csv' %(country, temporal_id, DemandProfileTier, CapacityFactor_adj,spatial),'%s_run/scenarios/cluster_temporal%i_Tier%i_uncertaint%f_spatial_%i.csv' %(country, temporal_id, DemandProfileTier, CapacityFactor_adj,spatial) )
@@ -361,8 +361,8 @@ for j in dict_modelruns.keys():
     pvcost = 2540 #ATB 2021 version for 2021 value
     batterycost_kWh = 522  #ATB 2021 version for 2021 value with adjusted Kenyan value
     locations = '%s_run/scenarios/%i_GIS_data.csv' %(country, spatial)
-    scenario = 'Tier%i_loca%i_uncertain%f_time_%i.csv' %(DemandProfileTier, spatial, CapacityFactor_adj, int(temporal_id))
-    highscenario = 'High_loca%i_uncertain%f_time_%i.csv' %(spatial, CapacityFactor_adj,int(temporal_id))
+    scenario = 'Tier%i_loca%i_uncertain%f.csv' %(DemandProfileTier, spatial, CapacityFactor_adj)
+    highscenario = 'High_loca%i_uncertain%f.csv' %(spatial, CapacityFactor_adj)
     startDate = pd.to_datetime("2016-01-02")
     endDate = pd.to_datetime("2016-02-02")
     startDate_load = pd.to_datetime("1900-01-02")

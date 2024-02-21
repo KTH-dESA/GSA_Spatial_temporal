@@ -6,22 +6,23 @@ import tsam.timeseriesaggregation as tsam
 import copy
 #from modelgenerator.Build_csv_files import *
 
-def join_demand_cf(demand_rural, demand_urban, solar_pv, wind, tofile):
+def join_demand_cf(demand_rural, demand_urban, solar_pv, wind, capacityfactor_other, tofile):
     """
     This function joins together the datasets demand profile_rural, demandprofile_central, 
-    wind and solar for all locations
+    wind and solar, and the central power plants for all locations
     """    
+    capacityfactor_other_df = pd.read_csv(capacityfactor_other).drop('adjtime', axis=1)
     demand_rural =  demand_rural.rename(columns={c: c+'_Rural' for c in demand_rural.columns if c not in ['adjtime']})
     high_demand_df = pd.read_csv(demand_urban)
     high_demand_df =  high_demand_df.rename(columns={c: c+'_Central' for c in high_demand_df.columns if c not in ['adjtime']})
     pv_df = pd.read_csv(solar_pv)
     pv_df = pv_df.rename(columns={c: 'SOPV_'+c for c in pv_df.columns if c not in ['adjtime']})
     wind_df = pd.read_csv(wind)
-    wind_df =  wind_df.rename(columns={c: 'WI'+c for c in wind_df.columns if c not in ['adjtime']})
+    wind_df =  wind_df.rename(columns={c: 'WI_'+c for c in wind_df.columns if c not in ['adjtime']})
     
     wind_df = wind_df.drop('adjtime', axis=1)
     
-    cf_merger = pd.concat([pv_df, wind_df], axis=1)
+    cf_merger = pd.concat([pv_df, wind_df,capacityfactor_other_df], axis=1)
     cf_merger['adjtime'] = pd.to_datetime(cf_merger["adjtime"], format="%Y-%m-%d %H:%M:%S.%f")
     high_demand_df['adjtime'] = pd.to_datetime(high_demand_df["adjtime"], format="%Y-%m-%d %H:%M:%S.%f")
     cf_merge_highdem = pd.merge(high_demand_df, cf_merger, on=['adjtime'], how='left')
