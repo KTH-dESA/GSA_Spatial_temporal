@@ -23,7 +23,7 @@ config = ConfigParser()
 config.read('config/config_input.ini')
 
 #Choose which country to build
-country = 'Kenya' #sys.argv[1]
+country = sys.argv[1]
 
 if country == 'Benin':
     # Benin

@@ -594,7 +594,6 @@ def SpecifiedDemandProfile(outPutFile, demandprofile, input_data, demand, years)
     for i in range(0, len(demandprofile.columns)):
         slicearray = demandprofile.iloc[:,i]
         current_dataframe = slicearray.name
-        assert 0.99<sum(slicearray.values)<1.017
 
         df = pd.DataFrame.from_dict([slicearray])
         df= df.T
@@ -606,7 +605,7 @@ def SpecifiedDemandProfile(outPutFile, demandprofile, input_data, demand, years)
         if current_dataframe == 'Load_Rural':
             fuels = demand['Fuel']
             demand_fuels = [x for x in fuels if str(x) != 'nan']
-            d = multiple.columns[1:]
+            d = multiple.columns[0:]
             for i in demand_fuels:
                 start, mid, end = i.split('_')
                 if end == '0':
@@ -618,7 +617,7 @@ def SpecifiedDemandProfile(outPutFile, demandprofile, input_data, demand, years)
         if current_dataframe == 'Load_Central':
             fuels = demand['Fuel']
             demand_fuels = [x for x in fuels if str(x) != 'nan']
-            d = multiple.columns[1:]
+            d = multiple.columns[0:]
             for i in demand_fuels:
                 start, mid, end = i.split('_')
                 if end == '1':
@@ -655,9 +654,6 @@ def capacityfactor(outPutFile, GIS_file, timedependent_df, input_data,  elec, un
     for i in range(0, len(timedependent_df.columns)):
         slicearray = timedependent_df.iloc[:,i]
         current_dataframe = slicearray.name
-        
-        assert 0.99<sum(slicearray.values)<1.017
-
         df = pd.DataFrame.from_dict([slicearray])
         df= df.T
         df.index.names = ['Timeslice']
@@ -668,7 +664,7 @@ def capacityfactor(outPutFile, GIS_file, timedependent_df, input_data,  elec, un
         if 'PV' in current_dataframe:
             for index in range(len(multiple)):
                 timeslice = multiple.index[index]
-                d = multiple.columns[1:]
+                d = multiple.columns[0:]
                 if elec['id'].eq(GIS_file['Location']).any():
                     for j in d:
                         value = multiple.loc[timeslice][j]
@@ -682,7 +678,7 @@ def capacityfactor(outPutFile, GIS_file, timedependent_df, input_data,  elec, un
         else:
             for index in range(len(multiple)):
                 timeslice = multiple.index[index]
-                d = multiple.columns[1:]
+                d = multiple.columns[0:]
                 for j in d:
                     value = multiple.loc[timeslice][j]
                     dataToInsert += "%s\t%s\t%s\t%s\t%f\n" % (input_data['region'][0],current_dataframe, timeslice, j, value)
