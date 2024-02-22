@@ -66,9 +66,19 @@ def clustering_tsam(timeseries_df, typicalperiods, intraday_steps, to_indexfile,
 
     typPeriods_clusters = aggregation.createTypicalPeriods()
     typPeriods_clusters.to_csv(to_clusterfile)
+    #Fix season index
+    typerioddf = pd.read_csv(to_clusterfile)
+    typerioddf.iloc[:,0] = typerioddf.iloc[:,0].astype(str).radd('S')
+    typerioddf.rename(columns={'Unnamed: 0':'Season'}, inplace=True )
+    typerioddf.to_csv(to_clusterfile)
 
     typical_series_index = aggregation.indexMatching()
     typical_series_index.to_csv(to_indexfile)
+    #Fix season index
+    typical_index = pd.read_csv(to_indexfile)
+    typical_index['PeriodNum'] = typical_index['PeriodNum'].astype(str).radd('S')
+    typical_index.to_csv(to_indexfile)
+
     
     return to_indexfile, to_clusterfile
 
@@ -107,17 +117,17 @@ def timedependentprofile_calculation(clusters, temporal_clusters_index, savepath
     temporal_clusters_index_df= pd.read_csv(temporal_clusters_index)
 
     temporal_clusters_index_df['TimeSlice']=  temporal_clusters_index_df["PeriodNum"].astype(str) + temporal_clusters_index_df["SegmentIndex"].astype(str)
-    clusters_df.columns.values[0] = "PeriodIndex"
-    clusters_df['TimeSlice'] =  clusters_df["PeriodIndex"].astype(str) + clusters_df["Segment Step"].astype(str)
+    #clusters_df.columns.values[0] = "PeriodIndex"
+    clusters_df['TimeSlice'] =  clusters_df["Season"].astype(str) + clusters_df["Segment Step"].astype(str)
     clusters_df_dem = clusters_df[['TimeSlice','Load_Rural','Load_Central']]
     clusters_df.index = clusters_df['TimeSlice']
-    cluster_df_nodem = clusters_df.drop(columns=['TimeSlice','Load_Rural','Load_Central','PeriodIndex',	'Segment Step',	'Segment Duration'])
+    cluster_df_nodem = clusters_df.drop(columns=['Season','Unnamed: 0','TimeSlice','Load_Rural','Load_Central','Segment Step',	'Segment Duration'])
 
     #Join the two datasets together to get the full dataset for the year.
     merged_cluster_index = pd.merge(temporal_clusters_index_df, clusters_df_dem, how="left", on=["TimeSlice"])
     specf_dem_clusters = merged_cluster_index.groupby("TimeSlice").sum().reset_index()
     specf_dem_clusters.index = specf_dem_clusters['TimeSlice']
-    specf_dem_clusters = specf_dem_clusters.drop(columns=['PeriodNum', "SegmentIndex", "TimeStep", 'TimeSlice'])
+    specf_dem_clusters = specf_dem_clusters.drop(columns=['Unnamed: 0', "SegmentIndex", "TimeStep", 'TimeSlice'])
   
     #Divide the sum of each time slice with the total sum per column
     specifiecdem_clusters_ts = specf_dem_clusters.div(specf_dem_clusters.sum(axis=0), axis=1)    
