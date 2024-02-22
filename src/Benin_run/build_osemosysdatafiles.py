@@ -181,7 +181,7 @@ def residualcapacity(outPutFile, residual_df, country):
     dataToInsert = ""
     print("FUEL SET", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     if country == 'Benin':
-        param = "param ResidualCapacity default 0 :=\n[Benin,*,*]:\n2020	2021	2022	2023	2024	2025	2026	2027	2028	2029	2030	231	2032	2033	2034	2035	2036	2037	2038	2039	2040:=\n"
+        param = "param ResidualCapacity default 0 :=\n[Benin,*,*]:\n2020	2021	2022	2023	2024	2025	2026	2027	2028	2029	2030	2031	2032	2033	2034	2035	2036	2037	2038	2039	2040:=\n"
     else:
         param = "param ResidualCapacity default 0 :=\n[Kenya,*,*]:\n2020	2021	2022	2023	2024	2025	2026	2027	2028	2029	2030	2031	2032	2033	2034	2035	2036	2037	2038	2039	2040:=\n"
 
@@ -589,10 +589,10 @@ def SpecifiedDemandProfile(outPutFile, demandprofile, input_data, demand, years)
 
 
     demandprofile.index= demandprofile['TimeSlice']
-    demandprofile = demandprofile.drop(columns=['TimeSlice'])
+    demandprofile_df = demandprofile[['Load_Rural', 'Load_Central']]
     #Take out each column and feed into the next step
-    for i in range(0, len(demandprofile.columns)):
-        slicearray = demandprofile.iloc[:,i]
+    for i in range(0, len(demandprofile_df.columns)):
+        slicearray = demandprofile_df.iloc[:,i]
         current_dataframe = slicearray.name
 
         df = pd.DataFrame.from_dict([slicearray])
@@ -665,7 +665,8 @@ def capacityfactor(outPutFile, GIS_file, timedependent_df, input_data,  elec, un
             for index in range(len(multiple)):
                 timeslice = multiple.index[index]
                 d = multiple.columns[0:]
-                if elec['id'].eq(GIS_file['Location']).any():
+                start,end = current_dataframe.split('_')
+                if int(end) in elec['id'].values:
                     for j in d:
                         value = multiple.loc[timeslice][j]
                         dataToInsert += "%s\t%s_1\t%s\t%s\t%f\n" % (input_data['region'][0], current_dataframe, timeslice, j, value)
