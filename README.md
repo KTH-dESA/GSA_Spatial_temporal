@@ -12,8 +12,7 @@ The workflow is only tested on a Windows computer, therefore, there might be sma
 
 ### Modelled input parameters
 
-![image](https://github.com/KTH-dESA/GSA_Spatial_temporal/assets/30128518/ecde38dd-310b-4c27-9a21-9ea791614a31)
-
+![image](https://github.com/KTH-dESA/GSA_Spatial_temporal/assets/30128518/fd52717f-5dfb-41cf-a78b-9006d12825d4)
 
 # Python dependencies
 The workflow has a number packages that needs to be installed.
