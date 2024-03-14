@@ -225,7 +225,7 @@ def peakdemand_csv(demand_csv, specifieddemand,capacitytoactivity, yearsplit_csv
 
     TRLV_TRLVM = pd.concat([peakdemand_divided_km_cleaned, peakdemandLVM_divided_km_cleaned])
 
-    TRLV_TRLVM.to_csv(os.path.join(tofolder,'%i_%i_%ipeakdemand.csv') %(spatail, demand_scneario, temporal_id))
+    TRLV_TRLVM.to_csv(os.path.join(tofolder,'%i_%i_%ipeakdemand.csv') %(spatail, int(demand_scneario), temporal_id))
 
 def distribution_elec_startyear(demand, capacitytoactivity, distrlosses,basetopeak, years, savepath, PVshare_baseyear, PV_capacityfactor):
     demand_df =pd.read_csv(demand)

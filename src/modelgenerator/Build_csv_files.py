@@ -26,15 +26,14 @@ def battery_to_pv(loadprofile, capacityfactor_pv, efficiency_discharge, efficien
     """This function re-distributes the load based on the load and capacity factor from renewable ninja
     """
 
-    def calculate_average(data, startdate, enddate):
+    def extract_one_month(data, startdate, enddate):
         mask = (data.index > startdate) & (data.index <= enddate)
         thisMonthOnly = data.loc[mask]
         return (thisMonthOnly)
 
-
     
     def indexfix(df_path):
-        df = pd.read_csv(df_path).dropna()
+        df = pd.read_csv(df_path)
         df_copy = df.copy()
         df_copy_datetime = pd.to_datetime(df_copy['adjtime'], errors='coerce', format='%Y/%m/%d %H:%M')
         df_copy.index = df_copy_datetime
@@ -45,8 +44,8 @@ def battery_to_pv(loadprofile, capacityfactor_pv, efficiency_discharge, efficien
     load = indexfix(loadprofile)
     df = pd.read_csv(locations, index_col=0, header=0)
     
-    PV_range = calculate_average(capacityf_solar, startDate, endDate)
-    load_range =calculate_average(load, startDate_load, endDate_load)
+    PV_range = extract_one_month(capacityf_solar, startDate, endDate)
+    load_range =extract_one_month(load, startDate_load, endDate_load)
 
     #normalise data
     def reduceload_data(data):
@@ -80,30 +79,30 @@ def battery_to_pv(loadprofile, capacityfactor_pv, efficiency_discharge, efficien
 
     df_PV_battery_size.to_csv(tofilePV)
 
-def annualload(minuteload, topath, nr_timeslice):
+def annualload(minuteload, topath):
     minutedf = pd.read_csv(minuteload)
     minutedf['Datetime'] = pd.to_datetime('1900-01-01 ' + minutedf['Minute'])
     minutedf.set_index('Datetime', inplace=True)
-    length = str(1440/nr_timeslice)+'min'
+    #length = str(1440/nr_timeslice)+'min'
 
-    minutedf_group = minutedf.groupby([pd.Grouper(freq=length)]).mean().reset_index()
+    minutedf_group = minutedf.groupby([pd.Grouper(freq='H')]).mean().reset_index()
     minutedf_group.set_index('Datetime', inplace=True)
 
-    hours = []
-    for i in range(0,24):
-        fromDate =  pd.to_datetime(f'1900-01-01 {i}:00')
-        toDate = fromDate + timedelta(hours=1)
+    # hours = []
+    # for i in range(0,24):
+    #     fromDate =  pd.to_datetime(f'1900-01-01 {i}:00')
+    #     toDate = fromDate + timedelta(hours=1)
 
-        result = minutedf_group.loc[fromDate:toDate]
-        if (result.values.size == 0):
-            value = hours[i-1]
-        else:
-            value = result.values[0][0]
+    #     result = minutedf_group.loc[fromDate:toDate]
+    #     if (result.values.size == 0):
+    #         value = hours[i-1]
+    #     else:
+    #         value = result.values[0][0]
      
-        hours.append(value)
-    rural_dataframe = pd.DataFrame(hours)
+    #     hours.append(value)
+    # rural_dataframe = pd.DataFrame(hours)
         
-    s = rural_dataframe.squeeze()
+    s = minutedf_group.squeeze()
     fullyearhours = pd.DataFrame(np.tile(s, 365), columns = ['Load'])
     # create a new DataFrame with a datetime index that spans the entire year
     start_date = pd.to_datetime('1900-01-01')
@@ -115,21 +114,7 @@ def annualload(minuteload, topath, nr_timeslice):
     fullyearhours['adjtime'] = fullyearhours.index
 
     fullyearhours.to_csv(topath)
-    return topath
-
-def highprofile_aggre(hourlyprofile, topath, nr_timeslice):
-    hourlydf = pd.read_csv(hourlyprofile)
-    hourlydf['adjtime'] = pd.to_datetime(hourlydf['adjtime'])
-    hourlydf.set_index('adjtime', inplace=True)
-    length = str(1440/nr_timeslice)+'min'
-
-    hourlydf_group = hourlydf.groupby([pd.Grouper(freq=length)]).mean().reset_index()
-    hourlydf_group.set_index('adjtime', inplace=True)
-    
-    hourly_data = hourlydf_group.resample('H').ffill()
-
-    hourly_data.to_csv(topath)
-    return topath
+    return fullyearhours, topath
 
 def renewableninja(path, dest, spatial, CapacityFactor_adj):
     """

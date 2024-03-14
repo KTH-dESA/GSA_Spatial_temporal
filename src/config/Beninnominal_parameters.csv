@@ -1,13 +1,13 @@
 name,group,indexes,min_value_base_year,max_value_base_year,min_value_end_year,max_value_end_year,dist,interpolation_index,action,floor
 Spatial,Spatial resolution,GLOBAL,1,1230,1,1230,unif,None,fixed,Y
 DiscountRate,Discount Rate,GLOBAL,0.08,0.15,0.08,0.15,unif,None,fixed,N
-Dailytemporalresolution,Temporal resolution,GLOBAL,1,24,1,24,unif,None,fixed,Y
+Dailytemporalresolution,Temporal resolution,GLOBAL,2,12,2,12,unif,None,fixed,Y
 CapitalCost_PV,Capital Cost PV,SOPV,2743.333,2743.333,670.7297516,1650.927983,unif,None,fixed,Y
 CapitalCost_Battery_kWh,CapitalCost Battery kWh,battery,654.5783917,654.5783917,213.7218153,339.3920417,unif,None,fixed,Y
 CapitalCost_Wind,Capital Cost Wind,WI,1405,1405,589,913,unif,YEAR,interpolate,N
 CapitalCost_transm,CapitalCost transmission lines,Transmission,2,4,2,4,unif,None,fixed,N
 CapitalCost_distribution,Capital Cost distribution lines,Distribution,10000,28000,10000,28000,unif,None,fixed,N
-CapacityFactor_error,Capacity Factor error,SOPV,-0.05,0.05,-0.05,0.05,unif,None,fixed,N
+CapacityFactor_error,Capacity Factor error,SOPV,-0.03,0.03,-0.03,0.03,unif,None,fixed,N
 Demand,Demand,GLOBAL,4564000,4564000,10217431.38,47420554.72,unif,None,fixed,Y
 FuelpriceNG,Fuel price natural gas,Natural gas,9,9,4,8,unif,YEAR,interpolate,N
 FuelpriceCRUDEOIL,Fuel price crude oil,Oil,17.20123217,17.20123217,7.354149984,22.06244995,unif,None,fixed,Y
