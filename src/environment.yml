@@ -16,6 +16,8 @@ dependencies:
   - seaborn>=0.11.2
   - snakemake-minimal>=5.19.2
   - pytest
+  - tsam
+  - pulp
   - pip:
     - numpy>=1.21.6
     - sklearn>=0.0
